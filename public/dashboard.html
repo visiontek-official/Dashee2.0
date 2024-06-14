@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="user-menu">
+            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="profile.html">My Profile</a>
+                <a href="#">Settings</a>
+                <a href="#">File Management</a>
+                <a href="#">Support</a>
+                <a href="index.html" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </header>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
+            </div>
+            <ul class="sidebar-menu" id="sidebarMenu">
+                <li><a href="dashboard.html" id="menuHome">Home</a></li>
+                <li><a href="content.html" id="menuContent">Content</a></li>
+                <li><a href="#" id="menuScreens">Screens</a></li>
+                <li><a href="#" id="menuGroups">Groups</a></li>
+                <li><a href="#" id="menuPlaylists">Playlists</a></li>
+                <li><a href="#" id="menuWebsites">Websites</a></li>
+                <li id="userMenuItem"></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <section class="content">
+                <h1>Dashboard</h1>
+                <!-- Add your dashboard content here -->
+            </section>
+        </main>
+    </div>
+    <script>
+        function toggleDropdown() {
+            var dropdownMenu = document.getElementById('dropdownMenu');
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function logout() {
+            console.log('User logged out');
+            window.location.href = 'index.html';
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
+                var dropdownMenu = document.getElementById('dropdownMenu');
+                if (dropdownMenu.style.display === 'block') {
+                    dropdownMenu.style.display = 'none';
+                }
+            }
+        }
+
+        window.onload = function() {
+            console.log('Page loaded');
+            fetch('/getUserDetails')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('User details:', data);  // Log the fetched user details
+                    document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
+                    document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+
+                    if (data.role === 'admin') {
+                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html" id="menuUsers">Users</a>';
+                    }
+                })
+                .catch(error => console.error('Error fetching user details:', error));
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLocation = window.location.href;
+            const menuItems = document.querySelectorAll('.sidebar-menu a');
+            menuItems.forEach(item => {
+                if (item.href === currentLocation) {
+                    item.classList.add('active'); // Add 'active' class to the current menu item
+                }
+            });
+        });
+    </script>
+</body>
+</html>

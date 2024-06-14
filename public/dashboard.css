@@ -1,0 +1,134 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    overflow: hidden; /* Prevents scroll bars */
+}
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.main-header {
+    display: flex;
+    width: calc(100% - 250px); /* Adjusted to fit sidebar */
+    padding: 1em;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 250px; /* Adjusted to fit sidebar */
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-right: 3em; /* Add more padding to the right */
+}
+
+.user-menu .profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-menu .user-name {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 1em;
+    top: 4em;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 1000;
+    padding: 1em; /* Add padding to the dropdown */
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 1em;
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #1d2a38;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar-header .logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Remove margins from sidebar menu */
+}
+
+.sidebar-menu li {
+    padding: 0; /* Remove padding from list items */
+}
+
+.sidebar-menu li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 1em; /* Ensure the hover effect covers the entire block */
+}
+
+.sidebar-menu li a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    padding: 1em;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 250px;
+    margin-top: 60px; /* Adjusted to fit below the header */
+    overflow: auto; /* Allows internal scroll without affecting the main layout */
+}
+
+.content {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+}

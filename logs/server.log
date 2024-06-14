@@ -1,0 +1,139 @@
+[2024-06-13T06:43:32.772Z] Server running on port 8001
+[2024-06-13T06:43:32.782Z] Connected to database
+[2024-06-13T06:43:32.787Z] Database checked/created
+[2024-06-13T06:43:32.790Z] Table checked/created
+[2024-06-13T06:43:32.794Z] Admin user already exists
+[2024-06-13T06:43:41.486Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-13T06:43:41.494Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-13T06:43:41.497Z] User logged in: info@visiontek.co.za
+[2024-06-13T06:43:41.497Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:43:41.802Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:43:44.777Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:44:01.169Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:44:07.993Z] User updated: info@visiontek.co.za
+[2024-06-13T06:44:09.428Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:44:11.791Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T06:44:14.117Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T07:11:12.435Z] Server running on port 8001
+[2024-06-13T07:11:12.446Z] Connected to database
+[2024-06-13T07:11:12.451Z] Database checked/created
+[2024-06-13T07:11:12.455Z] Table checked/created
+[2024-06-13T07:11:12.458Z] Admin user already exists
+[2024-06-13T07:13:33.593Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}
+[2024-06-13T07:13:38.223Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-13T07:13:38.231Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-13T07:13:38.232Z] User logged in: info@visiontek.co.za
+[2024-06-13T07:13:38.232Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T07:13:38.379Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T07:13:41.799Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T08:42:04.041Z] Server running on port 8001
+[2024-06-13T08:42:04.052Z] Connected to database
+[2024-06-13T08:42:04.057Z] Database checked/created
+[2024-06-13T08:42:04.060Z] Table checked/created
+[2024-06-13T08:42:04.064Z] Admin user already exists
+[2024-06-13T08:42:09.695Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}
+[2024-06-13T08:42:15.090Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-13T08:42:15.097Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-13T08:42:15.098Z] User logged in: info@visiontek.co.za
+[2024-06-13T08:42:15.098Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T08:42:15.285Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T08:42:19.166Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T08:43:16.736Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-13T08:43:23.283Z] Login form data: {"email":"kobus4@gmail.com","password":"KristyLee5483@!1"}
+[2024-06-13T08:43:23.295Z] Login query results: [{"id":2,"firstname":"Kobus","lastname":"Engelbrecht","email":"kobus4@gmail.com","password":"KristyLee5483@!1","profile_pic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user","enabled":1}]
+[2024-06-13T08:43:23.296Z] User logged in: kobus4@gmail.com
+[2024-06-13T08:43:23.297Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:23.458Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:25.610Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:25.647Z] Error reading user directory: Error: ENOENT: no such file or directory, scandir 'E:\VisionTEK\Dashee2.0\uploads\2'
+[2024-06-13T08:43:31.495Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:42.244Z] User profile updated: undefined
+[2024-06-13T08:43:43.907Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:45.787Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:49.470Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:54.873Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:43:55.689Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:44:04.522Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:44:06.560Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-13T08:44:07.387Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"user"}
+[2024-06-14T06:15:48.170Z] Server running on port 8001
+[2024-06-14T06:15:48.202Z] Connected to database
+[2024-06-14T06:15:48.205Z] Database checked/created
+[2024-06-14T06:15:48.208Z] Table checked/created
+[2024-06-14T06:15:48.211Z] Admin user already exists
+[2024-06-14T06:16:11.770Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-14T06:16:11.773Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-14T06:16:11.773Z] User logged in: info@visiontek.co.za
+[2024-06-14T06:16:11.774Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:16:12.106Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:16:15.608Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:16:27.276Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:16:30.808Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:24:39.821Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:24:42.989Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:24:44.190Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:24:48.025Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:24:51.804Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:26:08.880Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:27:16.631Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:27:22.808Z] User updated: info@visiontek.co.za
+[2024-06-14T06:27:24.251Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:27:37.531Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:27:39.547Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:29:59.563Z] Server running on port 8001
+[2024-06-14T06:29:59.573Z] Connected to database
+[2024-06-14T06:29:59.578Z] Database checked/created
+[2024-06-14T06:29:59.582Z] Table checked/created
+[2024-06-14T06:29:59.586Z] Admin user already exists
+[2024-06-14T06:30:08.987Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}
+[2024-06-14T06:30:15.904Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-14T06:30:15.908Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-14T06:30:15.909Z] User logged in: info@visiontek.co.za
+[2024-06-14T06:30:15.910Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:16.047Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:18.688Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:24.848Z] Folder creation failed: Folder already exists
+[2024-06-14T06:30:41.212Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:42.807Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:43.583Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:44.799Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:46.991Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:30:47.944Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:35:40.138Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:35:47.079Z] Folder created: test2
+[2024-06-14T06:42:42.057Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:42:50.285Z] Folder created: test3
+[2024-06-14T06:43:08.465Z] File upload attempt: {"fieldname":"file","originalname":"touch_screen_icon.png","encoding":"7bit","mimetype":"image/png","destination":"E:\\VisionTEK\\Dashee2.0\\uploads\\1","filename":"touch_screen_icon.png","path":"E:\\VisionTEK\\Dashee2.0\\uploads\\1\\touch_screen_icon.png","size":10444}
+[2024-06-14T06:43:08.466Z] File uploaded: E:\VisionTEK\Dashee2.0\uploads\1\touch_screen_icon.png
+[2024-06-14T06:57:28.812Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:57:41.938Z] File upload attempt: {"fieldname":"file","originalname":"connected_admin.png","encoding":"7bit","mimetype":"image/png","destination":"E:\\VisionTEK\\Dashee2.0\\uploads\\1","filename":"connected_admin.png","path":"E:\\VisionTEK\\Dashee2.0\\uploads\\1\\connected_admin.png","size":33716}
+[2024-06-14T06:57:41.939Z] File uploaded: E:\VisionTEK\Dashee2.0\uploads\1\connected_admin.png
+[2024-06-14T06:58:05.080Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T06:58:41.083Z] File upload attempt: {"fieldname":"file","originalname":"img_splash_landscape.png","encoding":"7bit","mimetype":"image/png","destination":"E:\\VisionTEK\\Dashee2.0\\uploads\\1","filename":"img_splash_landscape.png","path":"E:\\VisionTEK\\Dashee2.0\\uploads\\1\\img_splash_landscape.png","size":58936}
+[2024-06-14T06:58:41.084Z] File uploaded: E:\VisionTEK\Dashee2.0\uploads\1\img_splash_landscape.png
+[2024-06-14T06:58:55.927Z] File deleted: E:\VisionTEK\Dashee2.0\uploads\1\touch_screen_icon.png
+[2024-06-14T07:13:11.565Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:13:27.505Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:13:28.189Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:33:03.885Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:33:11.404Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:33:23.488Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:33:24.458Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:53:29.563Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:53:38.899Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T07:53:45.858Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:10:06.957Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:10:19.904Z] Folder created: test5
+[2024-06-14T08:51:15.695Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:51:24.852Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:51:33.708Z] Server running on port 8001
+[2024-06-14T08:51:33.719Z] Connected to database
+[2024-06-14T08:51:33.724Z] Database checked/created
+[2024-06-14T08:51:33.727Z] Table checked/created
+[2024-06-14T08:51:33.731Z] Admin user already exists
+[2024-06-14T08:51:38.706Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-14T08:51:38.709Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Administrator","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-14T08:51:38.710Z] User logged in: info@visiontek.co.za
+[2024-06-14T08:51:38.711Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:51:38.925Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-14T08:51:41.733Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}

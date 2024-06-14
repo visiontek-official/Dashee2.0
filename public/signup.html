@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-left">
+            <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-2048x380.png" alt="VisionTEK Logo" class="logo">
+            <form id="signupForm">
+                <h2>Create an account</h2>
+                <label for="firstname">First Name</label>
+                <input type="text" id="firstname" name="firstname" required>
+                <label for="lastname">Last Name</label>
+                <input type="text" id="lastname" name="lastname" required>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <label for="terms">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    By registering you confirm that you've read and accepted our 
+                    <a href="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Terms-and-Conditions-v1.2.pdf" target="_blank">terms</a> 
+                    and 
+                    <a href="https://www.visiontek.co.za/privacy-statement-za/" target="_blank">privacy policy</a>.
+                </label>
+                <button type="submit" class="button">Sign Up</button>
+                <p>OR</p>
+                <a href="index.html">Login Now</a>
+                <div id="signupError" class="error-message"></div>
+            </form>
+        </div>
+        <div class="auth-right">
+            <h1>Free digital signage software</h1>
+            <h2>A simple, reliable cloud-based platform to display videos and images on any screen.</h2>
+            <img src="http://www.visiontek.co.za/wp-content/uploads/2024/06/Coffee-Shop-Digital-Menu-Board-2.png" alt="Digital Menu Board" class="image">
+        </div>
+    </div>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new URLSearchParams(new FormData(this)).toString();
+            console.log('Signup form data:', formData);
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Signup response data:', data);
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    document.getElementById('signupError').innerText = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error during signup:', error);
+                document.getElementById('signupError').innerText = 'An error occurred. Please try again.';
+            });
+        });
+    </script>
+</body>
+</html>
