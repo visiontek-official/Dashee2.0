@@ -88,13 +88,13 @@
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html" id="menuHome">Home</a></li>
-                <li><a href="content.html" id="menuContent">Content</a></li>
-                <li><a href="#" id="menuScreens">Screens</a></li>
-                <li><a href="#" id="menuGroups">Groups</a></li>
-                <li><a href="#" id="menuPlaylists">Playlists</a></li>
-                <li><a href="#" id="menuWebsites">Websites</a></li>
-                <li><a href="users.html" id="menuUsers">Users</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem"></li>
             </ul>
         </nav>
         <main class="main-content">
@@ -146,6 +146,10 @@
                     console.log('User details:', data);  // Log the fetched user details
                     document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
                     document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+                    
+                    if (data.role === 'admin') {
+                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
+                    }
                 })
                 .catch(error => console.error('Error fetching user details:', error));
 

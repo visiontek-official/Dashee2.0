@@ -28,12 +28,13 @@
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html">Home</a></li>
-                <li><a href="#">Content</a></li>
-                <li><a href="#">Screens</a></li>
-                <li><a href="#">Groups</a></li>
-                <li><a href="#">Playlists</a></li>
-                <li><a href="#">Websites</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem"></li>
             </ul>
         </nav>
         <main class="main-content">
@@ -100,9 +101,7 @@
                     document.getElementById('email').value = data.email;
 
                     if (data.role === 'admin') {
-                        const usersMenuItem = document.createElement('li');
-                        usersMenuItem.innerHTML = '<a href="#">Users</a>';
-                        document.getElementById('sidebarMenu').appendChild(usersMenuItem);
+                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
                     }
                 })
                 .catch(error => console.error('Error fetching user details:', error));
