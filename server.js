@@ -377,13 +377,13 @@ app.get('/getUserStats', (req, res) => {
             log('Error fetching total users: ' + err, true);
             return res.status(500).json({ error: 'Failed to fetch total users' });
         }
-        
+
         db.query(activeUsersQuery, (err, activeUsersResult) => {
             if (err) {
                 log('Error fetching active users: ' + err, true);
                 return res.status(500).json({ error: 'Failed to fetch active users' });
             }
-            
+
             const stats = {
                 totalUsers: totalUsersResult[0].totalUsers,
                 activeUsers: activeUsersResult[0].activeUsers
@@ -393,4 +393,5 @@ app.get('/getUserStats', (req, res) => {
         });
     });
 });
+
 
