@@ -6,6 +6,53 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .dashboard-menu {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .dashboard-menu a {
+            display: block;
+            width: 150px;
+            height: 100px;
+            background-color: #1d2a38;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-menu a i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #ff2592;
+        }
+        .dashboard-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .dashboard-stats .stat {
+            width: 200px;
+            height: 100px;
+            background-color: #1d2a38;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-stats .stat i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #ff2592;
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
@@ -38,8 +85,48 @@
         </nav>
         <main class="main-content">
             <section class="content">
-                <h1>Dashboard</h1>
-                <!-- Add your dashboard content here -->
+                <div class="dashboard-menu">
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
+                    <a href="content.html">
+                        <i class="fas fa-folder"></i>
+                        Content
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-desktop"></i>
+                        Screens
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-users"></i>
+                        Groups
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-play"></i>
+                        Playlists
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-globe"></i>
+                        Websites
+                    </a>
+                    <a href="users.html">
+                        <i class="fas fa-user"></i>
+                        Users
+                    </a>
+                </div>
+                <div class="dashboard-stats">
+                    <div class="stat">
+                        <i class="fas fa-user"></i>
+                        <p>4</p>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-user-check"></i>
+                        <p>3</p>
+                        <p>Total Active Users</p>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -68,7 +155,7 @@
             fetch('/getUserDetails')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User details:', data);  // Log the fetched user details
+                    console.log('User details:', data);
                     document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
                     document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
 
@@ -78,6 +165,7 @@
                 })
                 .catch(error => console.error('Error fetching user details:', error));
         };
+
         document.addEventListener('DOMContentLoaded', function() {
             const currentLocation = window.location.href;
             const menuItems = document.querySelectorAll('.sidebar-menu a');
