@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        .welcome-block {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .welcome-block img {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
+        .welcome-block .welcome-text {
+            max-width: 600px;
+        }
+        .welcome-block .welcome-text h2 {
+            margin: 0;
+            color: #333;
+        }
+        .welcome-block .welcome-text h2 span {
+            color: #0000ff; /* Blue color for the name */
+        }
+        .welcome-block .welcome-text p {
+            margin: 10px 0 0 0;
+            color: #666;
+        }
         .dashboard-stats {
             display: flex;
             justify-content: space-around;
@@ -19,7 +47,7 @@
             color: #fff;
             text-align: center;
             padding: 20px;
-            margin: 10px;
+            margin: 10px 10px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -61,6 +89,13 @@
         </nav>
         <main class="main-content">
             <section class="content">
+                <div class="welcome-block">
+                    <img src="uploads/man-with-laptop-light.png" alt="Welcome Image">
+                    <div class="welcome-text">
+                        <h2>Welcome Back <span id="userFullName" style="color: #ff2692;"" >VisionTEK!</span></h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Unde hic non repellendus debitis iure, doloremque assumenda. Autem modi, corrupti, nobis ea iure fugiat, veniam non quaerat mollitia animi error corporis.</p>
+                    </div>
+                </div>
                 <div class="dashboard-stats">
                     <div class="stat">
                         <i class="fas fa-user"></i>
@@ -104,6 +139,7 @@
                     console.log('User details:', data);
                     document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
                     document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+                    document.getElementById('userFullName').innerText = data.firstName + ' ' + data.lastName;
 
                     if (data.role === 'admin') {
                         document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
