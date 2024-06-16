@@ -14,7 +14,10 @@
             margin-bottom: 20px;
         }
         .dashboard-menu a {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             width: 150px;
             height: 100px;
             background-color: #1d2a38;
@@ -74,12 +77,12 @@
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html" id="menuHome">Home</a></li>
-                <li><a href="content.html" id="menuContent">Content</a></li>
-                <li><a href="#" id="menuScreens">Screens</a></li>
-                <li><a href="#" id="menuGroups">Groups</a></li>
-                <li><a href="#" id="menuPlaylists">Playlists</a></li>
-                <li><a href="#" id="menuWebsites">Websites</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
                 <li id="userMenuItem"></li>
             </ul>
         </nav>
@@ -88,42 +91,42 @@
                 <div class="dashboard-menu">
                     <a href="dashboard.html">
                         <i class="fas fa-home"></i>
-                        Home
+                        <span>Home</span>
                     </a>
                     <a href="content.html">
                         <i class="fas fa-folder"></i>
-                        Content
+                        <span>Content</span>
                     </a>
                     <a href="#">
                         <i class="fas fa-desktop"></i>
-                        Screens
+                        <span>Screens</span>
                     </a>
                     <a href="#">
                         <i class="fas fa-users"></i>
-                        Groups
+                        <span>Groups</span>
                     </a>
                     <a href="#">
                         <i class="fas fa-play"></i>
-                        Playlists
+                        <span>Playlists</span>
                     </a>
                     <a href="#">
                         <i class="fas fa-globe"></i>
-                        Websites
+                        <span>Websites</span>
                     </a>
                     <a href="users.html">
                         <i class="fas fa-user"></i>
-                        Users
+                        <span>Users</span>
                     </a>
                 </div>
                 <div class="dashboard-stats">
                     <div class="stat">
                         <i class="fas fa-user"></i>
-                        <p>4</p>
+                        <p id="totalUsers">0</p>
                         <p>Total Users</p>
                     </div>
                     <div class="stat">
                         <i class="fas fa-user-check"></i>
-                        <p>3</p>
+                        <p id="activeUsers">0</p>
                         <p>Total Active Users</p>
                     </div>
                 </div>
@@ -160,10 +163,18 @@
                     document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
 
                     if (data.role === 'admin') {
-                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html" id="menuUsers">Users</a>';
+                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
                     }
                 })
                 .catch(error => console.error('Error fetching user details:', error));
+
+            fetch('/getUserStats')
+                .then(response => response.json())
+                .then(stats => {
+                    document.getElementById('totalUsers').innerText = stats.totalUsers;
+                    document.getElementById('activeUsers').innerText = stats.activeUsers;
+                })
+                .catch(error => console.error('Error fetching user stats:', error));
         };
 
         document.addEventListener('DOMContentLoaded', function() {

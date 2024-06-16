@@ -103,14 +103,23 @@ body {
 .sidebar-menu li a {
     color: white;
     text-decoration: none;
-    display: block;
+    display: flex;
+    align-items: center;
     position: relative;
     transition: background-color 0.3s, color 0.3s;
     padding: 1em; /* Ensure the hover effect covers the entire block */
 }
 
+.sidebar-menu li a i {
+    margin-right: 10px; /* Small gap between icon and text */
+}
+
+.sidebar-menu li a .fas.fa-arrow-right {
+    margin-left: auto;
+}
+
 .sidebar-menu li a:hover {
-    background-color: #007bff;
+    background-color: #2f4050; /* Lighter shade for hover effect */
     color: white;
 }
 

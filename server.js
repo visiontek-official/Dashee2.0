@@ -363,3 +363,34 @@ app.post('/create-folder', (req, res) => {
 app.listen(port, () => {
     log(`Server running on port ${port}`);
 });
+
+app.get('/getUserStats', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const totalUsersQuery = 'SELECT COUNT(*) AS totalUsers FROM users';
+    const activeUsersQuery = 'SELECT COUNT(*) AS activeUsers FROM users WHERE enabled = true';
+
+    db.query(totalUsersQuery, (err, totalUsersResult) => {
+        if (err) {
+            log('Error fetching total users: ' + err, true);
+            return res.status(500).json({ error: 'Failed to fetch total users' });
+        }
+        
+        db.query(activeUsersQuery, (err, activeUsersResult) => {
+            if (err) {
+                log('Error fetching active users: ' + err, true);
+                return res.status(500).json({ error: 'Failed to fetch active users' });
+            }
+            
+            const stats = {
+                totalUsers: totalUsersResult[0].totalUsers,
+                activeUsers: activeUsersResult[0].activeUsers
+            };
+
+            res.json(stats);
+        });
+    });
+});
+
