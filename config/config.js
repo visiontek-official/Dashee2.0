@@ -1,7 +1,7 @@
 module.exports = {
     port: 8001,
-    dbUser: 'root',
-    dbPassword: '',
+    dbUser: 'VisionTEK',
+    dbPassword: 'b!lls4w5yqYN]Wsb',
     dbName: 'dashee2_0',
     sqlPort: 3306,
     logging: true,
