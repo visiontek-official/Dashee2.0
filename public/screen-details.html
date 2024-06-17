@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Details</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="screens.css">
+    <link rel="stylesheet" href="screen-details.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
+            </div>
+            <ul class="sidebar-menu" id="sidebarMenu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> <span>Home</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> <span>Content</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="screens.html"><i class="fas fa-desktop"></i> <span>Screens</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> <span>Groups</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> <span>Playlists</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> <span>Websites</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem"><a href="users.html"><i class="fas fa-user"></i> <span>Users</span> <i class="fas fa-arrow-right"></i></a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="user-menu">
+                    <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+                    <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="profile.html">My Profile</a>
+                        <a href="#">Settings</a>
+                        <a href="#">File Management</a>
+                        <a href="#">Support</a>
+                        <a href="index.html" onclick="logout()">Logout</a>
+                    </div>
+                </div>
+            </header>
+            <nav class="breadcrumb">
+                <a href="dashboard.html">Home</a> /
+                <a href="screens.html">Screens</a> /
+                <span id="breadcrumbScreenName">Screen Details</span>
+            </nav>
+            <section class="content">
+                <div class="screen-details-container">
+                    <div class="screen-details-left">
+                        <img src="uploads/screen-thumbnail.png" alt="Screen Image" class="screen-image">
+                        <div class="screen-details-info">
+                            <h2 id="screenName">Dad TV</h2>
+                            <p id="screenStatus">Offline</p>
+                            <p id="lastSeen">Last seen 8 days ago</p>
+                            <a href="#" id="screenDetailsLink">details</a>
+                        </div>
+                    </div>
+                    <div class="screen-details-right">
+                        <div class="MuiTabs-flexContainer">
+                            <button class="tablinks active" onclick="openTab(event, 'Content')">Content</button>
+                            <button class="tablinks" onclick="openTab(event, 'Websites')">Websites</button>
+                        </div>
+                        <div id="Content" class="tabcontent" style="display: block;">
+                            <h3>Content Library</h3>
+                            <div class="content-list" id="contentList">
+                                <div class="content-item">
+                                    <i class="fas fa-folder"></i>
+                                    <div>
+                                        <p>test</p>
+                                        <span>Folder</span>
+                                    </div>
+                                </div>
+                                <div class="content-item">
+                                    <img src="uploads/pixeltv-bg-login.jpg" alt="Image Thumbnail" class="content-thumbnail">
+                                    <div>
+                                        <p>pixeltv-bg-login.jpg</p>
+                                        <span>Image • landscape • 6 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="Websites" class="tabcontent">
+                            <!-- Websites content will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="screen-details.js"></script>
+</body>
+</html>

@@ -39,6 +39,13 @@ body {
     overflow: auto; /* Allows internal scroll without affecting the main layout */
 }
 
+.content {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 /* Sidebar styles */
 .sidebar {
     width: 250px;

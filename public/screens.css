@@ -39,6 +39,13 @@ body {
     overflow: auto; /* Allows internal scroll without affecting the main layout */
 }
 
+.content {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 /* Style for the hamburger container */
 .hamburger-container {
     display: flex;
@@ -213,6 +220,7 @@ body {
 }
 
 .close-btn {
+    color: #ff2692;
     position: absolute;
     top: 10px;
     right: 10px;
@@ -229,6 +237,51 @@ body {
 }
 
 .add-screen-btn:hover {
+    background-color: #e0207a;
+}
+
+.popup h2 {
+    background-color: #1d2a38; /* Purple color */
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin: -20px -20px 20px -20px;
+    display: flex;
+    align-items: center;
+}
+
+.popup h2 i {
+    margin-right: 10px;
+}
+
+.popup-body {
+    text-align: center;
+}
+
+.popup-body .app-links img {
+    width: 150px;
+    margin: 10px;
+}
+
+.popup-body input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.popup-body button {
+    background-color: #ff2692;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-body button:hover {
     background-color: #e0207a;
 }
 
@@ -261,9 +314,11 @@ body {
     margin: 10px;
     display: inline-block;
     position: relative; /* Ensure the screen thumbnail acts as a reference for absolute positioning */
+    cursor: pointer; /* Indicate that the card is clickable */
 }
 
 .screen-card {
+    color: #304050;
     width: 200px;
     height: 250px;
     background-color: #fff;
@@ -274,6 +329,13 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.screen-card:hover {
+    color: #304050;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    background-color: #e4e4e4;
 }
 
 .screen-image {
@@ -320,4 +382,28 @@ body {
 .screens-list {
     position: relative; /* Ensure the screens list acts as a reference for absolute positioning */
     overflow: visible; /* Ensure the dropdown can be displayed outside the list */
+}
+
+/* Breadcrumb styles */
+.breadcrumb {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.breadcrumb a {
+    color: #304050;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: #6c757d;
 }

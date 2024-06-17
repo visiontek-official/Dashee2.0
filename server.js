@@ -448,3 +448,19 @@ app.get('/getScreens', (req, res) => {
         }
     });
 });
+
+//Screen Details
+app.get('/getScreenDetails', (req, res) => {
+    const screenId = req.query.screenId;
+    const sql = 'SELECT * FROM screens WHERE screen_id = ?';
+
+    db.query(sql, [screenId], (err, results) => {
+        if (err) {
+            console.error('Error retrieving screen details:', err);
+            res.json({ success: false });
+        } else {
+            res.json(results[0]);
+        }
+    });
+});
+

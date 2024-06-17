@@ -29,7 +29,7 @@ function loadScreens() {
                 const screenElement = document.createElement('div');
                 screenElement.className = 'screen-thumbnail';
                 screenElement.innerHTML = `
-                    <div class="screen-card" data-id="${screen.id}">
+                    <div class="screen-card" data-id="${screen.id}" data-name="${screen.screen_name}" onclick="openScreenDetails(${screen.id}, '${screen.screen_name}')">
                         <img src="uploads/screen-thumbnail.png" alt="${screen.screen_name}" class="screen-image">
                         <div class="screen-status ${screen.enabled ? 'online' : 'offline'}">${screen.enabled ? 'Online' : 'Offline'}</div>
                         <div class="screen-details">
@@ -52,6 +52,10 @@ function loadScreens() {
         .catch(error => {
             console.error('Error:', error);
         });
+}
+
+function openScreenDetails(screenId, screenName) {
+    window.location.href = `screen-details.html?screenId=${screenId}&screenName=${encodeURIComponent(screenName)}`;
 }
 
 function loadUserDetails() {

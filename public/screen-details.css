@@ -1,0 +1,177 @@
+/* screen-details.css */
+.screen-details-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.screen-details-header img {
+    width: 100px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.screen-details-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.screen-details-info h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.screen-details-info p {
+    margin: 5px 0;
+}
+
+.screen-content {
+    display: flex;
+    padding: 20px;
+}
+
+.playlist-section {
+    flex: 1;
+    padding-right: 20px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.playlist-section h3 {
+    margin: 0 0 10px 0;
+}
+
+.playlist-section .playlist {
+    border: 1px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.playlist-section .add-content-icon {
+    font-size: 2em;
+    color: #ccc;
+}
+
+.save-changes-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-changes-btn:hover {
+    background-color: #0056b3;
+}
+
+.content-library {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.content-library h3 {
+    margin: 0 0 10px 0;
+}
+
+.content-tabs {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.content-tabs button {
+    background-color: #304050;
+    flex: 1;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.content-tabs button.active {
+    background-color: #f8068c;
+    color: white;
+}
+
+.tablinks active.active {
+    background-color: #f8068c;
+    color: white;
+}
+
+.content-list {
+    border: 1px solid #ccc;
+    padding: 20px;
+    height: 400px;
+    overflow-y: auto;
+}
+
+/* screen-details.css */
+.screen-details-container {
+    display: flex;
+    margin-top: 20px;
+}
+
+.screen-details-left {
+    flex: 1;
+    padding-right: 20px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.screen-details-left img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.screen-details-info h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.screen-details-info p {
+    margin: 5px 0;
+}
+
+.screen-details-right {
+    flex: 2;
+    padding-left: 20px;
+}
+
+.MuiTabs-flexContainer {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.MuiTabs-flexContainer button {
+    flex: 1;
+    padding
+
+.screen-card:hover {
+        background-color: #304050;
+    }
+
+/* Breadcrumb styles */
+.breadcrumb {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.breadcrumb a {
+    color: #304050;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: #6c757d;
+}
