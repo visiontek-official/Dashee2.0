@@ -64,19 +64,6 @@
 </head>
 <body>
     <header class="main-header">
-        <div class="user-menu">
-            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
-            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <a href="profile.html">My Profile</a>
-                <a href="#">Settings</a>
-                <a href="#">File Management</a>
-                <a href="#">Support</a>
-                <a href="index.html" onclick="logout()">Logout</a>
-            </div>
-        </div>
-    </header>
-    <header class="main-header">
         <div class="hamburger-container">
             <i class="fas fa-bars" id="hamburger"></i>
         </div>
@@ -98,13 +85,13 @@
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i><span> Home</span><i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i><span> Content</span><i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-desktop"></i><span> Screens</span><i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i><span> Groups</span><i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i><span> Playlists</span><i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i><span> Websites</span><i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem"><a href="users.html"><i class="fas fa-user"></i><span> Users</span><i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <main class="main-content">
@@ -130,7 +117,7 @@
                 </div>
             </section>
         </main>
-    </div>    
+    </div>                        
     <script>
         function toggleDropdown() {
             var dropdownMenu = document.getElementById('dropdownMenu');
@@ -184,9 +171,6 @@
                     item.classList.add('active'); // Add 'active' class to the current menu item
                 }
             });
-        });
-        document.getElementById('hamburger').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('collapsed');
         });
     </script>
 </body>
