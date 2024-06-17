@@ -154,3 +154,6 @@
 [2024-06-17T14:30:18.109Z] User logged in: danie@testdomain.com
 [2024-06-17T14:30:18.109Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":5,"firstName":"Danie","lastName":"van Eeden","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"admin"}
 [2024-06-17T14:30:20.106Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":5,"firstName":"Danie","lastName":"van Eeden","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"admin"}
+[2024-06-17T14:30:38.095Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":5,"firstName":"Danie","lastName":"van Eeden","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"admin"}
+[2024-06-17T14:30:47.856Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":5,"firstName":"Danie","lastName":"van Eeden","profilePic":"https://i.ibb.co/BTwp6Bv/default-profile-pic.png","role":"admin"}
+[2024-06-17T14:30:47.872Z] Error reading user directory: Error: ENOENT: no such file or directory, scandir 'E:\VisionTEK\Projects\dashee2.0\uploads\5'
