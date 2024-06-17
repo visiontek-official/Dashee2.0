@@ -278,16 +278,17 @@ app.post('/getFiles', (req, res) => {
 
     fs.readdir(userDir, (err, files) => {
         if (err) {
-            log('Error reading user directory: ' + err, true);
+            console.error('Error reading user directory:', err);
             return res.status(500).json({ error: 'Failed to read user directory' });
         }
         const fileData = files.map(file => {
             const filePath = path.join(userDir, file);
             const stat = fs.statSync(filePath);
+            const fileType = stat.isDirectory() ? 'folder' : path.extname(file).substring(1);
             return {
                 name: file,
-                path: path.join('/uploads', req.session.userId.toString(), folder || '', file),
-                type: stat.isDirectory() ? 'folder' : 'file',
+                path: `/uploads/${req.session.userId}/${folder ? folder + '/' : ''}${file}`,
+                type: fileType,
                 uploadDate: stat.mtime.toISOString()
             };
         });
