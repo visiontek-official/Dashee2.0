@@ -265,3 +265,13 @@
 [2024-06-17T19:37:00.800Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
 [2024-06-17T19:38:08.461Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
 [2024-06-17T19:38:17.134Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-17T19:45:59.864Z] User updated: info@visiontek.co.za
+[2024-06-17T19:46:01.641Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-17T19:46:10.494Z] User updated: info@visiontek.co.za
+[2024-06-17T19:46:11.783Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-17T19:46:14.496Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Administrator","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-17T19:46:22.642Z] Login form data: {"email":"info@visiontek.co.za","password":"admin"}
+[2024-06-17T19:46:22.644Z] Login query results: [{"id":1,"firstname":"VisionTEK","lastname":"Admin","email":"info@visiontek.co.za","password":"admin","profile_pic":"/uploads/1718196025405.png","role":"admin","enabled":1}]
+[2024-06-17T19:46:22.644Z] User logged in: info@visiontek.co.za
+[2024-06-17T19:46:22.645Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Admin","profilePic":"/uploads/1718196025405.png","role":"admin"}
+[2024-06-17T19:46:22.789Z] Fetching user details for session: {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Admin","profilePic":"/uploads/1718196025405.png","role":"admin"}
