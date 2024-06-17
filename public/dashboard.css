@@ -39,11 +39,6 @@ body {
     overflow: auto; /* Allows internal scroll without affecting the main layout */
 }
 
-/* Style for the hamburger container - removed */
-.hamburger-container {
-    display: none;
-}
-
 /* Sidebar styles */
 .sidebar {
     width: 250px;

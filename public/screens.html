@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screens</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="screens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
+            </div>
+            <ul class="sidebar-menu" id="sidebarMenu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> <span>Home</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> <span>Content</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="screens.html"><i class="fas fa-desktop"></i> <span>Screens</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> <span>Groups</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> <span>Playlists</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> <span>Websites</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem"><a href="users.html"><i class="fas fa-user"></i> <span>Users</span> <i class="fas fa-arrow-right"></i></a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="user-menu">
+                    <img src="default-profile-pic.png" alt="Profile Picture" class="profile-pic" id="profilePic">
+                    <span class="user-name" id="userName">VisionTEK Administrator</span>
+                    <i class="fas fa-caret-down dropdown-toggle"></i>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="#">Settings</a>
+                        <a href="#">File Management</a>
+                        <a href="#">Support</a>
+                        <a href="index.html" onclick="logout()">Logout</a>
+                    </div>
+                </div>
+            </header>
+            <section class="content">
+                <div class="screens-header">
+                    <h1>Screens</h1>
+                    <button class="add-screen-btn" onclick="showAddScreenPopup()">ADD SCREEN</button>
+                </div>
+                <div class="screens-list" id="screensList">
+                    <!-- Thumbnails for screens will be dynamically inserted here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Screen Popup -->
+    <div class="popup" id="addScreenPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="hideAddScreenPopup()">&times;</span>
+            <h2>Add Screen</h2>
+            <div class="popup-body">
+                <p>Download the AbleSign app for your device (Fire TV, Android TV etc).</p>
+                <div class="app-links">
+                    <img src="path/to/google-play-badge.png" alt="Google Play">
+                    <img src="path/to/amazon-appstore-badge.png" alt="Amazon Appstore">
+                </div>
+                <p>When the app first launches it will display a pairing code.</p>
+                <p>Please enter that code here:</p>
+                <input type="text" id="pairingCode" placeholder="Pairing code *" required>
+                <input type="text" id="screenName" placeholder="Screen name *" required>
+                <button onclick="addScreen()">NEXT</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="screens.js"></script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    overflow: hidden; /* Prevents scroll bars */
+}
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.main-header {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 250px); /* Adjusted to fit sidebar */
+    padding: 1em;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 250px; /* Adjusted to fit sidebar */
+}
+
+.main-content {
+    flex: 1;
+    padding: 1em;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: 250px;
+    margin-top: 60px; /* Adjusted to fit below the header */
+    overflow: auto; /* Allows internal scroll without affecting the main layout */
+}
+
+/* Style for the hamburger container */
+.hamburger-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.hamburger-container i {
+    font-size: 1.5em;
+    color: #333;
+}
+
+/* Toggle sidebar styles */
+.sidebar.collapsed {
+    width: 60px; /* Width for icon-only view */
+}
+
+.sidebar.collapsed .sidebar-header {
+    display: none; /* Hide header in collapsed view */
+}
+
+.sidebar.collapsed .sidebar-menu li a {
+    justify-content: center; /* Center icons */
+}
+
+.sidebar.collapsed .sidebar-menu li a span {
+    display: none; /* Hide text in collapsed view */
+}
+
+.sidebar.collapsed .sidebar-menu li a .fas.fa-arrow-right {
+    display: none; /* Hide arrow icon in collapsed view */
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-right: 3em; /* Add more padding to the right */
+    cursor: pointer;
+}
+
+.user-menu .profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-menu .user-name {
+    margin-right: 10px;
+}
+
+.user-menu .dropdown-toggle {
+    font-size: 1.2em;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 1em;
+    top: 4em;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 1000;
+    padding: 1em;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 1em;
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: #2f4050;
+    color: #a7b1c2;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid #3a4a5b;
+}
+
+.sidebar-header .logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Remove margins from sidebar menu */
+}
+
+.sidebar-menu li {
+    padding: 0; /* Remove padding from list items */
+    border-bottom: 1px solid #3a4a5b;
+}
+
+.sidebar-menu li a {
+    color: #a7b1c2;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 15px;
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px; /* Small gap between icon and text */
+    font-size: 1.2em;
+}
+
+.sidebar-menu li a .fas.fa-arrow-right {
+    margin-left: auto;
+}
+
+.sidebar-menu li a:hover {
+    background-color: #1a2733; /* Lighter shade for hover effect */
+    color: #ffffff;
+}
+
+.sidebar-menu li a.active {
+    background-color: #1a2733;
+    color: #ffffff;
+}
+
+.sidebar-menu li a .menu-arrow {
+    margin-left: auto;
+}
+
+/* Popup Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.add-screen-btn {
+    background-color: #ff2692;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-screen-btn:hover {
+    background-color: #e0207a;
+}
+
+/* Dropdown Menu Styles */
+.options-dropdown {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 1001; /* Ensure the dropdown is above other elements */
+}
+
+.options-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: black;
+}
+
+.options-dropdown a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Screen Card Styles */
+.screen-thumbnail {
+    margin: 10px;
+    display: inline-block;
+    position: relative; /* Ensure the screen thumbnail acts as a reference for absolute positioning */
+}
+
+.screen-card {
+    width: 200px;
+    height: 250px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: visible; /* Allow dropdown to overflow */
+    position: relative; /* Ensure the screen card acts as a reference for absolute positioning */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.screen-image {
+    width: 100%;
+    height: auto;
+    flex-grow: 1;
+}
+
+.screen-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.screen-status.online {
+    background-color: green;
+}
+
+.screen-details {
+    padding: 10px;
+}
+
+.screen-name {
+    font-weight: bold;
+}
+
+.last-seen {
+    color: gray;
+    font-size: 12px;
+}
+
+.screen-options {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.screens-list {
+    position: relative; /* Ensure the screens list acts as a reference for absolute positioning */
+    overflow: visible; /* Ensure the dropdown can be displayed outside the list */
+}

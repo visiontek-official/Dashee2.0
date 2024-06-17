@@ -70,26 +70,50 @@ db.connect((err) => {
                 log('Database selection failed: ' + err, true);
                 throw err;
             }
-            db.query(`CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                firstname VARCHAR(255) NOT NULL,
-                lastname VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                profile_pic VARCHAR(255) DEFAULT 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png',
-                role VARCHAR(50) DEFAULT 'user',
-                enabled BOOLEAN DEFAULT true
-            )`, (err, result) => {
-                if (err) {
-                    log('Table creation failed: ' + err, true);
-                    throw err;
-                }
-                log('Table checked/created');
-                checkAdminUser();
-            });
+            createTables();
         });
     });
 });
+
+const createTables = () => {
+    const userTableQuery = `CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        firstname VARCHAR(255) NOT NULL,
+        lastname VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        profile_pic VARCHAR(255) DEFAULT 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png',
+        role VARCHAR(50) DEFAULT 'user',
+        enabled BOOLEAN DEFAULT true
+    )`;
+
+    const screenTableQuery = `CREATE TABLE IF NOT EXISTS screens (
+        screen_id INT AUTO_INCREMENT PRIMARY KEY,
+        screen_name VARCHAR(255) NOT NULL,
+        pairing_code VARCHAR(255) NOT NULL,
+        user_id INT NOT NULL,
+        enabled BOOLEAN DEFAULT false,
+        last_connected DATETIME DEFAULT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )`;
+
+    db.query(userTableQuery, (err, result) => {
+        if (err) {
+            log('User table creation failed: ' + err, true);
+            throw err;
+        }
+        log('User table checked/created');
+        checkAdminUser();
+    });
+
+    db.query(screenTableQuery, (err, result) => {
+        if (err) {
+            log('Screen table creation failed: ' + err, true);
+            throw err;
+        }
+        log('Screen table checked/created');
+    });
+};
 
 const checkAdminUser = () => {
     const sql = 'SELECT * FROM users WHERE email = ?';
@@ -394,4 +418,33 @@ app.get('/getUserStats', (req, res) => {
     });
 });
 
+// Add screen endpoint
+app.post('/addScreen', (req, res) => {
+    const { pairingCode, screenName } = req.body;
+    const userId = req.session.userId; // Assuming user ID is stored in session
 
+    const sql = 'INSERT INTO screens (screen_name, pairing_code, user_id, enabled, last_connected) VALUES (?, ?, ?, false, NOW())';
+    db.query(sql, [screenName, pairingCode, userId], (err, result) => {
+        if (err) {
+            console.error('Error adding screen:', err);
+            res.json({ success: false });
+        } else {
+            res.json({ success: true });
+        }
+    });
+});
+
+// Get screens endpoint
+app.get('/getScreens', (req, res) => {
+    const userId = req.session.userId; // Assuming user ID is stored in session
+
+    const sql = 'SELECT * FROM screens WHERE user_id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error retrieving screens:', err);
+            res.json({ success: false });
+        } else {
+            res.json({ success: true, screens: results });
+        }
+    });
+});
