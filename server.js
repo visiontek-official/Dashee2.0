@@ -395,6 +395,8 @@ app.get('/getUserStats', (req, res) => {
 
     const totalUsersQuery = 'SELECT COUNT(*) AS totalUsers FROM users';
     const activeUsersQuery = 'SELECT COUNT(*) AS activeUsers FROM users WHERE enabled = true';
+    const disabledUsersQuery = 'SELECT COUNT(*) AS disabledUsers FROM users WHERE enabled != 1';
+    const totalScreensQuery = 'SELECT COUNT(*) AS totalScreens FROM screens';
 
     db.query(totalUsersQuery, (err, totalUsersResult) => {
         if (err) {
@@ -408,15 +410,32 @@ app.get('/getUserStats', (req, res) => {
                 return res.status(500).json({ error: 'Failed to fetch active users' });
             }
 
-            const stats = {
-                totalUsers: totalUsersResult[0].totalUsers,
-                activeUsers: activeUsersResult[0].activeUsers
-            };
+            db.query(disabledUsersQuery, (err, disabledUsersResult) => {
+                if (err) {
+                    log('Error fetching disabled users: ' + err, true);
+                    return res.status(500).json({ error: 'Failed to fetch disabled users' });
+                }
 
-            res.json(stats);
+                db.query(totalScreensQuery, (err, totalScreensResult) => {
+                    if (err) {
+                        log('Error fetching total screens: ' + err, true);
+                        return res.status(500).json({ error: 'Failed to fetch total screens' });
+                    }
+
+                    const stats = {
+                        totalUsers: totalUsersResult[0].totalUsers,
+                        activeUsers: activeUsersResult[0].activeUsers,
+                        disabledUsers: disabledUsersResult[0].disabledUsers,
+                        totalScreens: totalScreensResult[0].totalScreens
+                    };
+
+                    res.json(stats);
+                });
+            });
         });
     });
 });
+
 
 // Add screen endpoint
 app.post('/addScreen', (req, res) => {

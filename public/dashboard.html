@@ -60,6 +60,10 @@
             color: #ff2592;
         }
 
+        .dashboard-stats .stat p {
+            margin: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -111,7 +115,17 @@
                         <p id="activeUsers">0</p>
                         <p>Total Active Users</p>
                     </div>
-                </div>
+                    <div class="stat">
+                        <i class="fas fa-user-times"></i>
+                        <p id="disabledUsers">0</p>
+                        <p>Disabled Users</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-desktop"></i>
+                        <p id="totalScreens">0</p>
+                        <p>Total Screens</p>
+                    </div>
+                </div>                
             </section>
         </main>
     </div>                        
@@ -153,9 +167,11 @@
 
             fetch('/getUserStats')
                 .then(response => response.json())
-                .then(stats => {
-                    document.getElementById('totalUsers').innerText = stats.totalUsers;
-                    document.getElementById('activeUsers').innerText = stats.activeUsers;
+                .then(data => {
+                    document.getElementById('totalUsers').textContent = data.totalUsers;
+                    document.getElementById('activeUsers').textContent = data.activeUsers;
+                    document.getElementById('disabledUsers').textContent = data.disabledUsers;
+                    document.getElementById('totalScreens').textContent = data.totalScreens;
                 })
                 .catch(error => console.error('Error fetching user stats:', error));
         };
