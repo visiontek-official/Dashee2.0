@@ -37,7 +37,7 @@ function loadScreens() {
                             <p class="last-seen">Last seen ${screen.last_connected}</p>
                         </div>
                         <div class="screen-options">
-                            <i class="fas fa-ellipsis-v" onclick="toggleOptionsDropdown(${screen.id})"></i>
+                            <i class="fas fa-ellipsis-v" onclick="toggleOptionsDropdown(event, ${screen.id})"></i>
                             <div class="options-dropdown" id="optionsDropdown-${screen.id}">
                                 <a href="#" onclick="renameScreen(${screen.id})">Rename</a>
                                 <a href="#" onclick="confirmAction('disable', ${screen.id})">Disable</a>
@@ -107,10 +107,26 @@ function addScreen() {
     });
 }
 
-function toggleOptionsDropdown(screenId) {
+function toggleOptionsDropdown(event, screenId) {
+    event.stopPropagation(); // Prevent the click from bubbling up
     const dropdown = document.getElementById(`optionsDropdown-${screenId}`);
+    const allDropdowns = document.querySelectorAll('.options-dropdown');
+
+    allDropdowns.forEach(dd => {
+        if (dd !== dropdown) {
+            dd.style.display = 'none';
+        }
+    });
+
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
 }
+
+document.addEventListener('click', (event) => {
+    if (!event.target.matches('.fa-ellipsis-v')) {
+        const allDropdowns = document.querySelectorAll('.options-dropdown');
+        allDropdowns.forEach(dd => dd.style.display = 'none');
+    }
+});
 
 function confirmAction(action, screenId) {
     const confirmation = confirm(`Are you sure you want to ${action} this screen?`);
