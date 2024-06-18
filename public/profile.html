@@ -41,24 +41,32 @@
             <section class="content">
                 <h1>My Profile</h1>
                 <form id="profileForm" enctype="multipart/form-data">
-                    <label for="firstname">First Name:</label>
-                    <input type="text" id="firstname" name="firstname">
-                    
-                    <label for="lastname">Last Name:</label>
-                    <input type="text" id="lastname" name="lastname">
-                    
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email">
-                    
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
-                    
-                    <label for="profilePicInput">Profile Picture:</label>
-                    <input type="file" id="profilePicInput" name="profilePic">
-                    
-                    <button type="submit">Update</button>
+                    <div class="form-group">
+                        <label for="firstname">First Name:</label>
+                        <input type="text" id="firstname" name="firstname">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Last Name:</label>
+                        <input type="text" id="lastname" name="lastname">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePicInput">Profile Picture:</label>
+                        <input type="file" id="profilePicInput" name="profilePic">
+                    </div>
+                    <div class="button-container">
+                        <button type="submit">Update</button>
+                        <button type="button" id="clearButton">Clear</button>
+                      </div>
                 </form>
-                
+                <div id="notification" class="notification"></div>
             </section>
         </main>
     </div>

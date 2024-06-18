@@ -51,6 +51,24 @@ window.onload = function() {
     });
 };
 
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000); // Hide after 3 seconds
+}
+
+function validateFile(file) {
+    const allowedFormats = ['image/jpeg', 'image/png', 'video/mp4'];
+    if (file && !allowedFormats.includes(file.type)) {
+        showNotification('Invalid file format. Please upload a JPEG, PNG, or MP4 file.');
+        return false;
+    }
+    return true;
+}
+
 // Add event listener for form submission to handle profile update
 document.getElementById('profileForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -74,6 +92,9 @@ document.getElementById('profileForm').addEventListener('submit', function(event
 
     const profilePicInput = document.getElementById('profilePicInput');
     if (profilePicInput.files.length > 0) {
+        if (!validateFile(profilePicInput.files[0])) {
+            return; // Stop the form submission if file validation fails
+        }
         formData.append('profilePic', profilePicInput.files[0]);
     }
 
@@ -90,11 +111,19 @@ document.getElementById('profileForm').addEventListener('submit', function(event
     .then(data => {
         if (data.error) throw new Error(data.error);
         console.log('Profile updated successfully:', data);
-        alert('Profile updated successfully');
+        showNotification('Profile updated successfully');
         location.reload(); // Refresh the page to show updated details
     })
     .catch(error => {
         console.error('Error updating profile:', error);
-        alert('Failed to update profile');
+        showNotification('Failed to update profile');
     });
+});
+
+// Add event listener for the clear button
+document.getElementById('clearButton').addEventListener('click', function() {
+    document.getElementById('firstname').value = '';
+    document.getElementById('lastname').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('profilePicInput').value = '';
 });

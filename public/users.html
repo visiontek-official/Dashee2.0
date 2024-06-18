@@ -61,51 +61,7 @@
             </section>
         </main>
     </div>
-
-    <!-- Edit User Modal -->
-    <div id="editUserModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('editUserModal').style.display='none'">&times;</span>
-            <h2>Edit User</h2>
-            <form id="editUserForm" enctype="multipart/form-data">
-                <input type="hidden" id="editUserId" name="id">
-                <div>
-                    <label for="editFirstname">First Name:</label>
-                    <input type="text" id="editFirstname" name="firstname">
-                </div>
-                <div>
-                    <label for="editLastname">Last Name:</label>
-                    <input type="text" id="editLastname" name="lastname">
-                </div>
-                <div>
-                    <label for="editEmail">Email:</label>
-                    <input type="email" id="editEmail" name="email">
-                </div>
-                <div>
-                    <label for="editRole">Role:</label>
-                    <select id="editRole" name="role">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="editEnabled">Enabled:</label>
-                    <select id="editEnabled" name="enabled">
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="editProfilePic">Profile Picture:</label>
-                    <input type="file" id="editProfilePic" name="profilePic">
-                </div>
-                <div>
-                    <button type="submit">Update User</button>
-                </div>
-            </form>            
-        </div>
-    </div>
-
+    <div id="notification" class="notification"></div>
     <script src="users.js"></script>
 </body>
 </html>

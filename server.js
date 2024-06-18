@@ -18,6 +18,21 @@ const generateToken = (userId) => {
     return jwt.sign({ userId }, config.secretKey, { expiresIn: '1h' });
 };
 
+// Verify Token Middleware
+function verifyToken(req, res, next) {
+    const token = req.headers['authorization'];
+    if (!token) {
+        return res.status(403).send({ auth: false, message: 'No token provided.' });
+    }
+    jwt.verify(token.split(' ')[1], config.secretKey, function(err, decoded) { // Use config.secretKey
+        if (err) {
+            return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
+        }
+        req.userId = decoded.userId;
+        next();
+    });
+}
+
 // Log function for web server
 const log = (message, indepth = false) => {
     const logMessage = `[${new Date().toISOString()}] ${message}`;
@@ -146,19 +161,16 @@ app.use(session({
     secret: config.secretKey,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 }
+    cookie: { secure: false } // Set secure to true if using HTTPS
 }));
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), req.body.folder || '');
-        if (!fs.existsSync(userDir)) {
-            fs.mkdirSync(userDir, { recursive: true });
-        }
-        cb(null, userDir);
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname); // Keep the original file name
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix);
     }
 });
 
@@ -181,6 +193,12 @@ apiApp.listen(config.apiPort, () => {
 // API server middleware and routes
 apiApp.use(bodyParser.urlencoded({ extended: true }));
 apiApp.use(bodyParser.json());
+
+// Middleware to log API requests and responses and verify tokens if required
+apiApp.use((req, res, next) => {
+    apiLog(`API request: ${req.method} ${req.url} - Body: ${JSON.stringify(req.body)}`);
+    next();
+});
 
 // Middleware to log API requests and responses and verify tokens
 app.use((req, res, next) => {
@@ -323,6 +341,57 @@ app.get('/api/statistics', (req, res) => {
         res.status(500).json({ error: 'Failed to fetch statistics' });
     });
 });
+
+//**********************************API END POINTS**********************************
+apiApp.get('/api/stats', verifyToken, (req, res) => {
+    const queries = {
+        totalUsers: 'SELECT COUNT(*) AS count FROM users',
+        activeUsers: 'SELECT COUNT(*) AS count FROM users WHERE logged_in = TRUE',
+        disabledUsers: 'SELECT COUNT(*) AS count FROM users WHERE enabled = FALSE',
+        totalScreens: 'SELECT COUNT(*) AS count FROM screens'
+    };
+
+    Promise.all(Object.values(queries).map(query => new Promise((resolve, reject) => {
+        db.query(query, (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results[0].count);
+            }
+        });
+    })))
+    .then(([totalUsers, activeUsers, disabledUsers, totalScreens]) => {
+        apiLog('Fetched statistics:', { totalUsers, activeUsers, disabledUsers, totalScreens });
+        res.json({ totalUsers, activeUsers, disabledUsers, totalScreens });
+    })
+    .catch(err => {
+        apiLog('Failed to fetch statistics:', err);
+        res.status(500).json({ error: 'Failed to fetch statistics' });
+    });
+});
+
+apiApp.get('/api/user-data', verifyToken, (req, res) => {
+    const userId = req.userId; // Use the userId from the token
+
+    console.log(`User ID from token: ${userId}`);
+
+    const sql = 'SELECT firstname, lastname, email, profile_pic, role FROM users WHERE id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.log('Failed to fetch user data:', err);
+            return res.status(500).json({ error: 'Failed to fetch user data' });
+        }
+        if (results.length > 0) {
+            console.log('Fetched user data:', results[0]);
+            res.json(results[0]);
+        } else {
+            console.log('User not found');
+            res.status(404).json({ error: 'User not found' });
+        }
+    });
+});
+
+//**********************************API END POINTS**********************************
 
 app.use((req, res, next) => {
     const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
@@ -630,7 +699,7 @@ app.get('/getUsers', (req, res) => {
     });
 });
 
-app.post('/api/update-user', upload.single('profilePic'), (req, res) => {
+app.post('/api/update-user', upload.single('profilePic'), verifyToken, (req, res) => {
     const { id, firstname, lastname, email, role, enabled } = req.body;
     const profilePic = req.file ? `/uploads/${req.file.filename}` : null;
     const fieldsToUpdate = {};

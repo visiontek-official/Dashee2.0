@@ -12,6 +12,22 @@
     padding: 20px;
     box-sizing: border-box;
 }
+.notification {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 15px;
+    background-color: #f44336; /* Red */
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+}
+
+.notification.show {
+    display: block;
+}
 
 table {
     width: 100%;
@@ -61,6 +77,87 @@ th {
 
 .profile-pic-label {
     cursor: pointer;
-    color: #007bff;
+    color: #1d2a38;
     text-decoration: underline;
+}
+
+/* General Styles */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.user-table th, .user-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.user-table th {
+    background-color: #f4f4f4;
+}
+
+.user-table tbody tr {
+    transition: background-color 0.3s;
+}
+
+.user-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Edit Mode Styles */
+.user-table tbody tr.editing {
+    background-color: #f9f9f9;
+}
+
+.user-table input[type="text"],
+.user-table input[type="email"],
+.user-table select {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.user-table input[type="text"]:focus,
+.user-table input[type="email"]:focus,
+.user-table select:focus {
+    border-color: #304050;
+    outline: none;
+}
+
+.user-table input[type="file"] {
+    margin: 0 10px;
+}
+
+.edit-button, .save-button {
+    background-color: #304050;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.edit-button:hover, .save-button:hover {
+    background-color: #0e2636;
+}
+
+.save-button {
+    background-color: #ff2592;
+}
+
+.save-button:hover {
+    background-color: #b82870;
 }

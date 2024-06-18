@@ -9,7 +9,7 @@ module.exports = {
     sqlPort: 3306,
     uploadConfig: {
         maxFileSize: 10 * 1024 * 1024, // 10MB
-        allowedFormats: ['image/jpeg', 'image/png', 'video/mp4']
+        allowedFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/avi']
     },
     secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
 };
