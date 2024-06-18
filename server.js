@@ -5,39 +5,20 @@ const mysql = require('mysql');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
 const config = require('./config/config');
 
-const app = express();
-const port = config.port;
+const app = express(); // Web server
+const apiApp = express(); // API server
 const logFile = path.join(__dirname, 'logs', 'server.log');
+const apiLogFile = path.join(__dirname, 'logs', 'api.log');
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), req.body.folder || '');
-        if (!fs.existsSync(userDir)) {
-            fs.mkdirSync(userDir, { recursive: true });
-        }
-        cb(null, userDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname); // Keep the original file name
-    }
-});
+// Helper function to generate token
+const generateToken = (userId) => {
+    return jwt.sign({ userId }, config.secretKey, { expiresIn: '1h' });
+};
 
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: config.uploadConfig.maxFileSize },
-    fileFilter: function (req, file, cb) {
-        if (config.uploadConfig.allowedFormats.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file format'));
-        }
-    }
-});
-
-// Add this function to log messages
+// Log function for web server
 const log = (message, indepth = false) => {
     const logMessage = `[${new Date().toISOString()}] ${message}`;
     fs.appendFileSync(logFile, logMessage + '\n'); // Always log to file
@@ -46,10 +27,20 @@ const log = (message, indepth = false) => {
     }
 };
 
+// Log function for API server
+const apiLog = (message, indepth = false) => {
+    const logMessage = `[${new Date().toISOString()}] ${message}`;
+    fs.appendFileSync(apiLogFile, logMessage + '\n'); // Always log to file
+    if (config.api_debug || indepth) {
+        console.log(logMessage); // Log to console conditionally
+    }
+};
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: config.dbUser,
     password: config.dbPassword,
+    database: config.dbName,
     port: config.sqlPort
 });
 
@@ -59,20 +50,8 @@ db.connect((err) => {
         throw err;
     }
     log('Connected to database');
-    db.query(`CREATE DATABASE IF NOT EXISTS ${config.dbName}`, (err, result) => {
-        if (err) {
-            log('Database creation failed: ' + err, true);
-            throw err;
-        }
-        log('Database checked/created');
-        db.changeUser({ database: config.dbName }, (err) => {
-            if (err) {
-                log('Database selection failed: ' + err, true);
-                throw err;
-            }
-            createTables();
-        });
-    });
+    createTables();
+    logOutAllUsers(); // Log out all users on server start
 });
 
 const createTables = () => {
@@ -84,7 +63,11 @@ const createTables = () => {
         password VARCHAR(255) NOT NULL,
         profile_pic VARCHAR(255) DEFAULT 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png',
         role VARCHAR(50) DEFAULT 'user',
-        enabled BOOLEAN DEFAULT true
+        enabled BOOLEAN DEFAULT true,
+        logged_in BOOLEAN DEFAULT FALSE,
+        api_token VARCHAR(255) DEFAULT NULL,
+        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`;
 
     const screenTableQuery = `CREATE TABLE IF NOT EXISTS screens (
@@ -94,6 +77,8 @@ const createTables = () => {
         user_id INT NOT NULL,
         enabled BOOLEAN DEFAULT false,
         last_connected DATETIME DEFAULT NULL,
+        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
 
@@ -141,15 +126,236 @@ const checkAdminUser = () => {
     });
 };
 
+const logOutAllUsers = () => {
+    const sql = 'UPDATE users SET logged_in = FALSE, api_token = NULL';
+    db.query(sql, (err, result) => {
+        if (err) {
+            log('Failed to log out all users: ' + err, true);
+            throw err;
+        }
+        log('All users logged out');
+    });
+};
+
+// Web server middleware and routes
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads directory
 app.use(session({
-    secret: 'yourSecretKey',
+    secret: config.secretKey,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: { maxAge: 60000 }
 }));
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), req.body.folder || '');
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        cb(null, userDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname); // Keep the original file name
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: config.uploadConfig.maxFileSize },
+    fileFilter: function (req, file, cb) {
+        if (config.uploadConfig.allowedFormats.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file format'));
+        }
+    }
+});
+
+apiApp.listen(config.apiPort, () => {
+    apiLog(`API server running on port ${config.apiPort}`);
+});
+
+// API server middleware and routes
+apiApp.use(bodyParser.urlencoded({ extended: true }));
+apiApp.use(bodyParser.json());
+
+// Middleware to log API requests and responses and verify tokens
+app.use((req, res, next) => {
+    const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
+    if (publicPaths.some(path => req.path.startsWith(path))) {
+        return next();
+    }
+
+    const token = req.headers['authorization'] ? req.headers['authorization'].split(' ')[1] : null;
+    if (!token) {
+        console.log('No token provided, redirecting to login');
+        return res.redirect('/index.html');
+    }
+
+    jwt.verify(token, config.secretKey, (err, decoded) => {
+        if (err) {
+            console.log('Token verification failed:', err);
+            return res.redirect('/index.html');
+        }
+
+        console.log('Decoded token:', decoded);
+
+        const sql = 'SELECT * FROM users WHERE id = ?';
+        db.query(sql, [decoded.userId], (err, results) => {
+            if (err) {
+                console.log('Error checking api_token:', err);
+                return res.status(500).json({ error: 'Failed to check api_token' });
+            }
+
+            console.log('User data from token verification:', results);
+
+            if (results.length > 0 && token === results[0].api_token) {
+                console.log('Token verified');
+                req.session.userId = decoded.userId;
+                req.session.save(() => {
+                    console.log('Session saved:', req.session);
+                    next();
+                });
+            } else {
+                req.session.destroy();
+                console.log('Invalid token, redirecting to login');
+                return res.redirect('/index.html');
+            }
+        });
+    });
+});
+
+// Your API routes here
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+apiApp.post('/api/some-endpoint', (req, res) => {
+    apiLog(`API request to /api/some-endpoint: ${JSON.stringify(req.body)}`);
+    // Your API logic here
+    res.json({ success: true });
+});
+
+app.get('/api/user-details', (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) {
+        console.log('No session user ID, redirecting to login');
+        return res.redirect('/index.html');
+    }
+
+    const sql = 'SELECT firstname, lastname, profile_pic, role FROM users WHERE id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.log('Failed to fetch user details:', err);
+            return res.status(500).json({ error: 'Failed to fetch user details' });
+        }
+        if (results.length > 0) {
+            console.log('Fetched user details:', results[0]);
+            res.json(results[0]);
+        } else {
+            console.log('User not found');
+            res.status(404).json({ error: 'User not found' });
+        }
+    });
+});
+
+app.get('/api/statistics', (req, res) => {
+    const queries = {
+        totalUsers: 'SELECT COUNT(*) AS count FROM users',
+        activeUsers: 'SELECT COUNT(*) AS count FROM users WHERE logged_in = TRUE',
+        disabledUsers: 'SELECT COUNT(*) AS count FROM users WHERE enabled = FALSE',
+        totalScreens: 'SELECT COUNT(*) AS count FROM screens'
+    };
+
+    Promise.all(Object.values(queries).map(query => new Promise((resolve, reject) => {
+        db.query(query, (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results[0].count);
+            }
+        });
+    })))
+    .then(([totalUsers, activeUsers, disabledUsers, totalScreens]) => {
+        console.log('Fetched statistics:', { totalUsers, activeUsers, disabledUsers, totalScreens });
+        res.json({ totalUsers, activeUsers, disabledUsers, totalScreens });
+    })
+    .catch(err => {
+        console.log('Failed to fetch statistics:', err);
+        res.status(500).json({ error: 'Failed to fetch statistics' });
+    });
+});
+
+apiApp.get('/user-details', (req, res) => {
+    const sql = 'SELECT firstname, lastname, profile_pic, role FROM users WHERE id = ?';
+    db.query(sql, [req.userId], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: 'User not found' });
+        res.json(results[0]);
+    });
+});
+
+apiApp.get('/statistics', (req, res) => {
+    const sql = `
+        SELECT 
+            (SELECT COUNT(*) FROM users) AS totalUsers,
+            (SELECT COUNT(*) FROM users WHERE enabled = TRUE) AS activeUsers,
+            (SELECT COUNT(*) FROM users WHERE enabled = FALSE) AS disabledUsers,
+            (SELECT COUNT(*) FROM screens) AS totalScreens
+    `;
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to fetch statistics' });
+        res.json(results[0]);
+    });
+});
+
+app.use((req, res, next) => {
+    const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
+    if (publicPaths.some(path => req.path.startsWith(path))) {
+        return next();
+    }
+
+    const token = req.headers['authorization'] ? req.headers['authorization'].split(' ')[1] : null;
+    if (!token) {
+        console.log('No token provided, redirecting to login');
+        return res.redirect('/index.html');
+    }
+
+    jwt.verify(token, config.secretKey, (err, decoded) => {
+        if (err) {
+            console.log('Token verification failed:', err);
+            return res.redirect('/index.html');
+        }
+
+        console.log('Decoded token:', decoded);
+
+        const sql = 'SELECT * FROM users WHERE id = ?';
+        db.query(sql, [decoded.userId], (err, results) => {
+            if (err) {
+                console.log('Error checking api_token:', err);
+                return res.status(500).json({ error: 'Failed to check api_token' });
+            }
+
+            console.log('User data from token verification:', results);
+
+            if (results.length > 0 && token === results[0].api_token) {
+                console.log('Token verified');
+                req.session.userId = decoded.userId;
+                req.session.save(() => {
+                    console.log('Session saved:', req.session);
+                    next();
+                });
+            } else {
+                req.session.destroy();
+                console.log('Invalid token, redirecting to login');
+                return res.redirect('/index.html');
+            }
+        });
+    });
+});
 
 app.post('/signup', (req, res) => {
     const { firstname, lastname, email, password, terms } = req.body;
@@ -168,32 +374,66 @@ app.post('/signup', (req, res) => {
     });
 });
 
-// Add logging to verify session data
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     log(`Login form data: ${JSON.stringify(req.body)}`);
     const sql = 'SELECT * FROM users WHERE email = ? AND password = ? AND enabled = true';
     db.query(sql, [email, password], (err, results) => {
-        if (err) {
-            log('Login failed: ' + err, true);
-            return res.json({ success: false, message: 'Login failed. Please try again.' });
-        }
-        log(`Login query results: ${JSON.stringify(results)}`);
+        if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+
         if (results.length > 0) {
             const user = results[0];
-            req.session.userId = user.id;
-            req.session.firstName = user.firstname;
-            req.session.lastName = user.lastname;
-            req.session.profilePic = user.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-            req.session.role = user.role;
-            log(`User logged in: ${email}`);
-            log(`Session data: ${JSON.stringify(req.session)}`);
-            return res.json({ success: true });
+            const token = jwt.sign({ userId: user.id }, config.secretKey, { expiresIn: '1h' });
+
+            log(`Generated token: ${token}`);
+
+            const updateSql = 'UPDATE users SET logged_in = TRUE, api_token = ? WHERE id = ?';
+            db.query(updateSql, [token, user.id], (err) => {
+                if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+
+                const fetchUpdatedUserSql = 'SELECT * FROM users WHERE id = ?';
+                db.query(fetchUpdatedUserSql, [user.id], (err, updatedResults) => {
+                    if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+
+                    log(`Updated user data: ${JSON.stringify(updatedResults)}`);
+
+                    req.session.regenerate((err) => {
+                        if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+
+                        req.session.userId = user.id;
+                        req.session.firstName = user.firstname;
+                        req.session.lastName = user.lastname;
+                        req.session.profilePic = user.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+                        req.session.role = user.role;
+                        log(`User logged in: ${email}`);
+                        log(`Session data: ${JSON.stringify(req.session)}`);
+                        req.session.save(() => {
+                            log('Session data after login:', req.session);
+                            res.json({ success: true, token });
+                        });
+                    });
+                });
+            });
         } else {
-            log(`Incorrect email or password or user not enabled for: ${email}`, true);
-            return res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
+            res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
         }
     });
+});
+
+app.post('/logout', (req, res) => {
+    if (req.session.userId) {
+        db.query('UPDATE users SET logged_in = FALSE, api_token = NULL WHERE id = ?', [req.session.userId], (err) => {
+            if (err) {
+                log('Logout failed: ' + err, true);
+                return res.json({ success: false, message: 'Logout failed. Please try again.' });
+            }
+            req.session.destroy();
+            log('User logged out');
+            return res.redirect('/login');
+        });
+    } else {
+        return res.redirect('/login');
+    }
 });
 
 app.post('/update-profile', upload.single('profile-pic'), (req, res) => {
@@ -332,7 +572,7 @@ app.get('/getUsers', (req, res) => {
         return res.status(401).json({ error: 'Not authenticated or not authorized' });
     }
 
-    const sql = 'SELECT id, firstname, lastname, email, role, enabled FROM users';
+    const sql = 'SELECT id, firstname, lastname, email, role, enabled, created, updated, logged_in FROM users';
     db.query(sql, (err, results) => {
         if (err) {
             log('Error fetching users: ' + err, true);
@@ -345,7 +585,7 @@ app.get('/getUsers', (req, res) => {
 app.post('/updateUser', (req, res) => {
     const { id, firstName, lastName, email, role, enabled } = req.body;
 
-    const sql = 'UPDATE users SET firstname = ?, lastname = ?, email = ?, role = ?, enabled = ? WHERE id = ?';
+    const sql = 'UPDATE users SET firstname = ?, lastname = ?, email = ?, role = ?, enabled = ?, updated = CURRENT_TIMESTAMP WHERE id = ?';
     db.query(sql, [firstName, lastName, email, role, enabled, id], (err, result) => {
         if (err) {
             log('Error updating user: ' + err, true);
@@ -385,102 +625,6 @@ app.post('/create-folder', (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    log(`Server running on port ${port}`);
+app.listen(config.webPort, () => {
+    log(`Web server running on port ${config.webPort}`);
 });
-
-app.get('/getUserStats', (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-
-    const totalUsersQuery = 'SELECT COUNT(*) AS totalUsers FROM users';
-    const activeUsersQuery = 'SELECT COUNT(*) AS activeUsers FROM users WHERE enabled = true';
-    const disabledUsersQuery = 'SELECT COUNT(*) AS disabledUsers FROM users WHERE enabled != 1';
-    const totalScreensQuery = 'SELECT COUNT(*) AS totalScreens FROM screens';
-
-    db.query(totalUsersQuery, (err, totalUsersResult) => {
-        if (err) {
-            log('Error fetching total users: ' + err, true);
-            return res.status(500).json({ error: 'Failed to fetch total users' });
-        }
-
-        db.query(activeUsersQuery, (err, activeUsersResult) => {
-            if (err) {
-                log('Error fetching active users: ' + err, true);
-                return res.status(500).json({ error: 'Failed to fetch active users' });
-            }
-
-            db.query(disabledUsersQuery, (err, disabledUsersResult) => {
-                if (err) {
-                    log('Error fetching disabled users: ' + err, true);
-                    return res.status(500).json({ error: 'Failed to fetch disabled users' });
-                }
-
-                db.query(totalScreensQuery, (err, totalScreensResult) => {
-                    if (err) {
-                        log('Error fetching total screens: ' + err, true);
-                        return res.status(500).json({ error: 'Failed to fetch total screens' });
-                    }
-
-                    const stats = {
-                        totalUsers: totalUsersResult[0].totalUsers,
-                        activeUsers: activeUsersResult[0].activeUsers,
-                        disabledUsers: disabledUsersResult[0].disabledUsers,
-                        totalScreens: totalScreensResult[0].totalScreens
-                    };
-
-                    res.json(stats);
-                });
-            });
-        });
-    });
-});
-
-
-// Add screen endpoint
-app.post('/addScreen', (req, res) => {
-    const { pairingCode, screenName } = req.body;
-    const userId = req.session.userId; // Assuming user ID is stored in session
-
-    const sql = 'INSERT INTO screens (screen_name, pairing_code, user_id, enabled, last_connected) VALUES (?, ?, ?, false, NOW())';
-    db.query(sql, [screenName, pairingCode, userId], (err, result) => {
-        if (err) {
-            console.error('Error adding screen:', err);
-            res.json({ success: false });
-        } else {
-            res.json({ success: true });
-        }
-    });
-});
-
-// Get screens endpoint
-app.get('/getScreens', (req, res) => {
-    const userId = req.session.userId; // Assuming user ID is stored in session
-
-    const sql = 'SELECT * FROM screens WHERE user_id = ?';
-    db.query(sql, [userId], (err, results) => {
-        if (err) {
-            console.error('Error retrieving screens:', err);
-            res.json({ success: false });
-        } else {
-            res.json({ success: true, screens: results });
-        }
-    });
-});
-
-//Screen Details
-app.get('/getScreenDetails', (req, res) => {
-    const screenId = req.query.screenId;
-    const sql = 'SELECT * FROM screens WHERE screen_id = ?';
-
-    db.query(sql, [screenId], (err, results) => {
-        if (err) {
-            console.error('Error retrieving screen details:', err);
-            res.json({ success: false });
-        } else {
-            res.json(results[0]);
-        }
-    });
-});
-

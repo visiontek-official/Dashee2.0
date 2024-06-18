@@ -1,13 +1,15 @@
 module.exports = {
-    port: 8001,
+    webPort: 8001,
+    apiPort: 8002,
+    logging: true,
+    api_debug: true,
     dbUser: 'VisionTEK',
     dbPassword: 'b!lls4w5yqYN]Wsb',
     dbName: 'dashee2_0',
     sqlPort: 3306,
-    logging: true,
-    displayAdminCredentials: true,
     uploadConfig: {
-        allowedFormats: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
-        maxFileSize: 10485760 // 10 MB
-    }
+        maxFileSize: 10 * 1024 * 1024, // 10MB
+        allowedFormats: ['image/jpeg', 'image/png', 'video/mp4']
+    },
+    secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
 };

@@ -129,62 +129,6 @@
             </section>
         </main>
     </div>                        
-    <script>
-        function toggleDropdown() {
-            var dropdownMenu = document.getElementById('dropdownMenu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function logout() {
-            console.log('User logged out');
-            window.location.href = 'index.html';
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
-                var dropdownMenu = document.getElementById('dropdownMenu');
-                if (dropdownMenu.style.display === 'block') {
-                    dropdownMenu.style.display = 'none';
-                }
-            }
-        }
-
-        window.onload = function() {
-            console.log('Page loaded');
-            fetch('/getUserDetails')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('User details:', data);
-                    document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
-                    document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-                    document.getElementById('userFullName').innerText = data.firstName + ' ' + data.lastName;
-
-                    if (data.role === 'admin') {
-                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
-                    }
-                })
-                .catch(error => console.error('Error fetching user details:', error));
-
-            fetch('/getUserStats')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalUsers').textContent = data.totalUsers;
-                    document.getElementById('activeUsers').textContent = data.activeUsers;
-                    document.getElementById('disabledUsers').textContent = data.disabledUsers;
-                    document.getElementById('totalScreens').textContent = data.totalScreens;
-                })
-                .catch(error => console.error('Error fetching user stats:', error));
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentLocation = window.location.href;
-            const menuItems = document.querySelectorAll('.sidebar-menu a');
-            menuItems.forEach(item => {
-                if (item.href === currentLocation) {
-                    item.classList.add('active'); // Add 'active' class to the current menu item
-                }
-            });
-        });
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>

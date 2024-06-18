@@ -27,8 +27,8 @@
         <header class="main-header">
             <div class="user-menu">
                 <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
-                <span class="user-name dropdown-toggle" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
-                <div class="dropdown-menu">
+                <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+                <div class="dropdown-menu" id="dropdownMenu">
                     <a href="profile.html">My Profile</a>
                     <a href="#">Settings</a>
                     <a href="content.html">File Management</a>
@@ -36,7 +36,7 @@
                     <a href="index.html" onclick="logout()">Logout</a>
                 </div>
             </div>
-        </header>                        
+        </header>
         <main class="main-content">
             <section class="content">
                 <div class="content-header">

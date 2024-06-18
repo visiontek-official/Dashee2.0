@@ -19,31 +19,64 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadUserDetails() {
-    fetch('/getUserDetails')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('userName').innerHTML = `${data.firstName} ${data.lastName} <i class="fas fa-caret-down"></i>`;
-            document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-            if (data.role === 'admin') {
-                document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
-            }
-        })
-        .catch(error => console.error('Error fetching user details:', error));
+    fetch('/api/user-details', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (response.status !== 200) {
+            throw new Error('Failed to authenticate');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        document.getElementById('userName').innerHTML = `${data.firstName} ${data.lastName} <i class="fas fa-caret-down"></i>`;
+        document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+
+        if (data.role === 'admin') {
+            document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user details:', error);
+        window.location.href = 'index.html';
+    });
 }
 
 let currentFolder = '';
 
 function fetchFiles(folder = '') {
     currentFolder = folder;
-    fetch('/getFiles', {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/files', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ folder: folder })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status !== 200) {
+            throw new Error('Failed to fetch files');
+        }
+        return response.json();
+    })
     .then(files => {
         const fileList = document.getElementById('fileList');
         fileList.innerHTML = ''; // Clear existing thumbnails
@@ -92,7 +125,10 @@ function fetchFiles(folder = '') {
 
         updateBreadcrumb();
     })
-    .catch(error => console.error('Error fetching files:', error));
+    .catch(error => {
+        console.error('Error fetching files:', error);
+        window.location.href = 'index.html';
+    });
 }
 
 function openFolder(folderName) {
@@ -166,7 +202,7 @@ function uploadFiles(files) {
     formData.append('folder', currentFolder);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload-file', true);
+    xhr.open('POST', '/api/upload-file', true);
 
     xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
@@ -191,10 +227,11 @@ function uploadFiles(files) {
 
 function createFolder() {
     const folderName = document.getElementById('folderNameInput').value;
-    fetch('/create-folder', {
+    fetch('/api/create-folder', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ folderName: folderName, currentFolder: currentFolder })
     })
@@ -214,10 +251,11 @@ function createFolder() {
 function renameFile(fileName) {
     const newName = prompt('Enter new name for the file/folder:', fileName);
     if (newName) {
-        fetch('/rename-file', {
+        fetch('/api/rename-file', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({ oldName: fileName, newName: newName, currentFolder: currentFolder })
         })
@@ -235,11 +273,12 @@ function renameFile(fileName) {
 }
 
 function deleteFile(fileName) {
-    if (confirm('Are you sure you want to delete this file/folder?')) {
-        fetch('/delete-file', {
+    if (confirm('Are you sure you want to delete this file?')) {
+        fetch('/api/delete-file', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({ fileName: fileName, currentFolder: currentFolder })
         })
