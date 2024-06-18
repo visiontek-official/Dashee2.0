@@ -1,8 +1,8 @@
 module.exports = {
     webPort: 8001,
     apiPort: 8002,
-    logging: true,
-    api_debug: true,
+    logging: true,//enable server logs
+    api_debug: true,//enable api logs
     dbUser: '******',//your database username
     dbPassword: '********',//your database user password
     dbName: '*******',//your database name
