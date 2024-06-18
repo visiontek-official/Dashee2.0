@@ -240,6 +240,40 @@ apiApp.post('/api/some-endpoint', (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/api/users', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, config.secretKey);
+
+    if (!decoded) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const userId = decoded.userId;
+
+    // Check if the user is an admin
+    const sqlCheckAdmin = 'SELECT role FROM users WHERE id = ?';
+    db.query(sqlCheckAdmin, [userId], (err, results) => {
+        if (err) {
+            console.log('Failed to verify user role:', err);
+            return res.status(500).json({ error: 'Failed to verify user role' });
+        }
+        if (results.length === 0 || results[0].role !== 'admin') {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        // Fetch all users
+        const sqlFetchUsers = 'SELECT id, firstname, lastname, email, role, enabled, profile_pic FROM users';
+        db.query(sqlFetchUsers, (err, results) => {
+            if (err) {
+                console.log('Failed to fetch users:', err);
+                return res.status(500).json({ error: 'Failed to fetch users' });
+            }
+            console.log('Fetched users:', results);
+            res.json(results);
+        });
+    });
+});
+
 app.get('/api/user-details', (req, res) => {
     const userId = req.session.userId;
     if (!userId) {
@@ -287,20 +321,6 @@ app.get('/api/statistics', (req, res) => {
     .catch(err => {
         console.log('Failed to fetch statistics:', err);
         res.status(500).json({ error: 'Failed to fetch statistics' });
-    });
-});
-
-apiApp.get('/statistics', (req, res) => {
-    const sql = `
-        SELECT 
-            (SELECT COUNT(*) FROM users) AS totalUsers,
-            (SELECT COUNT(*) FROM users WHERE enabled = TRUE) AS activeUsers,
-            (SELECT COUNT(*) FROM users WHERE enabled = FALSE) AS disabledUsers,
-            (SELECT COUNT(*) FROM screens) AS totalScreens
-    `;
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Failed to fetch statistics' });
-        res.json(results[0]);
     });
 });
 
@@ -610,19 +630,67 @@ app.get('/getUsers', (req, res) => {
     });
 });
 
-app.post('/updateUser', (req, res) => {
-    const { id, firstName, lastName, email, role, enabled } = req.body;
+app.post('/api/update-user', upload.single('profilePic'), (req, res) => {
+    const { id, firstname, lastname, email, role, enabled } = req.body;
+    const profilePic = req.file ? `/uploads/${req.file.filename}` : null;
+    const fieldsToUpdate = {};
 
-    const sql = 'UPDATE users SET firstname = ?, lastname = ?, email = ?, role = ?, enabled = ?, updated = CURRENT_TIMESTAMP WHERE id = ?';
-    db.query(sql, [firstName, lastName, email, role, enabled, id], (err, result) => {
+    if (firstname) fieldsToUpdate.firstname = firstname;
+    if (lastname) fieldsToUpdate.lastname = lastname;
+    if (email) fieldsToUpdate.email = email;
+    if (role) fieldsToUpdate.role = role;
+    if (enabled !== undefined) fieldsToUpdate.enabled = enabled;
+    if (profilePic) fieldsToUpdate.profile_pic = profilePic;
+
+    console.log('Received profile update request:', fieldsToUpdate);
+
+    if (Object.keys(fieldsToUpdate).length === 0) {
+        console.log('No fields to update');
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const sql = 'UPDATE users SET ? WHERE id = ?';
+    db.query(sql, [fieldsToUpdate, id], (err, results) => {
         if (err) {
-            log('Error updating user: ' + err, true);
-            return res.status(500).json({ success: false, message: 'Failed to update user' });
+            console.error('Failed to update user:', err);
+            return res.status(500).json({ error: 'Failed to update user' });
         }
-        log(`User updated: ${email}`);
+        console.log('User updated successfully:', results);
         res.json({ success: true });
     });
 });
+
+app.get('/api/user/:id', (req, res) => {
+    const userId = req.params.id;
+    const sql = 'SELECT id, firstname, lastname, email, role, enabled, profile_pic FROM users WHERE id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Failed to fetch user details:', err);
+            return res.status(500).json({ error: 'Failed to fetch user details' });
+        }
+        if (results.length > 0) {
+            console.log('Fetched user details:', results[0]);
+            res.json(results[0]);
+        } else {
+            console.log('User not found');
+            res.status(404).json({ error: 'User not found' });
+        }
+    });
+});
+
+//app.post('/updateUser', (req, res) => {
+//    const { id, firstName, lastName, email, role, enabled } = req.body;
+//
+//    const sql = 'UPDATE users SET firstname = ?, lastname = ?, email = ?, role = ?, enabled = ?, updated = CURRENT_TIMESTAMP WHERE id = ?';
+//    db.query(sql, [firstName, lastName, email, role, enabled, id], (err, result) => {
+//        if (err) {
+//            log('Error updating user: ' + err, true);
+//            return res.status(500).json({ success: false, message: 'Failed to update user' });
+//        }
+//        log(`User updated: ${email}`);
+//        res.json({ success: true });
+//    });
+//});
 
 app.post('/upload-profile-pic', upload.single('profile-pic'), (req, res) => {
     const { userId } = req.body;

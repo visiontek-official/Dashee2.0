@@ -3,85 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management</title>
+    <title>Users</title>
+    <link rel="stylesheet" href="users.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        .main-content {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-        }
-
-        .content {
-            width: 100%;
-            max-width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        .edit-button, .save-button {
-            padding: 5px 10px;
-            background-color: #1d2a38;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .edit-button:hover, .save-button:hover {
-            background-color: #253f5f;
-        }
-
-        .edit-input {
-            width: 100%;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-
-        .profile-pic-input {
-            display: none;
-        }
-
-        .profile-pic-label {
-            cursor: pointer;
-            color: #007bff;
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="user-menu">
-            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
-            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <a href="profile.html">My Profile</a>
-                <a href="#">Settings</a>
-                <a href="content.html">File Management</a>
-                <a href="#">Support</a>
-                <a href="index.html" onclick="logout()">Logout</a>
-            </div>
-        </div>
-    </header>
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="sidebar-header">
@@ -97,10 +24,25 @@
                 <li id="userMenuItem"></li>
             </ul>
         </nav>
+        <header class="main-header">
+            <div class="user-menu">
+                <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+                <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="profile.html">My Profile</a>
+                    <a href="#">Settings</a>
+                    <a href="content.html">File Management</a>
+                    <a href="#">Support</a>
+                    <a href="index.html" onclick="logout()">Logout</a>
+                </div>
+            </div>
+        </header>
         <main class="main-content">
             <section class="content">
-                <h1>User Management</h1>
-                <table id="userTable">
+                <div class="content-header">
+                    <h1>Users</h1>
+                </div>
+                <table id="userTable" class="user-table">
                     <thead>
                         <tr>
                             <th>First Name</th>
@@ -119,131 +61,51 @@
             </section>
         </main>
     </div>
-    <script>
-        function toggleDropdown() {
-            var dropdownMenu = document.getElementById('dropdownMenu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        }
 
-        function logout() {
-            console.log('User logged out');
-            window.location.href = 'index.html';
-        }
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('editUserModal').style.display='none'">&times;</span>
+            <h2>Edit User</h2>
+            <form id="editUserForm" enctype="multipart/form-data">
+                <input type="hidden" id="editUserId" name="id">
+                <div>
+                    <label for="editFirstname">First Name:</label>
+                    <input type="text" id="editFirstname" name="firstname">
+                </div>
+                <div>
+                    <label for="editLastname">Last Name:</label>
+                    <input type="text" id="editLastname" name="lastname">
+                </div>
+                <div>
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" name="email">
+                </div>
+                <div>
+                    <label for="editRole">Role:</label>
+                    <select id="editRole" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="editEnabled">Enabled:</label>
+                    <select id="editEnabled" name="enabled">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="editProfilePic">Profile Picture:</label>
+                    <input type="file" id="editProfilePic" name="profilePic">
+                </div>
+                <div>
+                    <button type="submit">Update User</button>
+                </div>
+            </form>            
+        </div>
+    </div>
 
-        window.onclick = function(event) {
-            if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
-                var dropdownMenu = document.getElementById('dropdownMenu');
-                if (dropdownMenu.style.display === 'block') {
-                    dropdownMenu.style.display = 'none';
-                }
-            }
-        }
-
-        window.onload = function() {
-            fetch('/getUserDetails')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('User details:', data);  // Log the fetched user details
-                    document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
-                    document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-                    
-                    if (data.role === 'admin') {
-                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
-                    }
-                })
-                .catch(error => console.error('Error fetching user details:', error));
-
-            fetch('/getUsers')
-                .then(response => response.json())
-                .then(users => {
-                    const userTableBody = document.getElementById('userTable').querySelector('tbody');
-                    users.forEach(user => {
-                        const userRow = document.createElement('tr');
-                        userRow.innerHTML = `
-                            <td><span class="user-data" data-id="${user.id}" data-field="firstname">${user.firstname}</span></td>
-                            <td><span class="user-data" data-id="${user.id}" data-field="lastname">${user.lastname}</span></td>
-                            <td><span class="user-data" data-id="${user.id}" data-field="email">${user.email}</span></td>
-                            <td><span class="user-data" data-id="${user.id}" data-field="role">${user.role}</span></td>
-                            <td><span class="user-data" data-id="${user.id}" data-field="enabled">${user.enabled}</span></td>
-                            <td>
-                                <img src="${user.profile_pic}" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%;">
-                                <label for="profile-pic-${user.id}" class="profile-pic-label">Change</label>
-                                <input type="file" id="profile-pic-${user.id}" class="profile-pic-input" onchange="uploadProfilePic(${user.id})">
-                            </td>
-                            <td><button class="edit-button" onclick="editUser(${user.id})">Edit</button></td>
-                        `;
-                        userTableBody.appendChild(userRow);
-                    });
-                })
-                .catch(error => console.error('Error fetching users:', error));
-        };
-
-        function editUser(userId) {
-            const userFields = document.querySelectorAll(`.user-data[data-id='${userId}']`);
-            userFields.forEach(field => {
-                const fieldName = field.getAttribute('data-field');
-                const fieldValue = field.textContent;
-                field.innerHTML = `<input type="text" class="edit-input" value="${fieldValue}" id="edit-${fieldName}-${userId}">`;
-            });
-            const editButton = document.querySelector(`.edit-button[onclick='editUser(${userId})']`);
-            editButton.textContent = 'Save';
-            editButton.className = 'save-button';
-            editButton.setAttribute('onclick', `saveUser(${userId})`);
-        }
-
-        function saveUser(userId) {
-            const firstName = document.getElementById(`edit-firstname-${userId}`).value;
-            const lastName = document.getElementById(`edit-lastname-${userId}`).value;
-            const email = document.getElementById(`edit-email-${userId}`).value;
-            const role = document.getElementById(`edit-role-${userId}`).value;
-            const enabled = document.getElementById(`edit-enabled-${userId}`).value;
-
-            fetch('/updateUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: userId, firstName, lastName, email, role, enabled })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('User updated successfully');
-                    window.location.reload();
-                } else {
-                    alert('Failed to update user');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating user:', error);
-                alert('An error occurred. Please try again.');
-            });
-        }
-
-        function uploadProfilePic(userId) {
-            const fileInput = document.getElementById(`profile-pic-${userId}`);
-            const formData = new FormData();
-            formData.append('profile-pic', fileInput.files[0]);
-            formData.append('userId', userId);
-
-            fetch('/upload-profile-pic', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Profile picture updated successfully');
-                    window.location.reload();
-                } else {
-                    alert('Failed to update profile picture');
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading profile picture:', error);
-                alert('An error occurred. Please try again.');
-            });
-        }
-    </script>
+    <script src="users.js"></script>
 </body>
 </html>
