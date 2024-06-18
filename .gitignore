@@ -1,2 +1,11 @@
-logs/server.log
-logs/api.log
+# Ignore node_modules folder
+node_modules/
+
+# Ignore all .log files
+*.log
+
+# Ignore all .env files
+#.env
+
+# Ignore all config files
+#.env
