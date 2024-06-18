@@ -11,5 +11,5 @@ module.exports = {
         maxFileSize: 10 * 1024 * 1024, // 10MB
         allowedFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/avi']
     },
-    secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
+    secretKey: '**************************************************************', // your sectret key used for token generation
 };
