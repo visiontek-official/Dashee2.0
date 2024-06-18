@@ -543,3 +543,15 @@
 [2024-06-18T20:42:03.641Z] User logged in: info@visiontek.co.za
 [2024-06-18T20:42:03.641Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"secure":false,"httpOnly":true,"path":"/"},"userId":1,"firstName":"VisionTEK","lastName":"Admin","profilePic":"/uploads/1718196025405.png","role":"admin"}
 [2024-06-18T20:42:03.642Z] Session data after login:
+[2024-06-18T20:48:01.186Z] Web server running on port 8001
+[2024-06-18T20:48:01.198Z] Connected to database
+[2024-06-18T20:48:01.200Z] User table checked/created
+[2024-06-18T20:48:01.201Z] Screen table checked/created
+[2024-06-18T20:48:01.206Z] All users logged out
+[2024-06-18T20:48:01.211Z] Admin user already exists
+[2024-06-18T20:48:43.087Z] Login form data: {"email":"kobus4@gmail.com","password":"KristyLee5483@!1"}
+[2024-06-18T20:48:43.092Z] Generated token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxODc0MzcyMywiZXhwIjoxNzE4NzQ3MzIzfQ.d6bnr5T_ji5ADv-oYjsmKm-ohTkDGNZTyAVyUpPVk1k
+[2024-06-18T20:48:43.102Z] Updated user data: [{"id":2,"firstname":"Kobus","lastname":"Engelbrecht","email":"kobus4@gmail.com","password":"KristyLee5483@!1","profile_pic":"/uploads/man-with-laptop-light.png","role":"user","enabled":1,"logged_in":1,"created":"2024-06-18T06:33:52.000Z","updated":"2024-06-18T20:48:43.000Z","api_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxODc0MzcyMywiZXhwIjoxNzE4NzQ3MzIzfQ.d6bnr5T_ji5ADv-oYjsmKm-ohTkDGNZTyAVyUpPVk1k"}]
+[2024-06-18T20:48:43.103Z] User logged in: kobus4@gmail.com
+[2024-06-18T20:48:43.104Z] Session data: {"cookie":{"originalMaxAge":null,"expires":null,"secure":false,"httpOnly":true,"path":"/"},"userId":2,"firstName":"Kobus","lastName":"Engelbrecht","profilePic":"/uploads/man-with-laptop-light.png","role":"user"}
+[2024-06-18T20:48:43.104Z] Session data after login:
