@@ -40,94 +40,28 @@
         <main class="main-content">
             <section class="content">
                 <h1>My Profile</h1>
-                <form id="profileForm">
-                    <div class="form-group">
-                        <label for="firstname">First Name</label>
-                        <input type="text" id="firstname" name="firstname" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastname">Last Name</label>
-                        <input type="text" id="lastname" name="lastname" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-pic">Profile Picture</label>
-                        <input type="file" id="profile-pic" name="profile-pic" accept="image/*">
-                    </div>
-                    <button type="submit">Update Profile</button>
+                <form id="profileForm" enctype="multipart/form-data">
+                    <label for="firstname">First Name:</label>
+                    <input type="text" id="firstname" name="firstname">
+                    
+                    <label for="lastname">Last Name:</label>
+                    <input type="text" id="lastname" name="lastname">
+                    
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email">
+                    
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+                    
+                    <label for="profilePicInput">Profile Picture:</label>
+                    <input type="file" id="profilePicInput" name="profilePic">
+                    
+                    <button type="submit">Update</button>
                 </form>
+                
             </section>
         </main>
     </div>
-    <script>
-        function toggleDropdown() {
-            var dropdownMenu = document.getElementById('dropdownMenu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function logout() {
-            // Handle logout functionality here, for example, clearing session data
-            console.log('User logged out');
-            // Redirect to login page
-            window.location.href = 'index.html';
-        }
-
-        // Close the dropdown menu if the user clicks outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
-                var dropdownMenu = document.getElementById('dropdownMenu');
-                if (dropdownMenu.style.display === 'block') {
-                    dropdownMenu.style.display = 'none';
-                }
-            }
-        }
-
-        // Fetch user details from the server
-        window.onload = function() {
-            fetch('/getUserDetails')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
-                    document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-                    document.getElementById('firstname').value = data.firstName;
-                    document.getElementById('lastname').value = data.lastName;
-                    document.getElementById('email').value = data.email;
-
-                    if (data.role === 'admin') {
-                        document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
-                    }
-                })
-                .catch(error => console.error('Error fetching user details:', error));
-        };
-
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            fetch('/update-profile', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Profile updated successfully');
-                    window.location.reload();
-                } else {
-                    alert('Failed to update profile: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating profile:', error);
-                alert('An error occurred. Please try again.');
-            });
-        });
-    </script>
+    <script src="profile.js"></script>
 </body>
 </html>

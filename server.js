@@ -247,7 +247,7 @@ app.get('/api/user-details', (req, res) => {
         return res.redirect('/index.html');
     }
 
-    const sql = 'SELECT firstname, lastname, profile_pic, role FROM users WHERE id = ?';
+    const sql = 'SELECT firstname, lastname, email, profile_pic, role FROM users WHERE id = ?';
     db.query(sql, [userId], (err, results) => {
         if (err) {
             console.log('Failed to fetch user details:', err);
@@ -287,14 +287,6 @@ app.get('/api/statistics', (req, res) => {
     .catch(err => {
         console.log('Failed to fetch statistics:', err);
         res.status(500).json({ error: 'Failed to fetch statistics' });
-    });
-});
-
-apiApp.get('/user-details', (req, res) => {
-    const sql = 'SELECT firstname, lastname, profile_pic, role FROM users WHERE id = ?';
-    db.query(sql, [req.userId], (err, results) => {
-        if (err || results.length === 0) return res.status(500).json({ error: 'User not found' });
-        res.json(results[0]);
     });
 });
 
@@ -436,45 +428,81 @@ app.post('/logout', (req, res) => {
     }
 });
 
-app.post('/update-profile', upload.single('profile-pic'), (req, res) => {
-    const { firstname, lastname, email, password } = req.body;
-    let sql;
-    let params;
+app.post('/api/update-profile', upload.single('profilePic'), (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) {
+        console.log('No session user ID, redirecting to login');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check which fields have been provided
+    const fields = [];
+    const values = [];
+
+    if (req.body.firstname) {
+        fields.push('firstname = ?');
+        values.push(req.body.firstname);
+    }
+
+    if (req.body.lastname) {
+        fields.push('lastname = ?');
+        values.push(req.body.lastname);
+    }
+
+    if (req.body.email) {
+        fields.push('email = ?');
+        values.push(req.body.email);
+    }
+
+    if (req.body.password) {
+        fields.push('password = ?');
+        values.push(req.body.password);
+    }
 
     if (req.file) {
-        sql = 'UPDATE users SET firstname = ?, lastname = ?, profile_pic = ? WHERE email = ?';
-        params = [firstname, lastname, `/uploads/${req.session.userId}/${req.file.filename}`, email];
-    } else {
-        sql = 'UPDATE users SET firstname = ?, lastname = ? WHERE email = ?';
-        params = [firstname, lastname, email];
+        fields.push('profile_pic = ?');
+        values.push('/uploads/' + req.file.filename);
     }
 
-    if (password) {
-        sql = sql.replace('WHERE', ', password = ? WHERE');
-        params.splice(params.length - 1, 0, password);
+    if (fields.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
     }
 
-    db.query(sql, params, (err, result) => {
+    values.push(userId);
+
+    // Construct the SQL query dynamically based on provided fields
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    db.query(sql, values, (err, results) => {
         if (err) {
-            log('Profile update failed: ' + err, true);
-            res.status(500).json({ success: false, message: 'Profile update failed' });
-            return;
+            console.log('Failed to update profile:', err);
+            return res.status(500).json({ error: 'Failed to update profile' });
         }
-        log(`User profile updated: ${email}`, true);
+        console.log('Updated user data:', results);
         res.json({ success: true });
     });
 });
 
 app.get('/getUserDetails', (req, res) => {
     log(`Fetching user details for session: ${JSON.stringify(req.session)}`);
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Not authenticated' });
+    const userId = req.session.userId;
+    if (!userId) {
+        console.log('No session user ID, redirecting to login');
+        return res.redirect('/index.html');
     }
-    res.json({
-        firstName: req.session.firstName,
-        lastName: req.session.lastName,
-        profilePic: req.session.profilePic,
-        role: req.session.role
+
+    const sql = 'SELECT firstname, lastname, email, profile_pic, role FROM users WHERE id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.log('Failed to fetch user details:', err);
+            return res.status(500).json({ error: 'Failed to fetch user details' });
+        }
+        if (results.length > 0) {
+            console.log('Fetched user details:', results[0]);
+            res.json(results[0]);
+        } else {
+            console.log('User not found');
+            res.status(404).json({ error: 'User not found' });
+        }
     });
 });
 
