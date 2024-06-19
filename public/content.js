@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function toggleOptionsMenu(fileName, element) {
+function toggleOptionsMenu(fileName, element, event) {
+    event.stopPropagation(); // Prevents the thumbnail click event
     const dropdownMenu = element.nextElementSibling;
     const rect = element.getBoundingClientRect();
 
@@ -61,6 +62,31 @@ function toggleOptionsMenu(fileName, element) {
     });
 }
 
+/*
+function toggleOptionsMenu(fileName, element) {
+    const dropdownMenu = element.nextElementSibling;
+    const rect = element.getBoundingClientRect();
+
+    // Close all other dropdown menus
+    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+    dropdownMenus.forEach(menu => {
+        if (menu !== dropdownMenu) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // Toggle the current dropdown menu
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    dropdownMenu.style.position = 'absolute';
+    dropdownMenu.style.top = `${rect.bottom}px`;
+    dropdownMenu.style.left = `${rect.left}px`;
+
+    // Stop propagation to prevent the document click listener from closing it immediately
+    element.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+}
+*/
 
 function fetchFiles() {
     const token = localStorage.getItem('token');
@@ -104,7 +130,7 @@ function fetchFiles() {
                         <span>${file.uploadDate}</span>
                     </div>
                 </div>
-                <div class="options" onclick="toggleOptionsMenu('${file.name}', this)">
+                <div class="options" onclick="toggleOptionsMenu('${file.name}', this, event)">
                     <i class="fas fa-ellipsis-h"></i>
                 </div>
                 <div class="dropdown-options-menu">
