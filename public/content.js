@@ -240,25 +240,6 @@ window.onclick = function(event) {
     }
 }
 
-// Example of handling login response in your content.js or equivalent
-fetch('/login', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ email, password })
-})
-.then(response => response.json())
-.then(data => {
-    if (data.success) {
-        localStorage.setItem('token', data.token);
-        window.location.href = 'content.html';
-    } else {
-        alert(data.message);
-    }
-})
-.catch(error => console.error('Error during login:', error));
-
 function loadUserDetails() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -290,6 +271,58 @@ function loadUserDetails() {
 }
 
 let currentFolder = '';
+
+function renameFile(fileName) {
+    const fileParts = fileName.split('.');
+    const extension = fileParts.pop();
+    const baseName = fileParts.join('.');
+
+    const newBaseName = prompt('Enter new name for the file:', baseName);
+    if (newBaseName) {
+        const newName = `${newBaseName}.${extension}`;
+        fetch('/api/rename-file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ oldName: fileName, newName: newName, currentFolder: currentFolder })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('File renamed successfully');
+                fetchFiles();
+            } else {
+                alert('Failed to rename file: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error renaming file:', error));
+    }
+}
+
+function deleteFile(fileName) {
+    if (confirm('Are you sure you want to delete this file?')) {
+        fetch('/api/delete-file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ fileName: fileName, currentFolder: currentFolder })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('File deleted successfully');
+                fetchFiles();
+            } else {
+                alert('Failed to delete file: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error deleting file:', error));
+    }
+}
 
 function openFolder(folderName) {
     fetchFiles(`${currentFolder}/${folderName}`);
@@ -397,49 +430,3 @@ function createFolder() {
     .catch(error => console.error('Error creating folder:', error));
 }
 
-function renameFile(fileName) {
-    const newName = prompt('Enter new name for the file/folder:', fileName);
-    if (newName) {
-        fetch('/api/rename-file', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ oldName: fileName, newName: newName, currentFolder: currentFolder })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('File renamed successfully');
-                fetchFiles();
-            } else {
-                alert('Failed to rename file: ' + data.message);
-            }
-        })
-        .catch(error => console.error('Error renaming file:', error));
-    }
-}
-
-function deleteFile(fileName) {
-    if (confirm('Are you sure you want to delete this file?')) {
-        fetch('/api/delete-file', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ fileName: fileName, currentFolder: currentFolder })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('File deleted successfully');
-                fetchFiles();
-            } else {
-                alert('Failed to delete file: ' + data.message);
-            }
-        })
-        .catch(error => console.error('Error deleting file:', error));
-    }
-}

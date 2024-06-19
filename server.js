@@ -691,34 +691,67 @@ app.post('/getFiles', (req, res) => {
     });
 });
 
-app.post('/rename-file', (req, res) => {
+//Rename Endpoint
+app.post('/api/rename-file', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
     const { oldName, newName, currentFolder } = req.body;
-    const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), currentFolder || '');
+    const userId = req.session.userId;
+    const userDir = path.join(__dirname, 'uploads', userId.toString(), currentFolder || '');
     const oldPath = path.join(userDir, oldName);
     const newPath = path.join(userDir, newName);
+    const relativePath = `uploads/${userId.toString()}/${currentFolder ? currentFolder + '/' : ''}${newName}`;
+    const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
 
     fs.rename(oldPath, newPath, (err) => {
         if (err) {
             log('File rename failed: ' + err, true);
             return res.status(500).json({ success: false, message: 'File rename failed' });
         }
-        log(`File renamed from ${oldPath} to ${newPath}`);
-        res.json({ success: true });
+
+        const sql = 'UPDATE content SET file_name = ?, file_path = ? WHERE file_name = ? AND user_id = ?';
+        db.query(sql, [newName, urlPath, oldName, userId], (err, result) => {
+            if (err) {
+                log('Database update failed: ' + err, true);
+                return res.status(500).json({ success: false, message: 'Database update failed' });
+            }
+            log(`File renamed from ${oldPath} to ${newPath}`);
+            res.json({ success: true });
+        });
     });
 });
 
-app.post('/delete-file', (req, res) => {
+//Delete Endpoint
+app.post('/api/delete-file', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
     const { fileName, currentFolder } = req.body;
-    const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), currentFolder || '');
+    const userId = req.session.userId;
+    const userDir = path.join(__dirname, 'uploads', userId.toString(), currentFolder || '');
     const filePath = path.join(userDir, fileName);
+    const relativePath = `uploads/${userId.toString()}/${currentFolder ? currentFolder + '/' : ''}${fileName}`;
+    const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
 
     fs.rm(filePath, { recursive: true, force: true }, (err) => {
         if (err) {
             log('File delete failed: ' + err, true);
             return res.status(500).json({ success: false, message: 'File delete failed' });
         }
-        log(`File deleted: ${filePath}`);
-        res.json({ success: true });
+
+        // Delete from the database
+        const sql = 'DELETE FROM content WHERE file_name = ? AND user_id = ?';
+        db.query(sql, [fileName, userId], (err, result) => {
+            if (err) {
+                log('Database deletion failed: ' + err, true);
+                return res.status(500).json({ success: false, message: 'Database deletion failed' });
+            }
+            log(`File deleted: ${filePath}`);
+            res.json({ success: true });
+        });
     });
 });
 
