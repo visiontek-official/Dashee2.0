@@ -45,7 +45,7 @@ window.onload = function() {
         document.getElementById('userFullName').innerText = `${data.firstname} ${data.lastname}`;
 
         if (data.role === 'admin') {
-            document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
+            document.getElementById('userMenuItem').style.display = 'block';
         }
     })
     .catch(error => {

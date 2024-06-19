@@ -79,11 +79,11 @@ input[type="checkbox"] {
 }
 
 button {
+    width: 107%;
     background-color: #1d2a38; /* Background color */
     color: white; /* Text color */
     border: none;
     border-radius: 5px;
-    padding: 10px 20px;
     cursor: pointer;
     transition: background-color 0.3s;
 }
