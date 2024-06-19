@@ -6,17 +6,258 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const dropdownMenu = document.querySelector('.dropdown-menu');
 
-    dropdownToggle.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent the click from bubbling up
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    });
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
 
-    document.addEventListener('click', (event) => {
-        if (!userMenu.contains(event.target)) {
-            dropdownMenu.style.display = 'none';
+        document.addEventListener('click', (event) => {
+            if (!userMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if (this.files.length > 0) {
+            document.getElementById('dragArea').innerHTML = `<div class="file-selected">Selected: ${this.files[0].name}</div>`;
+            document.getElementById('dragArea').classList.add('uploaded');
         }
     });
+
+    // Event listener to close the options dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+        dropdownMenus.forEach(menu => {
+            if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    });
 });
+
+function toggleOptionsMenu(fileName, element) {
+    const dropdownMenu = element.nextElementSibling;
+    const rect = element.getBoundingClientRect();
+
+    // Close all other dropdown menus
+    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+    dropdownMenus.forEach(menu => {
+        if (menu !== dropdownMenu) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // Toggle the current dropdown menu
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    dropdownMenu.style.position = 'absolute';
+    dropdownMenu.style.top = `${rect.bottom}px`;
+    dropdownMenu.style.left = `${rect.left}px`;
+
+    // Stop propagation to prevent the document click listener from closing it immediately
+    element.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+}
+
+
+function fetchFiles() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/get-files', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(files => {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+        files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'thumbnail';
+            fileItem.draggable = true;
+            fileItem.ondragstart = (event) => {
+                event.dataTransfer.setData('text/plain', file.name);
+            };
+            let thumbnailContent;
+            if (file.type.startsWith('image/')) {
+                thumbnailContent = `<img src="${file.path}" alt="${file.name}">`;
+            } else if (file.type.startsWith('video/')) {
+                thumbnailContent = `<video src="${file.path}" alt="${file.name}" controls></video>`;
+            } else {
+                thumbnailContent = `<i class="fas fa-file file-icon"></i>`;
+            }
+            fileItem.innerHTML = `
+                ${thumbnailContent}
+                <div class="file-info">
+                    <div class="file-details">
+                        <strong>${file.name}</strong>
+                        <span>${file.uploadDate}</span>
+                    </div>
+                </div>
+                <div class="options" onclick="toggleOptionsMenu('${file.name}', this)">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="dropdown-options-menu">
+                    <a href="#" onclick="openFile('${file.name}')">Open</a>
+                    <a href="#" onclick="renameFile('${file.name}')">Rename</a>
+                    <a href="#" onclick="deleteFile('${file.name}')">Delete</a>
+                </div>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching files:', error);
+        window.location.href = 'index.html';
+    });
+}
+
+function uploadFiles() {
+    const files = document.getElementById('fileInput').files;
+    if (files.length === 0) {
+        alert('Please select a file to upload');
+        return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('file', files[i]);
+    }
+
+    const token = localStorage.getItem('token');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload-file', true);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+            const percentComplete = (event.loaded / event.total) * 100;
+            document.getElementById('progressBarFill').style.width = percentComplete + '%';
+            document.getElementById('progressBarFill').textContent = Math.round(percentComplete) + '%';
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                alert('File uploaded successfully');
+                closeUploadPopup();
+                fetchFiles();  // Fetch files after successful upload
+            } else {
+                alert('File upload failed');
+            }
+        } else {
+            alert('Error uploading file');
+        }
+    };
+
+    xhr.send(formData);
+}
+
+function updateFiles() {
+    const files = document.getElementById('fileInput').files;
+    if (files.length === 0) {
+        alert('Please select a file to upload');
+        return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('file', files[i]);
+    }
+
+    const token = localStorage.getItem('token');
+    fetch('/api/upload-file', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('File updated successfully');
+            document.getElementById('dragArea').innerHTML = `Uploaded: ${files[0].name}`;
+            document.getElementById('dragArea').classList.add('uploaded');
+            closeUploadPopup();
+            fetchFiles();
+        } else {
+            alert('File update failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating file:', error);
+        alert('Error updating file');
+    });
+}
+
+function openUploadPopup() {
+    document.getElementById('uploadPopup').style.display = 'flex';
+}
+
+function closeUploadPopup() {
+    document.getElementById('uploadPopup').style.display = 'none';
+    document.getElementById('dragArea').innerHTML = `
+        Drag & Drop to Upload File
+        <br>or<br>
+        <button class="browse-button" onclick="document.getElementById('fileInput').click()">Browse</button>
+    `;
+    document.getElementById('dragArea').classList.remove('uploaded');
+}
+
+function toggleDropdown() {
+    var dropdownMenu = document.getElementById('dropdownMenu');
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+}
+
+function logout() {
+    console.log('User logged out');
+    window.location.href = 'index.html';
+}
+
+window.onclick = function(event) {
+    console.log(//console print logging
+        '!event.target.matches(".user-name") && !event.target.matches(".fa-caret-down"):',//console print logging
+        !event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')
+    );
+    
+    if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        if (dropdownMenu.style.display === 'block') {
+            dropdownMenu.style.display = 'none';
+        }
+    }
+}
+
+// Example of handling login response in your content.js or equivalent
+fetch('/login', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.success) {
+        localStorage.setItem('token', data.token);
+        window.location.href = 'content.html';
+    } else {
+        alert(data.message);
+    }
+})
+.catch(error => console.error('Error during login:', error));
 
 function loadUserDetails() {
     const token = localStorage.getItem('token');
@@ -30,21 +271,16 @@ function loadUserDetails() {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => {
-        if (response.status !== 200) {
-            throw new Error('Failed to authenticate');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.error) {
             throw new Error(data.error);
         }
-        document.getElementById('userName').innerHTML = `${data.firstName} ${data.lastName} <i class="fas fa-caret-down"></i>`;
-        document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+        document.getElementById('userName').innerHTML = `${data.firstname} ${data.lastname} <i class="fas fa-caret-down"></i>`;
+        document.getElementById('profilePic').src = data.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
 
         if (data.role === 'admin') {
-            document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
+            document.getElementById('userMenuItem').style.display = 'block';
         }
     })
     .catch(error => {
@@ -54,82 +290,6 @@ function loadUserDetails() {
 }
 
 let currentFolder = '';
-
-function fetchFiles(folder = '') {
-    currentFolder = folder;
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    fetch('/api/files', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ folder: folder })
-    })
-    .then(response => {
-        if (response.status !== 200) {
-            throw new Error('Failed to fetch files');
-        }
-        return response.json();
-    })
-    .then(files => {
-        const fileList = document.getElementById('fileList');
-        fileList.innerHTML = ''; // Clear existing thumbnails
-        files.forEach(file => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'thumbnail';
-            fileItem.draggable = true; // Make file item draggable
-            fileItem.ondragstart = (event) => {
-                event.dataTransfer.setData('text/plain', file.name);
-            };
-            let thumbnailContent;
-            if (file.type === 'folder') {
-                thumbnailContent = `<i class="fas fa-folder file-icon"></i>`;
-                fileItem.onclick = () => {
-                    openFolder(file.name);
-                };
-            } else if (file.type === 'image') {
-                thumbnailContent = `<img src="${file.path}" alt="${file.name}">`;
-            } else if (file.type === 'video') {
-                thumbnailContent = `<video src="${file.path}" alt="${file.name}" controls></video>`;
-            } else {
-                thumbnailContent = `<i class="fas fa-file file-icon"></i>`;
-            }
-            fileItem.innerHTML = `
-                ${thumbnailContent}
-                <div class="file-info">
-                    <div class="file-details">
-                        <strong>${file.name}</strong>
-                        <span>${file.uploadDate}</span>
-                    </div>
-                </div>
-                <div class="options" onclick="toggleOptionsMenu('${file.name}', this)"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="dropdown-menu">
-                    ${file.type !== 'folder' ? `
-                    <a href="#" onclick="renameFile('${file.name}')">Rename</a>
-                    <a href="#" onclick="deleteFile('${file.name}')">Delete</a>
-                    ` : `
-                    <a href="#" onclick="openFolder('${file.name}')">Open</a>
-                    <a href="#" onclick="renameFile('${file.name}')">Rename</a>
-                    <a href="#" onclick="deleteFile('${file.name}')">Delete</a>
-                    `}
-                </div>
-            `;
-            fileList.appendChild(fileItem);
-        });
-
-        updateBreadcrumb();
-    })
-    .catch(error => {
-        console.error('Error fetching files:', error);
-        window.location.href = 'index.html';
-    });
-}
 
 function openFolder(folderName) {
     fetchFiles(`${currentFolder}/${folderName}`);
@@ -157,23 +317,6 @@ function updateBreadcrumb() {
     });
 }
 
-function openUploadPopup() {
-    document.getElementById('uploadPopup').style.display = 'flex';
-}
-
-function closeUploadPopup() {
-    document.getElementById('uploadPopup').style.display = 'none';
-}
-
-function openFolderPopup() {
-    document.getElementById('folderPopup').style.display = 'flex';
-    document.getElementById('folderNameInput').style.display = 'block'; // Ensure the input is displayed
-}
-
-function closeFolderPopup() {
-    document.getElementById('folderPopup').style.display = 'none';
-}
-
 document.getElementById('dragArea').addEventListener('dragover', function(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -194,37 +337,43 @@ document.getElementById('dragArea').addEventListener('drop', function(event) {
     uploadFiles(files);
 });
 
+/*
 function uploadFiles(files) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
         formData.append('file', files[i]);
     }
     formData.append('folder', currentFolder);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload-file', true);
-
-    xhr.upload.onprogress = function(event) {
-        if (event.lengthComputable) {
-            const percentComplete = (event.loaded / event.total) * 100;
-            document.getElementById('progressBarFill').style.width = percentComplete + '%';
-            document.getElementById('progressBarFill').textContent = Math.round(percentComplete) + '%';
-        }
-    };
-
-    xhr.onload = function() {
-        if (xhr.status === 200) {
+    fetch('/api/upload-file', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             alert('File uploaded successfully');
             closeUploadPopup();
-            fetchFiles(); // Refresh file list
+            fetchFiles();
         } else {
             alert('File upload failed');
         }
-    };
-
-    xhr.send(formData);
+    })
+    .catch(error => {
+        console.error('Error uploading file:', error);
+        alert('Error uploading file');
+    });
 }
-
+*/
 function createFolder() {
     const folderName = document.getElementById('folderNameInput').value;
     fetch('/api/create-folder', {
@@ -240,7 +389,7 @@ function createFolder() {
         if (data.success) {
             alert('Folder created successfully');
             closeFolderPopup();
-            fetchFiles(); // Refresh file list
+            fetchFiles();
         } else {
             alert('Failed to create folder: ' + data.message);
         }
@@ -263,7 +412,7 @@ function renameFile(fileName) {
         .then(data => {
             if (data.success) {
                 alert('File renamed successfully');
-                fetchFiles(); // Refresh file list
+                fetchFiles();
             } else {
                 alert('Failed to rename file: ' + data.message);
             }
@@ -286,22 +435,11 @@ function deleteFile(fileName) {
         .then(data => {
             if (data.success) {
                 alert('File deleted successfully');
-                fetchFiles(); // Refresh file list
+                fetchFiles();
             } else {
                 alert('Failed to delete file: ' + data.message);
             }
         })
         .catch(error => console.error('Error deleting file:', error));
     }
-}
-
-function toggleOptionsMenu(fileName, element) {
-    const menu = element.nextElementSibling;
-    const allDropdowns = document.querySelectorAll('.dropdown-menu');
-    allDropdowns.forEach(dropdown => {
-        if (dropdown !== menu) {
-            dropdown.style.display = 'none';
-        }
-    });
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }

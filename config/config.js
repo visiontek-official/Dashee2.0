@@ -1,15 +1,16 @@
 module.exports = {
+    server_url: 'http://visiontek.ddns.net',
     webPort: 8001,
     apiPort: 8002,
-    logging: true,//enable server logs
-    api_debug: true,//enable api logs
-    dbUser: '******',//your database username
-    dbPassword: '********',//your database user password
-    dbName: '*******',//your database name
+    logging: true,
+    api_debug: true,
+    dbUser: 'VisionTEK',
+    dbPassword: 'b!lls4w5yqYN]Wsb',
+    dbName: 'dashee2_0',
     sqlPort: 3306,
     uploadConfig: {
         maxFileSize: 10 * 1024 * 1024, // 10MB
         allowedFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/avi']
     },
-    secretKey: '**************************************************************', // your sectret key used for token generation
+    secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
 };

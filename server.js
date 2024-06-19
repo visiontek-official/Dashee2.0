@@ -97,6 +97,16 @@ const createTables = () => {
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
 
+    const contentTableQuery = `CREATE TABLE IF NOT EXISTS content (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        file_path VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )`;
+
     db.query(userTableQuery, (err, result) => {
         if (err) {
             log('User table creation failed: ' + err, true);
@@ -112,6 +122,14 @@ const createTables = () => {
             throw err;
         }
         log('Screen table checked/created');
+    });
+
+    db.query(contentTableQuery, (err, result) => {
+        if (err) {
+            log('Content table creation failed: ' + err, true);
+            throw err;
+        }
+        log('Content table checked/created');
     });
 };
 
@@ -391,52 +409,32 @@ apiApp.get('/api/user-data', verifyToken, (req, res) => {
     });
 });
 
-//**********************************API END POINTS**********************************
-
-app.use((req, res, next) => {
-    const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
-    if (publicPaths.some(path => req.path.startsWith(path))) {
-        return next();
+app.post('/api/get-files', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const token = req.headers['authorization'] ? req.headers['authorization'].split(' ')[1] : null;
-    if (!token) {
-        console.log('No token provided, redirecting to login');
-        return res.redirect('/index.html');
-    }
+    const userId = req.session.userId;
 
-    jwt.verify(token, config.secretKey, (err, decoded) => {
+    const sql = 'SELECT * FROM content WHERE user_id = ?';
+    db.query(sql, [userId], (err, results) => {
         if (err) {
-            console.log('Token verification failed:', err);
-            return res.redirect('/index.html');
+            console.error('Error fetching files:', err);
+            return res.status(500).json({ error: 'Failed to fetch files' });
         }
 
-        console.log('Decoded token:', decoded);
+        const files = results.map(file => ({
+            name: file.file_name,
+            path: file.file_path,
+            type: file.file_type,
+            uploadDate: file.upload_date
+        }));
 
-        const sql = 'SELECT * FROM users WHERE id = ?';
-        db.query(sql, [decoded.userId], (err, results) => {
-            if (err) {
-                console.log('Error checking api_token:', err);
-                return res.status(500).json({ error: 'Failed to check api_token' });
-            }
-
-            console.log('User data from token verification:', results);
-
-            if (results.length > 0 && token === results[0].api_token) {
-                console.log('Token verified');
-                req.session.userId = decoded.userId;
-                req.session.save(() => {
-                    console.log('Session saved:', req.session);
-                    next();
-                });
-            } else {
-                req.session.destroy();
-                console.log('Invalid token, redirecting to login');
-                return res.redirect('/index.html');
-            }
-        });
+        res.json(files);
     });
 });
+
+//**********************************API END POINTS**********************************
 
 app.post('/signup', (req, res) => {
     const { firstname, lastname, email, password, terms } = req.body;
@@ -490,6 +488,8 @@ app.post('/login', (req, res) => {
                         log(`Session data: ${JSON.stringify(req.session)}`);
                         req.session.save(() => {
                             log('Session data after login:', req.session);
+
+                            // Store the token in localStorage (use JavaScript in your frontend)
                             res.json({ success: true, token });
                         });
                     });
@@ -595,6 +595,43 @@ app.get('/getUserDetails', (req, res) => {
     });
 });
 
+app.post('/api/upload-file', upload.single('file'), (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const userId = req.session.userId;
+    const originalName = req.file.originalname;
+    const userDir = path.join(__dirname, 'uploads', userId.toString());
+
+    if (!fs.existsSync(userDir)) {
+        fs.mkdirSync(userDir, { recursive: true });
+    }
+
+    const filePath = path.join(userDir, originalName);
+    const relativePath = `uploads/${userId.toString()}/${originalName}`;
+    const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
+
+    fs.rename(req.file.path, filePath, (err) => {
+        if (err) {
+            console.log('File move failed: ' + err);
+            return res.status(500).json({ success: false, message: 'File move failed' });
+        }
+
+        const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type) VALUES (?, ?, ?, ?)';
+        db.query(sql, [userId, originalName, urlPath, req.file.mimetype], (err, result) => {
+            if (err) {
+                console.log('File save to database failed: ' + err);
+                return res.status(500).json({ success: false, message: 'File save to database failed' });
+            }
+
+            console.log(`File uploaded and saved: ${filePath}`);
+            res.json({ success: true, filePath: urlPath });
+        });
+    });
+});
+
+/*
 app.post('/upload-file', upload.single('file'), (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -608,6 +645,7 @@ app.post('/upload-file', upload.single('file'), (req, res) => {
         return res.status(400).json({ success: false, message: 'File upload failed' });
     }
 });
+*/
 
 app.post('/move-file', (req, res) => {
     const { fileName, targetFolder, currentFolder } = req.body;

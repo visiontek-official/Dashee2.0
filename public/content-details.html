@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile</title>
+    <title>Content Details</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="content.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -34,42 +34,48 @@
                 <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"></li>
+                <li id="userMenuItem" style="display: none;"></li>
             </ul>
         </nav>
         <main class="main-content">
             <section class="content">
-                <h1>My Profile</h1>
-                <form id="profileForm" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="firstname">First Name:</label>
-                        <input type="text" id="firstname" name="firstname">
+                <div class="content-header">
+                    <h1 id="fileName">Loading...</h1>
+                    <div class="content-controls">
+                        <button class="upload-button" onclick="openUploadPopup()">UPLOAD FILES</button>
+                        <div class="sort-filter">
+                            <a href="#">SORT</a>
+                            <a href="#">FILTERS</a>
+                        </div>
+                        <input type="text" placeholder="search" class="search-bar">
                     </div>
-                    <div class="form-group">
-                        <label for="lastname">Last Name:</label>
-                        <input type="text" id="lastname" name="lastname">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email">
-                    </div> 
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
-                    </div>
-                    <div class="form-group">
-                        <label for="profilePicInput">Profile Picture:</label>
-                        <input type="file" id="profilePicInput" name="profilePic">
-                    </div>
-                    <div class="button-container">
-                        <button type="submit">Update</button>
-                        <button type="button" id="clearButton">Clear</button>
-                      </div>
-                </form>
-                <div id="notification" class="notification"></div>
+                </div>
+                <div id="breadcrumb"></div>
+                <div class="thumbnail-container" id="fileList"></div>
             </section>
         </main>
     </div>
-    <script src="profile.js"></script>
+
+    <div class="upload-popup" id="uploadPopup">
+        <div class="popup-content">
+            <div class="drag-area" id="dragArea">
+                Drag & Drop to Upload File
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <button class="upload-button" onclick="closeUploadPopup()">Close</button>
+        </div>
+    </div>
+
+    <div class="folder-popup" id="folderPopup">
+        <div class="popup-content">
+            <input type="text" id="folderNameInput" placeholder="Enter folder name" maxlength="50">
+            <button class="upload-button" onclick="createFolder()">Create Folder</button>
+            <button class="upload-button" onclick="closeFolderPopup()">Close</button>
+        </div>
+    </div>
+
+    <script src="content-details.js"></script>
 </body>
 </html>

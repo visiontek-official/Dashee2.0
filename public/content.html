@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+    <header class="main-header">
+        <div class="user-menu">
+            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="profile.html">My Profile</a>
+                <a href="#">Settings</a>
+                <a href="content.html">File Management</a>
+                <a href="#">Support</a>
+                <a href="index.html" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </header>
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="sidebar-header">
@@ -18,25 +31,12 @@
                 <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="screens.html"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"></li>
+                <li id="userMenuItem" style="display: none;"></li>
             </ul>
         </nav>
-        <header class="main-header">
-            <div class="user-menu">
-                <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
-                <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <a href="profile.html">My Profile</a>
-                    <a href="#">Settings</a>
-                    <a href="content.html">File Management</a>
-                    <a href="#">Support</a>
-                    <a href="index.html" onclick="logout()">Logout</a>
-                </div>
-            </div>
-        </header>
         <main class="main-content">
             <section class="content">
                 <div class="content-header">
@@ -48,33 +48,29 @@
                             <a href="#">FILTERS</a>
                         </div>
                         <input type="text" placeholder="search" class="search-bar">
-                    </div>
+                    </div>                    
                 </div>
                 <div id="breadcrumb"></div>
                 <div class="thumbnail-container" id="fileList"></div>
-            </section>
+            </section><div class="main-content">
         </main>
     </div>
-
+    <div class="content-section" id="fileList">
+        <!-- Thumbnails will be injected here -->
+    </div>
     <div class="upload-popup" id="uploadPopup">
         <div class="popup-content">
-            <div class="drag-area" id="dragArea">
+            <div class="drag-area" id="dragArea" onclick="document.getElementById('fileInput').click()">
                 Drag & Drop to Upload File
             </div>
+            <input type="file" id="fileInput" style="display: none;" multiple />
+            <button class="upload-button" onclick="uploadFiles()">Upload</button>
             <div class="progress-bar" id="progressBar">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
-            <button class="upload-button" onclick="closeUploadPopup()">Close</button>
+            <button class="close-button" onclick="closeUploadPopup()">Close</button>
         </div>
-    </div>
-
-    <div class="folder-popup" id="folderPopup">
-        <div class="popup-content">
-            <input type="text" id="folderNameInput" placeholder="Enter folder name" maxlength="50">
-            <button class="upload-button" onclick="createFolder()">Create Folder</button>
-            <button class="upload-button" onclick="closeFolderPopup()">Close</button>
-        </div>
-    </div>
+    </div>        
 
     <script src="content.js"></script>
 </body>
