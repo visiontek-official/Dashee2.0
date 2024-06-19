@@ -1,11 +1,11 @@
 module.exports = {
     webPort: 8001,
     apiPort: 8002,
-    logging: true,
-    api_debug: true,
-    dbUser: 'VisionTEK',
-    dbPassword: 'b!lls4w5yqYN]Wsb',
-    dbName: 'dashee2_0',
+    logging: true,//enable server logs
+    api_debug: true,//enable api logs
+    dbUser: '******',//your database username
+    dbPassword: '********',//your database user password
+    dbName: '*******',//your database name
     sqlPort: 3306,
     uploadConfig: {
         maxFileSize: 10 * 1024 * 1024, // 10MB
