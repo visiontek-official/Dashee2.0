@@ -1,5 +1,6 @@
 module.exports = {
     server_url: 'http://visiontek.ddns.net',
+    sql_server_url: 'localhost',
     webPort: 8001,
     apiPort: 8002,
     logging: true,

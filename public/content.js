@@ -87,6 +87,7 @@ function fetchFiles() {
             fileItem.ondragstart = (event) => {
                 event.dataTransfer.setData('text/plain', file.name);
             };
+            fileItem.onclick = () => openFile(file.name);
             let thumbnailContent;
             if (file.type.startsWith('image/')) {
                 thumbnailContent = `<img src="${file.path}" alt="${file.name}">`;
@@ -107,7 +108,7 @@ function fetchFiles() {
                     <i class="fas fa-ellipsis-h"></i>
                 </div>
                 <div class="dropdown-options-menu">
-                    <a href="#" onclick="openFile('${file.name}')">Open</a>
+                    <a href="content-details.html?file=${file.name}">Open</a>
                     <a href="#" onclick="renameFile('${file.name}')">Rename</a>
                     <a href="#" onclick="deleteFile('${file.name}')">Delete</a>
                 </div>
@@ -271,6 +272,10 @@ function loadUserDetails() {
 }
 
 let currentFolder = '';
+
+function openFile(fileName) {
+    window.location.href = `content-details.html?file=${fileName}`;
+}
 
 function renameFile(fileName) {
     const fileParts = fileName.split('.');

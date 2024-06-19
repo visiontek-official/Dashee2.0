@@ -52,7 +52,7 @@ const apiLog = (message, indepth = false) => {
 };
 
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: config.sql_server_url,
     user: config.dbUser,
     password: config.dbPassword,
     database: config.dbName,
@@ -101,8 +101,15 @@ const createTables = () => {
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
         file_name VARCHAR(255) NOT NULL,
+        file_description VARCHAR(255) DEFAULT NULL,
         file_path VARCHAR(255) NOT NULL,
         file_type VARCHAR(50) NOT NULL,
+        file_tags VARCHAR(255) DEFAULT NULL,
+        file_schedule_start DATETIME DEFAULT NULL,
+        file_schedule_end DATETIME DEFAULT NULL,
+        file_size VARCHAR(50) DEFAULT NULL,
+        file_orientation VARCHAR(50) DEFAULT NULL,
+        file_dimensions VARCHAR(50) DEFAULT NULL,
         upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
@@ -611,6 +618,7 @@ app.post('/api/upload-file', upload.single('file'), (req, res) => {
     const filePath = path.join(userDir, originalName);
     const relativePath = `uploads/${userId.toString()}/${originalName}`;
     const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
+    const fileSizeInKB = Math.round(req.file.size / 1024); // Convert bytes to KB
 
     fs.rename(req.file.path, filePath, (err) => {
         if (err) {
@@ -618,8 +626,8 @@ app.post('/api/upload-file', upload.single('file'), (req, res) => {
             return res.status(500).json({ success: false, message: 'File move failed' });
         }
 
-        const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type) VALUES (?, ?, ?, ?)';
-        db.query(sql, [userId, originalName, urlPath, req.file.mimetype], (err, result) => {
+        const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type, file_size) VALUES (?, ?, ?, ?, ?)';
+        db.query(sql, [userId, originalName, urlPath, req.file.mimetype, fileSizeInKB], (err, result) => {
             if (err) {
                 console.log('File save to database failed: ' + err);
                 return res.status(500).json({ success: false, message: 'File save to database failed' });
@@ -691,7 +699,58 @@ app.post('/getFiles', (req, res) => {
     });
 });
 
-//Rename Endpoint
+//Get Files Endpoint
+app.get('/api/file-details', (req, res) => {
+    const { file } = req.query;
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const sql = `
+        SELECT file_name, file_description, file_path, file_tags, file_schedule_start, file_schedule_end, upload_date, file_size, file_orientation, file_dimensions
+        FROM content
+        WHERE file_name = ? AND user_id = ?`;
+    db.query(sql, [file, userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching file details:', err);
+            return res.status(500).json({ error: 'Failed to fetch file details' });
+        }
+
+        if (results.length > 0) {
+            const fileDetails = results[0];
+            res.json(fileDetails);
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
+    });
+});
+
+//Save File Endpoint
+app.post('/api/save-file-details', (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { file, title, description, tags, schedule_start, schedule_end, size, orientation, dimensions } = req.body;
+
+    const sql = `
+        UPDATE content
+        SET file_name = ?, file_description = ?, file_tags = ?, file_schedule_start = ?, file_schedule_end = ?, file_size = ?, file_orientation = ?, file_dimensions = ?
+        WHERE file_name = ? AND user_id = ?`;
+    db.query(sql, [title, description, tags, schedule_start, schedule_end, size, orientation, dimensions, file, userId], (err, results) => {
+        if (err) {
+            console.error('Error saving file details:', err);
+            return res.status(500).json({ error: 'Failed to save file details' });
+        }
+        res.json({ success: true });
+    });
+});
+
+
+//Rename File Endpoint
 app.post('/api/rename-file', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -723,7 +782,7 @@ app.post('/api/rename-file', (req, res) => {
     });
 });
 
-//Delete Endpoint
+//Delete File Endpoint
 app.post('/api/delete-file', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });

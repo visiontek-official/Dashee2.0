@@ -87,6 +87,10 @@
     gap: 10px;
 }
 
+.options {
+    padding-left: 15px;
+}   
+
 .thumbnail {
     display: inline-block;
     width: 320px;
@@ -143,11 +147,7 @@
     color: #888;
     margin-left: 10px;
     padding: 20px;
-}
-
-.options {
-    padding-left: 15px;
-}    
+} 
 
 .dropdown-menu {
     display: none;

@@ -1,0 +1,122 @@
+/* Main layout */
+.content-body {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.content-left {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.content-right {
+    flex: 1;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-left: 1px solid #ddd;
+}
+
+.content-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 5px;
+}
+
+/* Media details section */
+.actions {
+    margin-bottom: 20px;
+}
+
+.media-details {
+    margin-bottom: 20px;
+}
+
+.media-details h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.media-details label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.media-details input,
+.media-details textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.media-details button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.media-details button:hover {
+    background-color: #0056b3;
+}
+
+/* File info section */
+.content-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.info-item {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}
+
+.info-item span:first-child {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Breadcrumb styles */
+.breadcrumb {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.breadcrumb a {
+    color: #304050;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: #6c757d;
+}
