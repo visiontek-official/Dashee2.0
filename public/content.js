@@ -60,6 +60,15 @@ function toggleOptionsMenu(fileName, element, event) {
     element.addEventListener('click', (event) => {
         event.stopPropagation();
     });
+
+    // Add event listeners to the cancel buttons in the dialog
+    const cancelButtons = dropdownMenu.querySelectorAll('.cancel-button');
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            dropdownMenu.style.display = 'none'; // Close the dropdown menu
+        });
+    });
 }
 
 /*
@@ -113,7 +122,12 @@ function fetchFiles() {
             fileItem.ondragstart = (event) => {
                 event.dataTransfer.setData('text/plain', file.name);
             };
-            fileItem.onclick = () => openFile(file.name);
+            fileItem.onclick = (event) => {
+                if (event.target.classList.contains('fas') || event.target.tagName === 'A') {
+                    return; // Prevents opening file when clicking on the options
+                }
+                openFile(file.name);
+            };
             let thumbnailContent;
             if (file.type.startsWith('image/')) {
                 thumbnailContent = `<img src="${file.path}" alt="${file.name}">`;
@@ -329,6 +343,9 @@ function renameFile(fileName) {
             }
         })
         .catch(error => console.error('Error renaming file:', error));
+    } else {
+        // Close the dropdown menu if cancel is clicked
+        closeDropdownMenu();
     }
 }
 
@@ -352,6 +369,9 @@ function deleteFile(fileName) {
             }
         })
         .catch(error => console.error('Error deleting file:', error));
+    } else {
+        // Close the dropdown menu if cancel is clicked
+        closeDropdownMenu();
     }
 }
 
@@ -461,3 +481,9 @@ function createFolder() {
     .catch(error => console.error('Error creating folder:', error));
 }
 
+function closeDropdownMenu() {
+    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+    dropdownMenus.forEach(menu => {
+        menu.style.display = 'none';
+    });
+}
