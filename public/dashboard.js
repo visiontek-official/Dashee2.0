@@ -5,6 +5,7 @@ function toggleDropdown() {
 
 function logout() {
     console.log('User logged out');//console print logging
+    localStorage.removeItem('token'); // Clear the token from local storage
     window.location.href = 'index.html';
 }
 
@@ -36,7 +37,13 @@ window.onload = function() {
     fetch('/api/user-details', {
         headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user details');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.error) throw new Error(data.error);
 
@@ -57,7 +64,13 @@ window.onload = function() {
     fetch('/api/statistics', {
         headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error('Failed to fetch statistics');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.error) throw new Error(data.error);
 

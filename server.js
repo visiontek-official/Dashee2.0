@@ -12,6 +12,7 @@ const app = express(); // Web server
 const apiApp = express(); // API server
 const logFile = path.join(__dirname, 'logs', 'server.log');
 const apiLogFile = path.join(__dirname, 'logs', 'api.log');
+const swaggerSetup = require('./swagger');
 
 // Helper function to generate token
 const generateToken = (userId) => {
@@ -228,7 +229,7 @@ apiApp.use((req, res, next) => {
 // Middleware to log API requests and responses and verify tokens
 app.use((req, res, next) => {
     const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
-    if (publicPaths.some(path => req.path.startsWith(path))) {
+    if (publicPaths.some(path => req.path.startsWith(path)) || req.path.startsWith('/api')) {
         return next();
     }
 
@@ -273,16 +274,67 @@ app.use((req, res, next) => {
 
 // Your API routes here
 
+/**
+ * @swagger
+ * /login:
+ *   get:
+ *     summary: Login page
+ *     description: Serve the login page.
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Login page served
+ */
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+/*
 apiApp.post('/api/some-endpoint', (req, res) => {
     apiLog(`API request to /api/some-endpoint: ${JSON.stringify(req.body)}`);
     // Your API logic here
     res.json({ success: true });
 });
+*/
 
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve a list of all users. Only accessible by admin.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   firstname:
+ *                     type: string
+ *                   lastname:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   enabled:
+ *                     type: boolean
+ *                   profile_pic:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Access denied
+ */
 app.get('/api/users', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
     const decoded = jwt.verify(token, config.secretKey);
@@ -317,6 +369,36 @@ app.get('/api/users', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/user-details:
+ *   get:
+ *     summary: Get user details
+ *     description: Retrieve details of the logged-in user.
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 firstname:
+ *                   type: string
+ *                 lastname:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 profile_pic:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
 app.get('/api/user-details', (req, res) => {
     const userId = req.session.userId;
     if (!userId) {
@@ -340,6 +422,34 @@ app.get('/api/user-details', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/statistics:
+ *   get:
+ *     summary: Get statistics
+ *     description: Retrieve statistics of users and screens.
+ *     tags: [Statistics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalUsers:
+ *                   type: integer
+ *                 activeUsers:
+ *                   type: integer
+ *                 disabledUsers:
+ *                   type: integer
+ *                 totalScreens:
+ *                   type: integer
+ *       401:
+ *         description: Unauthorized
+ */
 app.get('/api/statistics', (req, res) => {
     const queries = {
         totalUsers: 'SELECT COUNT(*) AS count FROM users',
@@ -368,6 +478,36 @@ app.get('/api/statistics', (req, res) => {
 });
 
 //**********************************API END POINTS**********************************
+/**
+ * @swagger
+ * /api/stats:
+ *   get:
+ *     summary: Get statistics
+ *     description: Retrieve various statistics.
+ *     tags: [Statistics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalUsers:
+ *                   type: integer
+ *                 activeUsers:
+ *                   type: integer
+ *                 disabledUsers:
+ *                   type: integer
+ *                 totalScreens:
+ *                   type: integer
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Error retrieving statistics
+ */
 apiApp.get('/api/stats', verifyToken, (req, res) => {
     const queries = {
         totalUsers: 'SELECT COUNT(*) AS count FROM users',
@@ -395,6 +535,38 @@ apiApp.get('/api/stats', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/user-data:
+ *   get:
+ *     summary: Get user data
+ *     description: Retrieve details of the logged-in user.
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 firstname:
+ *                   type: string
+ *                 lastname:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 profile_pic:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
 apiApp.get('/api/user-data', verifyToken, (req, res) => {
     const userId = req.userId; // Use the userId from the token
 
@@ -416,6 +588,36 @@ apiApp.get('/api/user-data', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/get-files:
+ *   post:
+ *     summary: Get user files
+ *     description: Retrieve files for the logged-in user.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Files retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   path:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                   uploadDate:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ */
 app.post('/api/get-files', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -442,7 +644,36 @@ app.post('/api/get-files', (req, res) => {
 });
 
 //**********************************API END POINTS**********************************
-
+/**
+ * @swagger
+ * /signup:
+ *   post:
+ *     summary: User signup
+ *     description: Register a new user.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               terms:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Signup successful
+ *       400:
+ *         description: Signup failed
+ */
 app.post('/signup', (req, res) => {
     const { firstname, lastname, email, password, terms } = req.body;
     log(`Signup form data: ${JSON.stringify(req.body)}`);
@@ -460,6 +691,39 @@ app.post('/signup', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     description: Log in a user and return a JWT token.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Invalid email or password
+ */
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     log(`Login form data: ${JSON.stringify(req.body)}`);
@@ -508,6 +772,21 @@ app.post('/login', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: User logout
+ *     description: Log out the current user.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       500:
+ *         description: Logout failed
+ */
 app.post('/logout', (req, res) => {
     if (req.session.userId) {
         db.query('UPDATE users SET logged_in = FALSE, api_token = NULL WHERE id = ?', [req.session.userId], (err) => {
@@ -524,6 +803,43 @@ app.post('/logout', (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/update-profile:
+ *   post:
+ *     summary: Update user profile
+ *     description: Update the profile details of the logged-in user.
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               profilePic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: No fields to update
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Error updating profile
+ */
 app.post('/api/update-profile', upload.single('profilePic'), (req, res) => {
     const userId = req.session.userId;
     if (!userId) {
@@ -578,6 +894,36 @@ app.post('/api/update-profile', upload.single('profilePic'), (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /getUserDetails:
+ *   get:
+ *     summary: Get user details
+ *     description: Retrieve details of the logged-in user.
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 firstname:
+ *                   type: string
+ *                 lastname:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 profile_pic:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
 app.get('/getUserDetails', (req, res) => {
     log(`Fetching user details for session: ${JSON.stringify(req.session)}`);
     const userId = req.session.userId;
@@ -602,6 +948,33 @@ app.get('/getUserDetails', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/upload-file:
+ *   post:
+ *     summary: Upload a file
+ *     description: Upload a file to the server.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Error uploading file
+ */
 app.post('/api/upload-file', upload.single('file'), (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -655,6 +1028,32 @@ app.post('/upload-file', upload.single('file'), (req, res) => {
 });
 */
 
+/**
+ * @swagger
+ * /move-file:
+ *   post:
+ *     summary: Move a file
+ *     description: Move a file to a different folder.
+ *     tags: [Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fileName:
+ *                 type: string
+ *               targetFolder:
+ *                 type: string
+ *               currentFolder:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: File moved successfully
+ *       500:
+ *         description: Error moving file
+ */
 app.post('/move-file', (req, res) => {
     const { fileName, targetFolder, currentFolder } = req.body;
     const userDir = path.join(__dirname, 'uploads', req.session.userId.toString());
@@ -671,6 +1070,30 @@ app.post('/move-file', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /getFiles:
+ *   post:
+ *     summary: Get user files
+ *     description: Retrieve files for the logged-in user.
+ *     tags: [Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               folder:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Files retrieved successfully
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Error retrieving files
+ */
 app.post('/getFiles', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -700,6 +1123,58 @@ app.post('/getFiles', (req, res) => {
 });
 
 //Get Files Endpoint
+/**
+ * @swagger
+ * /api/file-details:
+ *   get:
+ *     summary: Get file details
+ *     description: Retrieve details of a specific file.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: file
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The name of the file
+ *     responses:
+ *       200:
+ *         description: File details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 file_name:
+ *                   type: string
+ *                 file_description:
+ *                   type: string
+ *                 file_path:
+ *                   type: string
+ *                 file_tags:
+ *                   type: string
+ *                 file_schedule_start:
+ *                   type: string
+ *                   format: date-time
+ *                 file_schedule_end:
+ *                   type: string
+ *                   format: date-time
+ *                 upload_date:
+ *                   type: string
+ *                   format: date-time
+ *                 file_size:
+ *                   type: string
+ *                 file_orientation:
+ *                   type: string
+ *                 file_dimensions:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: File not found
+ */
 app.get('/api/file-details', (req, res) => {
     const { file } = req.query;
     const userId = req.session.userId;
@@ -728,6 +1203,50 @@ app.get('/api/file-details', (req, res) => {
 });
 
 //Save File Endpoint
+/**
+ * @swagger
+ * /api/save-file-details:
+ *   post:
+ *     summary: Save file details
+ *     description: Update details of a specific file.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               tags:
+ *                 type: string
+ *               schedule_start:
+ *                 type: string
+ *                 format: date-time
+ *               schedule_end:
+ *                 type: string
+ *                 format: date-time
+ *               size:
+ *                 type: string
+ *               orientation:
+ *                 type: string
+ *               dimensions:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: File details saved successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Error saving file details
+ */
 app.post('/api/save-file-details', (req, res) => {
     const userId = req.session.userId;
     if (!userId) {
@@ -751,6 +1270,36 @@ app.post('/api/save-file-details', (req, res) => {
 
 
 //Rename File Endpoint
+/**
+ * @swagger
+ * /api/rename-file:
+ *   post:
+ *     summary: Rename file
+ *     description: Rename a specific file.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldName:
+ *                 type: string
+ *               newName:
+ *                 type: string
+ *               currentFolder:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: File renamed successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Error renaming file
+ */
 app.post('/api/rename-file', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -783,6 +1332,34 @@ app.post('/api/rename-file', (req, res) => {
 });
 
 //Delete File Endpoint
+/**
+ * @swagger
+ * /api/delete-file:
+ *   post:
+ *     summary: Delete file
+ *     description: Delete a specific file.
+ *     tags: [Files]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fileName:
+ *                 type: string
+ *               currentFolder:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: File deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Error deleting file
+ */
 app.post('/api/delete-file', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -814,6 +1391,50 @@ app.post('/api/delete-file', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /getUsers:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve a list of all users. Only accessible by admin.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   firstname:
+ *                     type: string
+ *                   lastname:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   enabled:
+ *                     type: boolean
+ *                   created:
+ *                     type: string
+ *                     format: date-time
+ *                   updated:
+ *                     type: string
+ *                     format: date-time
+ *                   logged_in:
+ *                     type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Access denied
+ */
 app.get('/getUsers', (req, res) => {
     if (!req.session.userId || req.session.role !== 'admin') {
         return res.status(401).json({ error: 'Not authenticated or not authorized' });
@@ -829,6 +1450,45 @@ app.get('/getUsers', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/update-user:
+ *   post:
+ *     summary: Update user
+ *     description: Update details of a specific user.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               enabled:
+ *                 type: boolean
+ *               profilePic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       400:
+ *         description: No fields to update
+ *       500:
+ *         description: Error updating user
+ */
 app.post('/api/update-user', upload.single('profilePic'), verifyToken, (req, res) => {
     const { id, firstname, lastname, email, role, enabled } = req.body;
     const profilePic = req.file ? `/uploads/${req.file.filename}` : null;
@@ -859,6 +1519,47 @@ app.post('/api/update-user', upload.single('profilePic'), verifyToken, (req, res
     });
 });
 
+/**
+ * @swagger
+ * /api/user/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieve details of a specific user by ID.
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 firstname:
+ *                   type: string
+ *                 lastname:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                 enabled:
+ *                   type: boolean
+ *                 profile_pic:
+ *                   type: string
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Error retrieving user details
+ */
 app.get('/api/user/:id', (req, res) => {
     const userId = req.params.id;
     const sql = 'SELECT id, firstname, lastname, email, role, enabled, profile_pic FROM users WHERE id = ?';
@@ -891,6 +1592,31 @@ app.get('/api/user/:id', (req, res) => {
 //    });
 //});
 
+/**
+ * @swagger
+ * /upload-profile-pic:
+ *   post:
+ *     summary: Upload profile picture
+ *     description: Upload a new profile picture for a user.
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *               profile-pic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded successfully
+ *       500:
+ *         description: Error uploading profile picture
+ */
 app.post('/upload-profile-pic', upload.single('profile-pic'), (req, res) => {
     const { userId } = req.body;
     const profilePicPath = `/uploads/${req.session.userId}/${req.file.filename}`;
@@ -906,6 +1632,32 @@ app.post('/upload-profile-pic', upload.single('profile-pic'), (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /create-folder:
+ *   post:
+ *     summary: Create a folder
+ *     description: Create a new folder in the user's directory.
+ *     tags: [Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               folderName:
+ *                 type: string
+ *               currentFolder:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Folder created successfully
+ *       400:
+ *         description: Folder already exists
+ *       500:
+ *         description: Error creating folder
+ */
 app.post('/create-folder', (req, res) => {
     const { folderName, currentFolder } = req.body;
     const userDir = path.join(__dirname, 'uploads', req.session.userId.toString(), currentFolder || '', folderName);
@@ -923,3 +1675,6 @@ app.post('/create-folder', (req, res) => {
 app.listen(config.webPort, () => {
     log(`Web server running on port ${config.webPort}`);
 });
+
+// Swagger setup
+swaggerSetup(app);
