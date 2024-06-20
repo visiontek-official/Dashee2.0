@@ -7,50 +7,44 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="screens.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </head>
 <body>
+    <header class="main-header">
+        <div class="user-menu">
+            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="profile.html">My Profile</a>
+                <a href="#">Settings</a>
+                <a href="content.html">File Management</a>
+                <a href="#">Support</a>
+                <a href="index.html" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </header>
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="sidebar-header">
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> <span>Home</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="content.html"><i class="fas fa-folder"></i> <span>Content</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="screens.html"><i class="fas fa-desktop"></i> <span>Screens</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-users"></i> <span>Groups</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-play"></i> <span>Playlists</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-globe"></i> <span>Websites</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"><a href="users.html"><i class="fas fa-user"></i> <span>Users</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="screens.html"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i><span> Users</span><i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <main class="main-content">
-            <header class="main-header">
-                <div class="user-menu">
-                    <img src="default-profile-pic.png" alt="Profile Picture" class="profile-pic" id="profilePic">
-                    <span class="user-name" id="userName">VisionTEK Administrator</span>
-                    <i class="fas fa-caret-down dropdown-toggle"></i>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="profile.html">My Profile</a>
-                        <a href="#">Settings</a>
-                        <a href="content.html">File Management</a>
-                        <a href="#">Support</a>
-                        <a href="index.html" onclick="logout()">Logout</a>
-                    </div>
-                </div>
-            </header>
-            <nav class="breadcrumb">
-                <a href="dashboard.html">Home</a> /
-                <a href="screens.html">Screens</a>
-            </nav>
             <section class="content">
-                <div class="screens-header">
+                <div class="content-header">
                     <h1>Screens</h1>
-                    <button class="add-screen-btn" onclick="showAddScreenPopup()">ADD SCREEN</button>
+                    <button class="add-screen-button" onclick="showAddScreenPopup()">ADD SCREEN</button>
                 </div>
-                <div class="screens-list" id="screensList">
-                    <!-- Thumbnails for screens will be dynamically inserted here -->
+                <div id="screenList" class="content-section">
+                    <!-- Screens will be dynamically inserted here -->
                 </div>
             </section>
         </main>
@@ -62,16 +56,16 @@
             <span class="close-btn" onclick="hideAddScreenPopup()">&times;</span>
             <h2><i class="fas fa-desktop"></i> Add Screen</h2>
             <div class="popup-body">
-                <p>Download the Dashee app for your device (Android or Android TV).</p>
+                <p>Download the AbleSign app for your device (Fire TV, Android TV etc).</p>
                 <div class="app-links">
-                    <img src="uploads\googleplay.png" style="display: inline-block; height: 47px; margin-right: 10px;" alt="Google Play">
-                    <img src="uploads\googleplay.png" style="display: inline-block; height: 47px; margin-right: 10px;" alt="Google Play">
+                    <img src="uploads/googleplay.png" style="display: inline-block; height: 47px; margin-right: 10px;" alt="Google Play">
+                    <img src="uploads/amazonappstore.png" style="display: inline-block; height: 47px; margin-right: 10px;" alt="Amazon Appstore">
                 </div>
                 <p>When the app first launches it will display a pairing code.</p>
                 <p>Please enter that code here:</p>
                 <input type="text" id="screenName" placeholder="Screen name *" required>
                 <input type="text" id="pairingCode" placeholder="Pairing code *" required>
-                <button onclick="addScreen()">ADD SCREEN</button>
+                <button class="next-button" onclick="addScreen()">NEXT</button>
             </div>
         </div>
     </div>

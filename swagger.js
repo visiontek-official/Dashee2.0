@@ -56,5 +56,6 @@ module.exports = (app) => {
     }));
 
     // Log message when Swagger setup is complete
-    logSwagger('Swagger UI is set up and accessible at /api');
+    const swaggerServerUrl = options.definition.servers[0].url;
+    logSwagger(`Swagger UI is set up and accessible at ${swaggerServerUrl}/api`);
 };

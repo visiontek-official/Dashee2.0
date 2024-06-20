@@ -292,16 +292,22 @@ input[type="file"], .folder-popup input[type="text"] {
     transition: width 0.3s;
 }
 
+.screen-card .options {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
 .dropdown-options-menu {
     display: none;
     width: 100px;
     position: absolute;
-    top: 100%;
-    right: 0;
+    top: 30px; /* Adjust based on design */
+    right: 10px;
     background-color: white;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
-    overflow: hidden;
     z-index: 1000;
 }
 

@@ -1,43 +1,114 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const screenId = params.get('screenId');
-    const screenName = params.get('screenName');
-
-    if (screenName) {
-        document.getElementById('screenName').textContent = screenName;
-    }
-
-    if (screenId) {
-        loadScreenDetails(screenId);
-    }
-
-    const userMenu = document.querySelector('.user-menu');
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-
-    dropdownToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', (event) => {
-        if (!userMenu.contains(event.target)) {
-            dropdownMenu.style.display = 'none';
-        }
-    });
+    loadUserDetails();
+    const urlParams = new URLSearchParams(window.location.search);
+    const screenId = urlParams.get('screenId');
+    loadScreenDetails(screenId);
 });
 
 function loadScreenDetails(screenId) {
-    fetch(`/getScreenDetails?screenId=${screenId}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('screenStatus').textContent = data.enabled ? 'Online' : 'Offline';
-            document.getElementById('lastSeen').textContent = `Last seen ${data.last_connected}`;
-            document.getElementById('screenDetailsLink').href = `screen-details.html?screenId=${screenId}`;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch(`/api/screen-details?screenId=${screenId}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(screen => {
+        document.getElementById('screenTitle').textContent = screen.screen_name;
+        document.getElementById('currentScreenName').textContent = screen.screen_name;
+        document.getElementById('screenDescription').textContent = screen.description;
+        document.getElementById('lastSeen').textContent = `${screen.last_seen} days ago`;
+        document.getElementById('screenThumbnail').src = screen.thumbnail || 'uploads/default-screen.png';
+    })
+    .catch(error => {
+        console.error('Error fetching screen details:', error);
+    });
+}
+
+function togglePlaylistOptionsMenu() {
+    const menu = document.getElementById('playlist-options-menu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function setPlaylistTransitions() {
+    alert('Set Playlist Transitions');
+}
+
+function shufflePlay() {
+    alert('Shuffle Play');
+}
+
+function copyPlaylistToOtherScreens() {
+    alert('Copy Playlist to Other Screens');
+}
+
+function clearPlaylist() {
+    alert('Clear Playlist');
+}
+
+function showTabContent(tabName) {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => button.classList.remove('active'));
+
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.style.display = 'none');
+
+    document.getElementById(tabName).style.display = 'block';
+    document.querySelector(`.tab-button[onclick="showTabContent('${tabName}')"]`).classList.add('active');
+}
+
+function showDetailsSidebar() {
+    document.getElementById('detailsSidebar').style.width = '400px'; // Adjust width as needed
+}
+
+function hideDetailsSidebar() {
+    document.getElementById('detailsSidebar').style.width = '0';
+}
+
+function showSidebarTabContent(tabName) {
+    const tabButtons = document.querySelectorAll('.sidebar .tab-button');
+    tabButtons.forEach(button => button.classList.remove('active'));
+
+    const tabContents = document.querySelectorAll('.sidebar .tab-content');
+    tabContents.forEach(content => content.style.display = 'none');
+
+    document.getElementById(tabName).style.display = 'block';
+    document.querySelector(`.sidebar .tab-button[onclick="showSidebarTabContent('${tabName}')"]`).classList.add('active');
+}
+
+function loadUserDetails() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/user-details', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        document.getElementById('userName').innerHTML = `${data.firstname} ${data.lastname} <i class="fas fa-caret-down"></i>`;
+        document.getElementById('profilePic').src = data.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+
+        if (data.role === 'admin') {
+            document.getElementById('userMenuItem').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user details:', error);
+        window.location.href = 'index.html';
+    });
 }
 
 function toggleDropdown() {
@@ -46,90 +117,6 @@ function toggleDropdown() {
 }
 
 function logout() {
-    console.log('User logged out');
+    localStorage.removeItem('token');
     window.location.href = 'index.html';
-}
-
-window.onclick = function(event) {
-    if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
-        var dropdownMenu = document.getElementById('dropdownMenu');
-        if (dropdownMenu.style.display === 'block') {
-            dropdownMenu.style.display = 'none';
-        }
-    }
-}
-
-window.onload = function() {
-    fetch('/getUserDetails')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('userName').innerHTML = data.firstName + ' ' + data.lastName + ' <i class="fas fa-caret-down"></i>';
-            document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-
-            if (data.role === 'admin') {
-                document.getElementById('userMenuItem').innerHTML = '<a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a>';
-            }
-        })
-        .catch(error => console.error('Error fetching user details:', error));
-
-    fetchFiles(); // Fetch files on load
-};
-
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const screenId = params.get('screenId');
-    const screenName = params.get('screenName');
-
-    if (screenName) {
-        document.getElementById('screenName').textContent = screenName;
-        document.getElementById('breadcrumbScreenName').textContent = screenName;
-    }
-
-    if (screenId) {
-        loadScreenDetails(screenId);
-    }
-
-    const userMenu = document.querySelector('.user-menu');
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-
-    dropdownToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', (event) => {
-        if (!userMenu.contains(event.target)) {
-            dropdownMenu.style.display = 'none';
-        }
-    });
-});
-
-
-function loadScreenDetails(screenId) {
-    fetch(`/getScreenDetails?screenId=${screenId}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('screenName').textContent = data.screen_name;
-            document.getElementById('screenStatus').textContent = data.enabled ? 'Online' : 'Offline';
-            document.getElementById('lastSeen').textContent = `Last seen ${data.last_connected}`;
-            document.getElementById('screenDetailsLink').href = `screen-details.html?screenId=${screenId}`;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
 }

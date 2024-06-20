@@ -1,21 +1,22 @@
+/* screens.css */
+
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
-    overflow: hidden; /* Prevents scroll bars */
 }
 
 .dashboard-container {
     display: flex;
     height: 100vh;
     width: 100vw;
-    overflow: hidden;
 }
 
 .main-header {
     display: flex;
     align-items: center;
-    width: calc(100% - 250px); /* Adjusted to fit sidebar */
+    width: calc(100% - 250px);
     padding: 1em;
     background-color: #ffffff;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -23,7 +24,7 @@ body {
     position: fixed;
     top: 0;
     right: 0;
-    left: 250px; /* Adjusted to fit sidebar */
+    left: 250px;
 }
 
 .main-content {
@@ -33,377 +34,177 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     margin-left: 250px;
-    margin-top: 60px; /* Adjusted to fit below the header */
-    overflow: auto; /* Allows internal scroll without affecting the main layout */
+    margin-top: 60px;
+    overflow: auto;
 }
 
-.content {
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    max-width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: 10px 0;
 }
 
-/* Style for the hamburger container */
-.hamburger-container {
+.content-controls {
     display: flex;
     align-items: center;
-    padding: 10px;
+}
+
+.add-screen-button {
+    background-color: #1d2a38;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.add-screen-button:hover {
+    background-color: #ff2592;
+}
+
+/* Screen Card Styles */
+.screen-card {
+    display: inline-block;
+    position: relative;
+    width: 320px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+    background-color: #fff;
     cursor: pointer;
 }
 
-.hamburger-container i {
-    font-size: 1.5em;
+.screen-card img {
+    width: 90%;
+    height: auto;
+    margin: 15px;
+    display: block;
+}
+
+.screen-card .screen-info {
+    padding: 10px;
+    position: relative;
+}
+
+.screen-card .screen-info h3 {
+    margin: 0;
+    font-size: 1em;
     color: #333;
 }
 
-/* Toggle sidebar styles */
-.sidebar.collapsed {
-    width: 60px; /* Width for icon-only view */
+.screen-card .screen-info p {
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+    color: #888;
 }
 
-.sidebar.collapsed .sidebar-header {
-    display: none; /* Hide header in collapsed view */
-}
-
-.sidebar.collapsed .sidebar-menu li a {
-    justify-content: center; /* Center icons */
-}
-
-.sidebar.collapsed .sidebar-menu li a span {
-    display: none; /* Hide text in collapsed view */
-}
-
-.sidebar.collapsed .sidebar-menu li a .fas.fa-arrow-right {
-    display: none; /* Hide arrow icon in collapsed view */
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    padding-right: 3em; /* Add more padding to the right */
-    cursor: pointer;
-}
-
-.user-menu .profile-pic {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.user-menu .user-name {
-    margin-right: 10px;
-}
-
-.user-menu .dropdown-toggle {
-    font-size: 1.2em;
-}
-
-.dropdown-menu {
-    display: none;
+.screen-card .status {
     position: absolute;
-    right: 1em;
-    top: 4em;
-    background-color: white;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-    z-index: 1000;
-    padding: 1em;
+    top: 10px;
+    right: 10px;
+    background-color: #d9534f;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    text-transform: uppercase;
 }
 
-.dropdown-menu a {
-    display: block;
-    padding: 1em;
-    text-decoration: none;
-    color: black;
-}
-
-.dropdown-menu a:hover {
-    background-color: #f1f1f1;
-}
-
-/* Sidebar Styles */
-.sidebar {
-    width: 250px;
-    background-color: #2f4050;
-    color: #a7b1c2;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    overflow-y: auto;
-}
-
-.sidebar-header {
-    padding: 1em;
-    display: flex;
-    justify-content: center;
-    border-bottom: 1px solid #3a4a5b;
-}
-
-.sidebar-header .logo {
-    max-width: 100%;
-    height: auto;
-}
-
-.sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0; /* Remove margins from sidebar menu */
-}
-
-.sidebar-menu li {
-    padding: 0; /* Remove padding from list items */
-    border-bottom: 1px solid #3a4a5b;
-}
-
-.sidebar-menu li a {
-    color: #a7b1c2;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    position: relative;
-    transition: background-color 0.3s, color 0.3s;
-    padding: 15px;
-}
-
-.sidebar-menu li a i {
-    margin-right: 10px; /* Small gap between icon and text */
-    font-size: 1.2em;
-}
-
-.sidebar-menu li a .fas.fa-arrow-right {
-    margin-left: auto;
-}
-
-.sidebar-menu li a:hover {
-    background-color: #1a2733; /* Lighter shade for hover effect */
-    color: #ffffff;
-}
-
-.sidebar-menu li a.active {
-    background-color: #1a2733;
-    color: #ffffff;
-}
-
-.sidebar-menu li a .menu-arrow {
-    margin-left: auto;
+.screen-card .status.online {
+    background-color: #5cb85c;
 }
 
 /* Popup Styles */
 .popup {
-    display: none;
-    position: fixed;
-    top: 0;
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
 }
 
 .popup-content {
     background-color: #fff;
+    margin: 10% auto;
     padding: 20px;
-    border-radius: 8px;
+    border: 1px solid #888;
     width: 90%;
-    max-width: 500px;
+    max-width: 400px; 
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: relative;
 }
 
-.close-btn {
-    color: #ff2692;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-}
-
-.add-screen-btn {
-    background-color: #ff2692;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.add-screen-btn:hover {
-    background-color: #e0207a;
-}
-
-.popup h2 {
-    background-color: #1d2a38; /* Purple color */
-    color: white;
+.popup-content h2 {
+    background-color: #263e4b;
+    color: #fff;
     padding: 10px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-radius: 10px 10px 0 0;
     margin: -20px -20px 20px -20px;
-    display: flex;
-    align-items: center;
-}
-
-.popup h2 i {
-    margin-right: 10px;
-}
-
-.popup-body {
     text-align: center;
 }
 
-.popup-body .app-links img {
-    width: 150px;
-    margin: 10px;
+.close-btn {
+    color: #fff;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.popup-body input {
-    width: calc(100% - 20px);
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.popup-body p {
+    margin: 10px 0;
+    text-align: center;
+}
+
+.popup-body .app-links {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.popup-body input[type="text"] {
+    width: 100%;
     padding: 10px;
     margin: 10px 0;
+    box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.popup-body button {
-    background-color: #ff2692;
+.popup-body .next-button {
+    background-color: #263e4b;
     color: white;
-    padding: 10px 20px;
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-}
-
-.popup-body button:hover {
-    background-color: #e0207a;
-}
-
-/* Dropdown Menu Styles */
-.options-dropdown {
-    display: none;
-    position: absolute;
-    top: 20px;
-    right: 0;
-    background-color: white;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-    z-index: 1001; /* Ensure the dropdown is above other elements */
-}
-
-.options-dropdown a {
-    display: block;
-    padding: 10px 15px;
-    text-decoration: none;
-    color: black;
-}
-
-.options-dropdown a:hover {
-    background-color: #f1f1f1;
-}
-
-/* Screen Card Styles */
-.screen-thumbnail {
-    margin: 10px;
-    display: inline-block;
-    position: relative; /* Ensure the screen thumbnail acts as a reference for absolute positioning */
-    cursor: pointer; /* Indicate that the card is clickable */
-}
-
-.screen-card {
-    color: #304050;
-    width: 200px;
-    height: 250px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: visible; /* Allow dropdown to overflow */
-    position: relative; /* Ensure the screen card acts as a reference for absolute positioning */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.screen-card:hover {
-    color: #304050;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
-    background-color: #e4e4e4;
-}
-
-.screen-image {
+    font-size: 16px;
+    transition: background-color 0.3s;
     width: 100%;
-    height: auto;
-    flex-grow: 1;
 }
 
-.screen-status {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: red;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.screen-status.online {
-    background-color: green;
-}
-
-.screen-details {
-    padding: 10px;
-}
-
-.screen-name {
-    font-weight: bold;
-}
-
-.last-seen {
-    color: gray;
-    font-size: 12px;
-}
-
-.screen-options {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    cursor: pointer;
-}
-
-.screens-list {
-    position: relative; /* Ensure the screens list acts as a reference for absolute positioning */
-    overflow: visible; /* Ensure the dropdown can be displayed outside the list */
-}
-
-/* Breadcrumb styles */
-.breadcrumb {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-.breadcrumb a {
-    color: #304050;
-    text-decoration: none;
-    margin-right: 5px;
-}
-
-.breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-.breadcrumb span {
-    color: #6c757d;
+.popup-body .next-button:hover {
+    background-color: #ff2592;
 }

@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function toggleOptionsMenu(fileName, element, event) {
+function toggleOptionsMenu(screenId, element, event) {
     event.stopPropagation(); // Prevents the thumbnail click event
     const dropdownMenu = element.nextElementSibling;
     const rect = element.getBoundingClientRect();

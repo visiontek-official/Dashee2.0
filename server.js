@@ -22,17 +22,24 @@ const generateToken = (userId) => {
 // Verify Token Middleware
 function verifyToken(req, res, next) {
     const token = req.headers['authorization'];
+    console.log('Received Token:', token);
     if (!token) {
+        console.log('No token provided');
         return res.status(403).send({ auth: false, message: 'No token provided.' });
     }
-    jwt.verify(token.split(' ')[1], config.secretKey, function(err, decoded) { // Use config.secretKey
+    jwt.verify(token.split(' ')[1], config.secretKey, function(err, decoded) {
         if (err) {
+            console.log('Failed to authenticate token:', err);
             return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
         }
         req.userId = decoded.userId;
+        console.log('Token authenticated, userId:', req.userId);
         next();
     });
 }
+
+apiApp.use('/api/get-screens', verifyToken);
+apiApp.use('/api/add-screen', verifyToken);
 
 // Log function for web server
 const log = (message, indepth = false) => {
@@ -272,6 +279,10 @@ app.use((req, res, next) => {
     });
 });
 
+// Use the verifyToken middleware for specific routes
+apiApp.use('/api/get-screens', verifyToken);
+apiApp.use('/api/add-screen', verifyToken);
+
 // Your API routes here
 
 /**
@@ -401,6 +412,7 @@ app.get('/api/users', (req, res) => {
  */
 app.get('/api/user-details', (req, res) => {
     const userId = req.session.userId;
+    console.log('Session userId:', userId);
     if (!userId) {
         console.log('No session user ID, redirecting to login');
         return res.redirect('/index.html');
@@ -1672,9 +1684,208 @@ app.post('/create-folder', (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/get-screens:
+ *   get:
+ *     summary: Get user screens
+ *     description: Retrieve screens for the logged-in user.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Screens retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   screen_id:
+ *                     type: integer
+ *                   screen_name:
+ *                     type: string
+ *                   pairing_code:
+ *                     type: string
+ *                   enabled:
+ *                     type: boolean
+ *                   last_connected:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ */
+app.get('/api/get-screens', verifyToken, (req, res) => {
+    const query = 'SELECT * FROM screens WHERE user_id = ?';
+    db.query(query, [req.userId], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error fetching screens', error: err });
+        }
+        res.status(200).send(results);
+    });
+});
+
+/**
+ * @swagger
+ * /api/add-screen:
+ *   post:
+ *     summary: Add a new screen
+ *     description: Add a new screen for the logged-in user.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               screenName:
+ *                 type: string
+ *               pairingCode:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Screen added successfully
+ *       400:
+ *         description: Failed to add screen
+ */
+app.post('/api/add-screen', verifyToken, (req, res) => {
+    const { screen_name, pairing_code } = req.body;
+    const query = 'INSERT INTO screens (screen_name, pairing_code, user_id) VALUES (?, ?, ?)';
+    db.query(query, [screen_name, pairing_code, req.userId], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error adding screen', error: err });
+        }
+        res.status(200).send({ success: true, message: 'Screen added successfully' });
+    });
+});
+
+/**
+ * @swagger
+ * /api/rename-screen:
+ *   post:
+ *     summary: Rename a screen
+ *     description: Update the name of a screen for the authenticated user.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - screen_id
+ *               - new_screen_name
+ *             properties:
+ *               screen_id:
+ *                 type: string
+ *                 description: The ID of the screen to rename.
+ *               new_screen_name:
+ *                 type: string
+ *                 description: The new name for the screen.
+ *     responses:
+ *       200:
+ *         description: Screen renamed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Screen renamed successfully
+ *       500:
+ *         description: Error renaming screen.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: string
+ */
+app.post('/api/rename-screen', verifyToken, (req, res) => {
+    const { screen_id, new_screen_name } = req.body;
+    const query = 'UPDATE screens SET screen_name = ? WHERE screen_id = ? AND user_id = ?';
+    db.query(query, [new_screen_name, screen_id, req.userId], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error renaming screen', error: err });
+        }
+        res.status(200).send({ success: true, message: 'Screen renamed successfully' });
+    });
+});
+
+/**
+ * @swagger
+ * /api/delete-screen:
+ *   post:
+ *     summary: Delete a screen
+ *     description: Delete a screen for the authenticated user.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - screen_id
+ *             properties:
+ *               screen_id:
+ *                 type: string
+ *                 description: The ID of the screen to delete.
+ *     responses:
+ *       200:
+ *         description: Screen deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Screen deleted successfully
+ *       500:
+ *         description: Error deleting screen.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: string
+ */
+app.post('/api/delete-screen', verifyToken, (req, res) => {
+    const { screen_id } = req.body;
+    const query = 'DELETE FROM screens WHERE screen_id = ? AND user_id = ?';
+    db.query(query, [screen_id, req.userId], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error deleting screen', error: err });
+        }
+        res.status(200).send({ success: true, message: 'Screen deleted successfully' });
+    });
+});
+
+// Setup Swagger at the end to avoid interference
+swaggerSetup(app);
+
 app.listen(config.webPort, () => {
     log(`Web server running on port ${config.webPort}`);
 });
-
-// Swagger setup
-swaggerSetup(app);

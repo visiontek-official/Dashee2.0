@@ -5,87 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Screen Details</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="screens.css">
     <link rel="stylesheet" href="screen-details.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+    <header class="main-header">
+        <div class="user-menu">
+            <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
+            <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="profile.html">My Profile</a>
+                <a href="#">Settings</a>
+                <a href="content.html">File Management</a>
+                <a href="#">Support</a>
+                <a href="index.html" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </header>
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="sidebar-header">
                 <img src="https://www.visiontek.co.za/wp-content/uploads/2024/03/VisionTEK-Logo-Full-2024-with-Tag-White-1024x190.png" alt="VisionTEK Logo" class="logo">
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> <span>Home</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="content.html"><i class="fas fa-folder"></i> <span>Content</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="screens.html"><i class="fas fa-desktop"></i> <span>Screens</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-users"></i> <span>Groups</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-play"></i> <span>Playlists</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li><a href="#"><i class="fas fa-globe"></i> <span>Websites</span> <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"><a href="users.html"><i class="fas fa-user"></i> <span>Users</span> <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Home <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="content.html"><i class="fas fa-folder"></i> Content <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="screens.html"><i class="fas fa-desktop"></i> Screens <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
+                <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <main class="main-content">
-            <header class="main-header">
-                <div class="user-menu">
-                    <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
-                    <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="profile.html">My Profile</a>
-                        <a href="#">Settings</a>
-                        <a href="content.html">File Management</a>
-                        <a href="#">Support</a>
-                        <a href="index.html" onclick="logout()">Logout</a>
+            <section class="content">
+                <div class="content-header">
+                    <div class="breadcrumbs">
+                        <a href="screens.html">Screens</a> > <span id="currentScreenName">Screen Title</span>
+                    </div>
+                    <h1 id="screenTitle"><img id="screenThumbnail" src="uploads/default-screen.png" alt="Screen Thumbnail"> Screen Title</h1>
+                    <div id="screenDescription">Description of the screen</div>
+                    <div>
+                        Last seen <span id="lastSeen">X days ago</span> 
+                        <button onclick="showDetailsSidebar()">Details</button>
                     </div>
                 </div>
-            </header>
-            <nav class="breadcrumb">
-                <a href="dashboard.html">Home</a> /
-                <a href="screens.html">Screens</a> /
-                <span id="breadcrumbScreenName">Screen Details</span>
-            </nav>
-            <section class="content">
-                <div class="screen-details-container">
-                    <div class="screen-details-left">
-                        <img src="uploads/screen-thumbnail.png" alt="Screen Image" class="screen-image">
-                        <div class="screen-details-info">
-                            <h2 id="screenName">Dad TV</h2>
-                            <p id="screenStatus">Offline</p>
-                            <p id="lastSeen">Last seen 8 days ago</p>
-                            <a href="#" id="screenDetailsLink">details</a>
-                        </div>
-                    </div>
-                    <div class="screen-details-right">
-                        <div class="MuiTabs-flexContainer">
-                            <button class="tablinks active" onclick="openTab(event, 'Content')">Content</button>
-                            <button class="tablinks" onclick="openTab(event, 'Websites')">Websites</button>
-                        </div>
-                        <div id="Content" class="tabcontent" style="display: block;">
-                            <h3>Content Library</h3>
-                            <div class="content-list" id="contentList">
-                                <div class="content-item">
-                                    <i class="fas fa-folder"></i>
-                                    <div>
-                                        <p>test</p>
-                                        <span>Folder</span>
-                                    </div>
-                                </div>
-                                <div class="content-item">
-                                    <img src="uploads/pixeltv-bg-login.jpg" alt="Image Thumbnail" class="content-thumbnail">
-                                    <div>
-                                        <p>pixeltv-bg-login.jpg</p>
-                                        <span>Image • landscape • 6 days ago</span>
-                                    </div>
-                                </div>
+                <div class="content-section">
+                    <div class="left-panel">
+                        <div class="playlist-header">
+                            <h2>Playlist</h2>
+                            <div class="options">
+                                <i class="fas fa-ellipsis-h" onclick="togglePlaylistOptionsMenu()"></i>
+                            </div>
+                            <div class="dropdown-options-menu" id="playlist-options-menu" style="display:none;">
+                                <a href="#" onclick="setPlaylistTransitions()">Set Playlist Transitions</a>
+                                <a href="#" onclick="shufflePlay()">Shuffle Play</a>
+                                <a href="#" onclick="copyPlaylistToOtherScreens()">Copy Playlist to Other Screens</a>
+                                <a href="#" onclick="clearPlaylist()">Clear Playlist</a>
                             </div>
                         </div>
-                        <div id="Websites" class="tabcontent">
-                            <!-- Websites content will be added here -->
+                        <div class="playlist-content">
+                            <p>Build your playlist by dragging content from the right to here</p>
+                            <!-- Content will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="right-panel">
+                        <div class="tabs">
+                            <button class="tab-button active" onclick="showTabContent('content')">Content</button>
+                            <button class="tab-button" onclick="showTabContent('websites')">Websites</button>
+                        </div>
+                        <div class="tab-content" id="content">
+                            <div class="content-library">
+                                <!-- Content library will be dynamically added here -->
+                            </div>
+                        </div>
+                        <div class="tab-content" id="websites" style="display:none;">
+                            <div class="content-library">
+                                <!-- Websites library will be dynamically added here -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
         </main>
+    </div>
+    <div id="detailsSidebar" class="sidebar">
+        <div class="sidebar-content">
+            <span class="close-btn" onclick="hideDetailsSidebar()">&times;</span>
+            <div class="tabs">
+                <button class="tab-button active" onclick="showSidebarTabContent('information')">Information</button>
+                <button class="tab-button" onclick="showSidebarTabContent('history')">History</button>
+            </div>
+            <div class="tab-content" id="information">
+                <!-- Information content goes here -->
+            </div>
+            <div class="tab-content" id="history" style="display:none;">
+                <!-- History content goes here -->
+            </div>
+        </div>
     </div>
     <script src="screen-details.js"></script>
 </body>
