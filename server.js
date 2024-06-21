@@ -59,23 +59,41 @@ const apiLog = (message, indepth = false) => {
     }
 };
 
-const db = mysql.createConnection({
-    host: config.sql_server_url,
-    user: config.dbUser,
-    password: config.dbPassword,
-    database: config.dbName,
-    port: config.sqlPort
-});
+// MySQL Connection with Reconnect Logic
 
-db.connect((err) => {
-    if (err) {
-        log('Database connection failed: ' + err, true);
-        throw err;
-    }
-    log('Connected to database');
-    createTables();
-    logOutAllUsers(); // Log out all users on server start
-});
+let db;
+
+function handleDisconnect() {
+    db = mysql.createConnection({
+        host: config.sql_server_url,
+        user: config.dbUser,
+        password: config.dbPassword,
+        database: config.dbName,
+        port: config.sqlPort
+    });
+
+    db.connect((err) => {
+        if (err) {
+            console.log('Database connection failed: ' + err);
+            setTimeout(handleDisconnect, 2000); // Retry after 2 seconds
+        } else {
+            console.log(`Connected to database ${config.dbName}`);
+            createTables();
+            logOutAllUsers(); // Log out all users on server start
+        }
+    });
+
+    db.on('error', (err) => {
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+            console.log('Database connection lost. Reconnecting...');
+            handleDisconnect();
+        } else {
+            throw err;
+        }
+    });
+}
+
+handleDisconnect();
 
 const createTables = () => {
     const userTableQuery = `CREATE TABLE IF NOT EXISTS users (

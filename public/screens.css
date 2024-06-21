@@ -169,7 +169,7 @@ body {
 
 .close-btn:hover,
 .close-btn:focus {
-    color: #000;
+    color: #ff018f;
     text-decoration: none;
     cursor: pointer;
 }

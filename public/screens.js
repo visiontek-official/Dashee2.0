@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
             addScreen();
         });
     }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (!event.target.closest('.user-name') && !event.target.closest('.dropdown-menu')) {
+            if (dropdownMenu.style.display === 'block') {
+                dropdownMenu.style.display = 'none';
+            }
+        }
+    });
 });
 
 function fetchScreens() {
