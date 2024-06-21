@@ -5,6 +5,7 @@ module.exports = {
     apiPort: 8002,
     logging: true,
     api_debug: true,
+    clearLogsOnStart: true,  // Set this to true or false to control archiving and clearing of logs
     dbUser: 'VisionTEK',
     dbPassword: 'b!lls4w5yqYN]Wsb',
     dbName: 'dashee2_0',

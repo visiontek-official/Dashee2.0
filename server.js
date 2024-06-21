@@ -12,12 +12,44 @@ const app = express(); // Web server
 const apiApp = express(); // API server
 const logFile = path.join(__dirname, 'logs', 'server.log');
 const apiLogFile = path.join(__dirname, 'logs', 'api.log');
+
+// Define the paths for the logs and archive directories
+const logDir = path.join(__dirname, 'logs');
+const archiveDir = path.join(logDir, 'archive');
+
 const swaggerSetup = require('./swagger');
 
 // Helper function to generate token
 const generateToken = (userId) => {
     return jwt.sign({ userId }, config.secretKey, { expiresIn: '1h' });
 };
+
+// Function to archive and clear logs
+const archiveAndClearLogs = () => {
+    if (!fs.existsSync(archiveDir)) {
+        fs.mkdirSync(archiveDir, { recursive: true });
+    }
+
+    const filesToArchive = ['api.log', 'server.log', 'swagger.log'];
+
+    filesToArchive.forEach((file) => {
+        const logFilePath = path.join(logDir, file);
+        //const archiveFilePath = path.join(archiveDir, `${file.replace('.log', '')}-${Date.now()}.log`);
+        const archiveFilePath = path.join(archiveDir, `${file}.backup.log`);
+
+        if (fs.existsSync(logFilePath)) {
+            fs.copyFileSync(logFilePath, archiveFilePath);  // Copy to archive
+            fs.truncateSync(logFilePath, 0);                // Clear the original log file
+        }
+    });
+
+    console.log('Logs have been archived and cleared');
+};
+
+// Call the function to archive and clear logs if the config is set to true
+if (config.clearLogsOnStart) {
+    archiveAndClearLogs();
+}
 
 // Verify Token Middleware
 function verifyToken(req, res, next) {
