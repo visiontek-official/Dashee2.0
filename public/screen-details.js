@@ -1,10 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     loadUserDetails();
+    loadScreenDetails();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const screenId = urlParams.get('screenId');
+    if (document.getElementById('addScreenForm')) {
+        document.getElementById('addScreenForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            addScreen();
+        });
+    }
 
-    // Event listener to close the user dropdown when clicking outside
+    // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
         const dropdownMenu = document.getElementById('dropdownMenu');
         if (!event.target.closest('.user-name') && !event.target.closest('.dropdown-menu')) {
@@ -23,8 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    loadScreenDetails(screenId);
 });
 
 function toggleOptionsMenu(screenId, element, event) {
@@ -75,11 +78,18 @@ function loadScreenDetails(screenId) {
     })
     .then(response => response.json())
     .then(screen => {
+        if (screen.message) {
+            // Handle error case, e.g., screen not found
+            console.error('Error fetching screen details:', screen.message);
+            return;
+        }
         document.getElementById('screenTitle').textContent = screen.screen_name;
         document.getElementById('currentScreenName').textContent = screen.screen_name;
         document.getElementById('screenDescription').textContent = screen.description;
         document.getElementById('lastSeen').textContent = `${screen.last_seen} days ago`;
         document.getElementById('screenThumbnail').src = screen.thumbnail || 'uploads/default-screen.png';
+        document.getElementById('screenStatus').textContent = screen.enabled ? 'Online' : 'Offline';
+        document.getElementById('screenStatus').classList.toggle('online', screen.enabled);
     })
     .catch(error => {
         console.error('Error fetching screen details:', error);
@@ -189,8 +199,14 @@ function toggleDropdown() {
 }
 
 function logout() {
-    console.log('User logged out');
+    localStorage.removeItem('token');
     window.location.href = 'index.html';
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';
+    console.log('User logged out of Screen-Detail page due to session that expired');
 }
 
 window.onclick = function(event) {

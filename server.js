@@ -303,6 +303,12 @@ apiApp.use('/api/add-screen', verifyToken);
 
 // Your API routes here
 
+
+// Check session status
+app.get('/api/check-session', verifyToken, (req, res) => {
+    res.status(200).send({ sessionExpired: false });
+});
+
 /**
  * @swagger
  * /login:

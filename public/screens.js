@@ -215,9 +215,34 @@ function toggleDropdown() {
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
 }
 
+function handleSessionExpiration() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/check-session', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sessionExpired) {
+            logout();
+        }
+    })
+    .catch(error => {
+        console.error('Error checking session:', error);
+        logout();
+    });
+}
+
 function logout() {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
+    console.log('User logged out of Screen page due to session that expired');
 }
 
 function toggleOptionsMenu(event, screenId) {
