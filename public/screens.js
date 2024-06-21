@@ -92,6 +92,11 @@ function addScreen() {
     const screenName = document.getElementById('screenName').value;
     const pairingCode = document.getElementById('pairingCode').value;
 
+    if (!screenName || !pairingCode) {
+        alert('Screen name and pairing code cannot be blank');
+        return;
+    }
+    
     fetch('/api/add-screen', {
         method: 'POST',
         headers: {
