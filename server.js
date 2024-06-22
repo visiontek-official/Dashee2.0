@@ -2025,6 +2025,74 @@ app.get('/api/screen-details/:id', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/search-screens:
+ *   get:
+ *     summary: Search screens
+ *     description: Search for screens by name for the logged-in user.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search query for the screen name.
+ *     responses:
+ *       200:
+ *         description: Screens retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   screen_id:
+ *                     type: integer
+ *                   screen_name:
+ *                     type: string
+ *                   pairing_code:
+ *                     type: string
+ *                   user_id:
+ *                     type: integer
+ *                   enabled:
+ *                     type: boolean
+ *                   online_status:
+ *                     type: integer
+ *                   last_connected:
+ *                     type: string
+ *                     format: date-time
+ *                   created:
+ *                     type: string
+ *                     format: date-time
+ *                   updated:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
 app.get('/api/search-screens', (req, res) => {
     const query = req.query.query.toLowerCase();
     const token = req.headers['authorization'].split(' ')[1];
