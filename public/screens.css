@@ -245,6 +245,7 @@ body {
 }
 
 .filters-section .dropdown-content {
+    width:50px;
     display: none;
     position: absolute;
     background-color: #f9f9f9;
@@ -262,10 +263,6 @@ body {
 
 .filters-section .dropdown-content a:hover {
     background-color: #f1f1f1;
-}
-
-.filters-section .dropdown:hover .dropdown-content {
-    display: block;
 }
 
 .filters-section a {

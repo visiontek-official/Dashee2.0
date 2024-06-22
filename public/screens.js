@@ -16,6 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('sortLink').addEventListener('click', function(event) {
+        event.preventDefault();
+        const sortDropdown = document.getElementById('sortDropdown');
+        sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    // Close sort dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const sortDropdown = document.getElementById('sortDropdown');
+        if (!event.target.closest('#sortLink') && !event.target.closest('#sortDropdown')) {
+            if (sortDropdown.style.display === 'block') {
+                sortDropdown.style.display = 'none';
+            }
+        }
+    });
+
     document.getElementById('filtersLink').addEventListener('click', showFilterPopup);
     document.querySelector('.popup .close-btn').addEventListener('click', hideFilterPopup);
 
@@ -95,12 +111,6 @@ function fetchScreens() {
     .catch(error => {
         console.error('Error fetching screens:', error);
     });
-}
-
-function sortScreens(criteria) {
-    console.log('Sorting screens by:', criteria);
-    // Implement sorting logic here based on criteria
-    // fetchScreens should be called again with sorted data
 }
 
 function searchScreens() {
