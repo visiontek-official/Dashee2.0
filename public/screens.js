@@ -9,6 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    document.getElementById('searchButton').addEventListener('click', searchScreens);
+    document.getElementById('searchInput').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            searchScreens();
+        }
+    });
+
+    document.getElementById('filtersLink').addEventListener('click', showFilterPopup);
+    document.querySelector('.popup .close-btn').addEventListener('click', hideFilterPopup);
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
         const dropdownMenu = document.getElementById('dropdownMenu');
@@ -27,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
 
 function fetchScreens() {
     const token = localStorage.getItem('token');
@@ -86,6 +97,79 @@ function fetchScreens() {
     });
 }
 
+function sortScreens(criteria) {
+    console.log('Sorting screens by:', criteria);
+    // Implement sorting logic here based on criteria
+    // fetchScreens should be called again with sorted data
+}
+
+function searchScreens() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    console.log('Searching for:', searchTerm);
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch(`/api/search-screens?query=${searchTerm}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(screens => {
+        const screenList = document.getElementById('screenList');
+        screenList.innerHTML = '';
+        screens.forEach(screen => {
+            const screenCard = document.createElement('div');
+            screenCard.className = 'screen-card';
+            screenCard.draggable = true;
+            screenCard.ondragstart = (event) => {
+                event.dataTransfer.setData('text/plain', screen.screen_id);
+            };
+            screenCard.onclick = (event) => {
+                if (event.target.classList.contains('fas') || event.target.tagName === 'A') {
+                    return; // Prevents opening screen when clicking on the options
+                }
+                openScreen(screen.screen_id);
+            };
+
+            // Determine the status based on online_status field
+            const statusText = screen.online_status === 1 ? 'Online' : 'Offline';
+            const statusClass = screen.online_status === 1 ? 'online' : 'offline';
+
+            screenCard.innerHTML = `
+                <img src="uploads/default-screen.png" alt="Screen">
+                <div class="screen-info">
+                    <h3>${screen.screen_name}</h3>
+                    <p>Last seen ${screen.last_seen} days ago</p>
+                    <span class="status ${statusClass}">${statusText}</span>
+                    <div class="options">
+                        <i class="fas fa-ellipsis-h" onclick="toggleOptionsMenu(event, '${screen.screen_id}')"></i>
+                        <div class="dropdown-options-menu" id="dropdown-options-menu-${screen.screen_id}" style="display:none;">
+                            <a href="#" onclick="openScreen('${screen.screen_id}')">Open</a>
+                            <a href="#" onclick="renameScreen('${screen.screen_id}', '${screen.screen_name}')">Rename</a>
+                            <a href="#" onclick="deleteScreen('${screen.screen_id}')">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            screenList.appendChild(screenCard);
+        });
+    })
+    .catch(error => {
+        console.error('Error searching screens:', error);
+    });
+}
+
+
 // Function to toggle the options menu
 function toggleOptionsMenu(event, screenId) {
     event.stopPropagation(); // Prevents the thumbnail click event
@@ -101,9 +185,6 @@ function toggleOptionsMenu(event, screenId) {
 
     // Toggle the current dropdown menu
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    dropdownMenu.style.position = 'absolute';
-    dropdownMenu.style.top = `${rect.bottom}px`;
-    dropdownMenu.style.left = `${rect.left}px`;
 
     // Stop propagation to prevent the document click listener from closing it immediately
     dropdownMenu.addEventListener('click', (event) => {
@@ -266,6 +347,34 @@ function handleSessionExpiration() {
         console.error('Error checking session:', error);
         logout();
     });
+}
+
+function showFilterPopup() {
+    document.getElementById('filterPopup').style.display = 'flex';
+}
+
+function hideFilterPopup() {
+    document.getElementById('filterPopup').style.display = 'none';
+}
+
+function filterByOrientation(orientation) {
+    console.log('Filtering by orientation:', orientation);
+    // Implement filter logic based on orientation
+}
+
+function filterByStatus(status) {
+    console.log('Filtering by status:', status);
+    // Implement filter logic based on status
+}
+
+function resetFilters() {
+    console.log('Resetting filters');
+    // Implement reset logic
+}
+
+function applyFilters() {
+    console.log('Applying filters');
+    // Implement apply filters logic
 }
 
 function logout() {

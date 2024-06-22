@@ -2025,6 +2025,31 @@ app.get('/api/screen-details/:id', (req, res) => {
     });
 });
 
+app.get('/api/search-screens', (req, res) => {
+    const query = req.query.query.toLowerCase();
+    const token = req.headers['authorization'].split(' ')[1];
+    let userId;
+
+    try {
+        const decoded = jwt.verify(token, config.secretKey); // Use the secret key from the config
+        userId = decoded.userId;
+    } catch (err) {
+        console.error('Invalid token:', err);
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const sql = `SELECT * FROM screens WHERE screen_name LIKE ? AND user_id = ?`;
+    const searchQuery = `%${query}%`;
+    
+    db.query(sql, [searchQuery, userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching screens:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.json(results);
+    });
+});
+
 // Setup Swagger at the end to avoid interference
 swaggerSetup(app);
 

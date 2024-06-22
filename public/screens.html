@@ -43,6 +43,25 @@
                     <h1>Screens</h1>
                     <button class="add-screen-button" onclick="showAddScreenPopup()">ADD SCREEN</button>
                 </div>
+                <!-- New Filters Section -->
+                <div class="filters-section">
+                    <div class="dropdown">
+                        <a href="#" id="sortLink"><i class="fas fa-sort"></i> SORT</a>
+                        <div class="dropdown-content" id="sortDropdown">
+                            <a href="#" onclick="sortScreens('dateNewest')">Date added (newest first)</a>
+                            <a href="#" onclick="sortScreens('dateOldest')">Date added (oldest first)</a>
+                            <a href="#" onclick="sortScreens('alphaAsc')">Alphabetical (ascending)</a>
+                            <a href="#" onclick="sortScreens('alphaDesc')">Alphabetical (descending)</a>
+                            <a href="#" onclick="sortScreens('lastSeenNewest')">Time last seen (newest first)</a>
+                            <a href="#" onclick="sortScreens('lastSeenOldest')">Time last seen (oldest first)</a>
+                        </div>
+                    </div>
+                    <a href="#" id="filtersLink" onclick="showFilterPopup()"><i class="fas fa-filter"></i> FILTERS</a>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search">
+                        <button id="searchButton"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
                 <div id="screenList" class="content-section">
                     <!-- Screens will be dynamically inserted here -->
                 </div>
@@ -66,6 +85,46 @@
                 <input type="text" id="screenName" placeholder="Screen name *" required>
                 <input type="text" id="pairingCode" placeholder="Pairing code *" required>
                 <button class="next-button" onclick="addScreen()">NEXT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Popup -->
+    <div class="popup" id="filterPopup" style="display: none;">
+        <div class="popup-content">
+            <span class="close-btn" onclick="hideFilterPopup()">&times;</span>
+            <h2>Filters</h2>
+            <div class="popup-body">
+                <label for="dateAdded">Date added</label>
+                <select id="dateAdded">
+                    <option value="any">Any time</option>
+                    <option value="last24Hours">Last 24 hours</option>
+                    <option value="lastWeek">Last week</option>
+                    <option value="lastMonth">Last month</option>
+                    <option value="lastYear">Last year</option>
+                </select>
+                
+                <label for="screenOrientation">Screen orientation</label>
+                <div id="screenOrientation">
+                    <button onclick="filterByOrientation('landscape')">Landscape</button>
+                    <button onclick="filterByOrientation('portrait')">Portrait (+90 degrees)</button>
+                    <button onclick="filterByOrientation('upsideDown')">Upside down (+180 degrees)</button>
+                    <button onclick="filterByOrientation('reversePortrait')">Reverse portrait (+270 degrees)</button>
+                </div>
+
+                <label for="status">Status</label>
+                <div id="status">
+                    <button onclick="filterByStatus('offline')">Offline</button>
+                    <button onclick="filterByStatus('online')">Online</button>
+                </div>
+
+                <label for="tags">Tags</label>
+                <input type="text" id="tags" placeholder="Type and press enter">
+
+                <div class="popup-footer">
+                    <button onclick="resetFilters()">RESET</button>
+                    <button onclick="applyFilters()">APPLY</button>
+                </div>
             </div>
         </div>
     </div>
