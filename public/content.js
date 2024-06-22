@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function toggleOptionsMenu(screenId, element, event) {
+function toggleOptionsMenu(fileName, element, event) {
     event.stopPropagation(); // Prevents the thumbnail click event
     const dropdownMenu = element.nextElementSibling;
     const rect = element.getBoundingClientRect();
@@ -140,7 +140,7 @@ function fetchFiles() {
                 ${thumbnailContent}
                 <div class="file-info">
                     <div class="file-details">
-                        <strong>${file.name}</strong>
+                        <strong>${file.name}</strong> 
                         <span>${file.uploadDate}</span>
                     </div>
                 </div>

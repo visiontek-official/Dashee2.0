@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdownMenu.style.display = 'none';
             }
         }
+
+        // Close all other dropdown menus
+        const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+        dropdownMenus.forEach(menu => {
+            if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
     });
 });
 
@@ -49,19 +57,24 @@ function fetchScreens() {
                 }
                 openScreen(screen.screen_id);
             };
+
+            // Determine the status based on online_status field
+            const statusText = screen.online_status === 1 ? 'Online' : 'Offline';
+            const statusClass = screen.online_status === 1 ? 'online' : 'offline';
+
             screenCard.innerHTML = `
                 <img src="uploads/default-screen.png" alt="Screen">
                 <div class="screen-info">
                     <h3>${screen.screen_name}</h3>
                     <p>Last seen ${screen.last_seen} days ago</p>
-                    <span class="status ${screen.enabled ? 'online' : 'offline'}">${screen.enabled ? 'Online' : 'Offline'}</span>
-                    <div class="options" onclick="toggleOptionsMenu('${screen.screen_id}')">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                    <div class="dropdown-options-menu" id="dropdown-options-menu-${screen.screen_id}" style="display:none;">
-                        <a href="#" onclick="openScreen('${screen.screen_id}')">Open</a>
-                        <a href="#" onclick="renameScreen('${screen.screen_id}', '${screen.screen_name}')">Rename</a>
-                        <a href="#" onclick="deleteScreen('${screen.screen_id}')">Delete</a>
+                    <span class="status ${statusClass}">${statusText}</span>
+                    <div class="options">
+                        <i class="fas fa-ellipsis-h" onclick="toggleOptionsMenu(event, '${screen.screen_id}')"></i>
+                        <div class="dropdown-options-menu" id="dropdown-options-menu-${screen.screen_id}" style="display:none;">
+                            <a href="#" onclick="openScreen('${screen.screen_id}')">Open</a>
+                            <a href="#" onclick="renameScreen('${screen.screen_id}', '${screen.screen_name}')">Rename</a>
+                            <a href="#" onclick="deleteScreen('${screen.screen_id}')">Delete</a>
+                        </div>
                     </div>
                 </div>
             `;
@@ -73,18 +86,29 @@ function fetchScreens() {
     });
 }
 
-function toggleOptionsMenu(screenId) {
+// Function to toggle the options menu
+function toggleOptionsMenu(event, screenId) {
+    event.stopPropagation(); // Prevents the thumbnail click event
     const dropdownMenu = document.getElementById(`dropdown-options-menu-${screenId}`);
-    const isVisible = dropdownMenu.style.display === 'block';
 
-    // Hide all dropdown menus
+    // Close all other dropdown menus
     const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
-    dropdownMenus.forEach(menu => menu.style.display = 'none');
+    dropdownMenus.forEach(menu => {
+        if (menu !== dropdownMenu) {
+            menu.style.display = 'none';
+        }
+    });
 
-    // Toggle the clicked menu
-    if (!isVisible) {
-        dropdownMenu.style.display = 'block';
-    }
+    // Toggle the current dropdown menu
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    dropdownMenu.style.position = 'absolute';
+    dropdownMenu.style.top = `${rect.bottom}px`;
+    dropdownMenu.style.left = `${rect.left}px`;
+
+    // Stop propagation to prevent the document click listener from closing it immediately
+    dropdownMenu.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
 }
 
 function addScreen() {
@@ -248,29 +272,4 @@ function logout() {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
     console.log('User logged out of Screen page due to session that expired');
-}
-
-function toggleOptionsMenu(event, screenId) {
-    event.stopPropagation(); // Prevents the thumbnail click event
-    const dropdownMenu = document.getElementById(`dropdown-options-menu-${screenId}`);
-    const rect = event.target.getBoundingClientRect();
-
-    // Close all other dropdown menus
-    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
-    dropdownMenus.forEach(menu => {
-        if (menu !== dropdownMenu) {
-            menu.style.display = 'none';
-        }
-    });
-
-    // Toggle the current dropdown menu
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    dropdownMenu.style.position = 'absolute';
-    dropdownMenu.style.top = `${rect.bottom}px`;
-    dropdownMenu.style.left = `${rect.left}px`;
-
-    // Stop propagation to prevent the document click listener from closing it immediately
-    dropdownMenu.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
 }

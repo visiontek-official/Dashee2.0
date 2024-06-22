@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     loadUserDetails();
-    loadScreenDetails();
+    const screenId = getScreenIdFromURL();
+    console.log('Extracted screen ID:', screenId); // Log the extracted screen ID
+    if (screenId) {
+        console.log('Calling updateScreenDetails with screenId:', screenId);
+        updateScreenDetails(screenId);
+    } else {
+        console.error('No screen ID found in the URL');
+    }
 
     if (document.getElementById('addScreenForm')) {
         document.getElementById('addScreenForm').addEventListener('submit', function(event) {
@@ -30,69 +37,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function toggleOptionsMenu(screenId, element, event) {
-    event.stopPropagation(); // Prevents the thumbnail click event
-    const dropdownMenu = element.nextElementSibling;
-    const rect = element.getBoundingClientRect();
-
-    // Close all other dropdown menus
-    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
-    dropdownMenus.forEach(menu => {
-        if (menu !== dropdownMenu) {
-            menu.style.display = 'none';
-        }
-    });
-
-    // Toggle the current dropdown menu
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    dropdownMenu.style.position = 'absolute';
-    dropdownMenu.style.top = `${rect.bottom}px`;
-    dropdownMenu.style.left = `${rect.left}px`;
-
-    // Stop propagation to prevent the document click listener from closing it immediately
-    element.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
-
-    // Add event listeners to the cancel buttons in the dialog
-    const cancelButtons = dropdownMenu.querySelectorAll('.cancel-button');
-    cancelButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            event.stopPropagation();
-            dropdownMenu.style.display = 'none'; // Close the dropdown menu
-        });
-    });
+function getScreenIdFromURL() {
+    console.log('Full URL:', window.location.href); // Log the full URL
+    const params = new URLSearchParams(window.location.search);
+    const screenId = params.get('screenId'); // Update to screenId
+    console.log('URL parameters:', params.toString()); // Log URL parameters
+    console.log('Screen ID from URL:', screenId); // Log extracted screen ID
+    return screenId;
 }
 
-function loadScreenDetails(screenId) {
+function updateScreenDetails(screenId) {
+    console.log('Entering updateScreenDetails function with screenId:', screenId); // Log function entry
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'index.html';
+        console.error('No token found');
         return;
     }
-
-    fetch(`/api/screen-details?screenId=${screenId}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+    console.log('Token:', token); // Log token
+    const url = `/api/screen-details/${screenId}`;
+    console.log('Fetching data from URL:', url); // Log URL
+    fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(response => response.json())
-    .then(screen => {
-        if (screen.message) {
-            // Handle error case, e.g., screen not found
-            console.error('Error fetching screen details:', screen.message);
-            return;
+    .then(response => {
+        console.log('Fetch request initiated'); // Log fetch initiation
+        console.log('Response status:', response.status); // Log response status
+        return response.json(); // Get response as JSON
+    })
+    .then(data => {
+        console.log('API response:', data); // Log the API response
+
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('screenTitle').textContent = data.title;
+        document.getElementById('screenThumbnail').src = data.thumbnail || 'uploads/default-screen.png';
+        document.getElementById('screenDescription').textContent = data.description || 'No description provided';
+
+        // Set the screen name in both the title section and the breadcrumbs
+        document.getElementById('screenName').textContent = data.screen_name;
+        document.getElementById('breadcrumbScreenName').textContent = data.screen_name;
+
+        const statusElement = document.getElementById('screenStatus');
+        console.log('Online status:', data.online_status); // Log the online status
+
+        if (data.online_status === 1) { // Adjusted condition to check for 1
+            statusElement.textContent = 'Online';
+            statusElement.classList.add('online');
+            statusElement.classList.remove('offline');
+        } else {
+            statusElement.textContent = 'Offline';
+            statusElement.classList.add('offline');
+            statusElement.classList.remove('online');
         }
-        document.getElementById('screenTitle').textContent = screen.screen_name;
-        document.getElementById('currentScreenName').textContent = screen.screen_name;
-        document.getElementById('screenDescription').textContent = screen.description;
-        document.getElementById('lastSeen').textContent = `${screen.last_seen} days ago`;
-        document.getElementById('screenThumbnail').src = screen.thumbnail || 'uploads/default-screen.png';
-        document.getElementById('screenStatus').textContent = screen.enabled ? 'Online' : 'Offline';
-        document.getElementById('screenStatus').classList.toggle('online', screen.enabled);
     })
     .catch(error => {
         console.error('Error fetching screen details:', error);
+        document.getElementById('screenStatus').textContent = 'Error loading status';
     });
 }
 

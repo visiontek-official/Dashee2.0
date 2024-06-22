@@ -107,20 +107,24 @@ body {
     color: #888;
 }
 
-.screen-card .status {
+.status {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #d9534f;
-    color: #fff;
     padding: 5px 10px;
     border-radius: 3px;
     font-size: 0.8em;
     text-transform: uppercase;
 }
 
-.screen-card .status.online {
+.status.online {
     background-color: #5cb85c;
+    color: #fff;
+}
+
+.status.offline {
+    background-color: #d9534f;
+    color: #fff;
 }
 
 /* Popup Styles */
@@ -205,6 +209,25 @@ body {
     width: 100%;
 }
 
-.popup-body .next-button:hover {
-    background-color: #ff2592;
+.dropdown-options-menu {
+    display: none;
+    width: 100px;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    z-index: 1000;
+    margin-top: -120px; /* Adjust the value as needed */
+    margin-left: 50px;
+}
+
+.dropdown-options-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown-options-menu a:hover {
+    background-color: #f1f1f1;
 }

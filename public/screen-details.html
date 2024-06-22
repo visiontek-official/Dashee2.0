@@ -41,21 +41,23 @@
             <section class="content">
                 <div class="content-header">
                     <div class="breadcrumbs">
-                        <a href="screens.html">Screens</a> > <span id="currentScreenName">Screen Title</span>
+                        <a href="screens.html">Screens</a> > <span id="breadcrumbScreenName">Screen Title</span>
                     </div>
                     <div class="title-section">
                         <div class="thumbnail-container">
                             <img id="screenThumbnail" src="uploads/default-screen.png" alt="Screen Thumbnail" class="screen-thumbnail">
-                            <span class="status online" id="screenStatus">Online</span>
+                            <span class="status" id="screenStatus">Loading...</span>
                         </div>
-                        <h1 id="screenTitle">Screen Title</h1>
+                        <div class="screen-details">
+                            <h1 id="screenTitle">Screen Title</h1>
+                            <h2 id="screenName">Screen Name</h2> <!-- Changed ID to screenName -->
+                        </div>
                     </div>
                     <div id="screenDescription">Description of the screen</div>
                     <div class="last-seen">
                         Last seen <span id="lastSeen">X days ago</span>
                         <button onclick="showDetailsSidebar()">Details</button>
-                    </div>
-                </div>                
+                    </div>             
                 <div class="content-section">
                     <div class="left-panel">
                         <div class="playlist-header">

@@ -149,6 +149,7 @@ const createTables = () => {
         pairing_code VARCHAR(255) NOT NULL,
         user_id INT NOT NULL,
         enabled BOOLEAN DEFAULT false,
+        online_status BOOLEAN DEFAULT false,
         last_connected DATETIME DEFAULT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1767,6 +1768,8 @@ app.post('/create-folder', (req, res) => {
  *                     type: string
  *                   enabled:
  *                     type: boolean
+ *                   online_status:
+ *                     type: integer
  *                   last_connected:
  *                     type: string
  *       401:
@@ -1936,6 +1939,89 @@ app.post('/api/delete-screen', verifyToken, (req, res) => {
             return res.status(500).send({ message: 'Error deleting screen', error: err });
         }
         res.status(200).send({ success: true, message: 'Screen deleted successfully' });
+    });
+});
+
+/**
+ * @swagger
+ * /api/screen-details/{id}:
+ *   get:
+ *     summary: Get screen details by ID
+ *     description: Retrieve the details of a specific screen by its ID.
+ *     tags: [Screens]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the screen to retrieve.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved screen details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 screen_id:
+ *                   type: integer
+ *                   example: 1
+ *                 screen_name:
+ *                   type: string
+ *                   example: "Screen Title 1"
+ *                 pairing_code:
+ *                   type: string
+ *                   example: "ABC123"
+ *                 user_id:
+ *                   type: integer
+ *                   example: 1
+ *                 enabled:
+ *                   type: boolean
+ *                   example: true
+ *                 online_status:
+ *                   type: integer
+ *                   example: 1
+ *                 last_connected:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2023-01-01T12:00:00Z"
+ *                 created:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2023-01-01T12:00:00Z"
+ *                 updated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2023-01-01T12:00:00Z"
+ *                 thumbnail:
+ *                   type: string
+ *                   example: "/uploads/screen-thumbnail.png"
+ *       404:
+ *         description: Screen not found.
+ *       500:
+ *         description: Internal server error.
+ */
+app.get('/api/screen-details/:id', (req, res) => {
+    const screenId = req.params.id;
+    const query = 'SELECT screen_id, screen_name, pairing_code, user_id, enabled, online_status, last_connected, created, updated FROM screens WHERE screen_id = ?';
+    
+    db.query(query, [screenId], (err, result) => {
+        if (err) {
+            console.error('Error fetching screen details:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'Screen not found' });
+        }
+
+        const screenDetails = result[0];
+        // Ensure the path to the thumbnail is correct
+        screenDetails.thumbnail = `/uploads/screen-thumbnail.png`;
+        
+        res.json(screenDetails);
     });
 });
 
