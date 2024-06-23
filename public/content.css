@@ -228,17 +228,6 @@ input[type="file"], .folder-popup input[type="text"] {
     align-items: center; /* Center the popup content */
 }
 
-.popup-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px; /* Set a maximum width */
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
 .drag-area {
     border: 2px dashed #ccc;
     border-radius: 10px;
@@ -301,7 +290,7 @@ input[type="file"], .folder-popup input[type="text"] {
 
 .dropdown-options-menu {
     display: none;
-    width: 100px;
+    width: 300px;
     position: absolute;
     top: 30px; /* Adjust based on design */
     right: 10px;
@@ -320,4 +309,115 @@ input[type="file"], .folder-popup input[type="text"] {
 
 .dropdown-options-menu a:hover {
     background-color: #f1f1f1;
+}
+
+/* Add to Multiple Screens Popup */
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #aaa;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.popup-body {
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group label {
+    margin: 0;
+}
+
+.apply-button {
+    background-color: #1d2a38;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.apply-button:hover {
+    background-color: #ff2592;
+}
+
+.apply-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#screensList {
+    margin-top: 20px;
+}
+
+#screensList .screen-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#screensList .screen-item img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+#screensList .screen-item p {
+    margin: 0;
+}
+
+#screensList .screen-item .status {
+    margin-left: auto;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: white;
+}
+
+#screensList .screen-item .status.online {
+    background-color: #28a745;
+}
+
+#screensList .screen-item .status.offline {
+    background-color: #dc3545;
 }

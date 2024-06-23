@@ -71,32 +71,6 @@ function toggleOptionsMenu(fileName, element, event) {
     });
 }
 
-/*
-function toggleOptionsMenu(fileName, element) {
-    const dropdownMenu = element.nextElementSibling;
-    const rect = element.getBoundingClientRect();
-
-    // Close all other dropdown menus
-    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
-    dropdownMenus.forEach(menu => {
-        if (menu !== dropdownMenu) {
-            menu.style.display = 'none';
-        }
-    });
-
-    // Toggle the current dropdown menu
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    dropdownMenu.style.position = 'absolute';
-    dropdownMenu.style.top = `${rect.bottom}px`;
-    dropdownMenu.style.left = `${rect.left}px`;
-
-    // Stop propagation to prevent the document click listener from closing it immediately
-    element.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
-}
-*/
-
 function fetchFiles() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -149,8 +123,12 @@ function fetchFiles() {
                 </div>
                 <div class="dropdown-options-menu">
                     <a href="content-details.html?file=${file.name}">Open</a>
+                    <a href="#" onclick="addtoplalistFile('${file.name}')">Add to playlists of multiple screens</a>
+                    <a href="#" onclick="removefromplalistFile('${file.name}')">Remove from all playlists</a>
+                    <a href="#" onclick="movetofolderFile('${file.name}')">Move to a different folder</a>
+                    <a href="#" onclick="filemanagementFile('${file.name}')">File Management</a>
                     <a href="#" onclick="renameFile('${file.name}')">Rename</a>
-                    <a href="#" onclick="deleteFile('${file.name}')">Delete</a>
+                    <a href="#" onclick="deleteFile('${file.name}')">Delete Content</a>
                 </div>
             `;
             fileList.appendChild(fileItem);
@@ -245,6 +223,99 @@ function updateFiles() {
 
 function openUploadPopup() {
     document.getElementById('uploadPopup').style.display = 'flex';
+}
+
+function addtoplalistFile(fileName) {
+    const popup = document.getElementById('addToMultipleScreensPopup');
+    const fileNameElement = document.getElementById('fileName');
+    fileNameElement.textContent = fileName;
+    fetchUserScreens(); // Fetch the screens for the current user
+    popup.style.display = 'block';
+}
+
+function hideAddToMultipleScreensPopup() {
+    const popup = document.getElementById('addToMultipleScreensPopup');
+    popup.style.display = 'none';
+}
+
+function fetchUserScreens() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/get-screens', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(screens => {
+        const screensList = document.getElementById('screensList');
+        screensList.innerHTML = ''; // Clear the list
+        screens.forEach(screen => {
+            const screenItem = document.createElement('div');
+            screenItem.className = 'screen-item';
+
+            // Determine the status based on online_status field
+            const statusText = screen.online_status === 1 ? 'Online' : 'Offline';
+            const statusClass = screen.online_status === 1 ? 'online' : 'offline';
+
+            screenItem.innerHTML = `
+                <input type="checkbox" class="screen-checkbox" value="${screen.screen_id}">
+                <img src="uploads/default-screen.png" alt="Screen">
+                <div>
+                    <p>${screen.screen_name}</p>
+                    <p>Last seen ${screen.last_seen} days ago • ${screen.orientation} orientation</p>
+                </div>
+                <span class="status ${statusClass}">${statusText}</span>
+            `;
+            screensList.appendChild(screenItem);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching screens:', error);
+    });
+}
+
+function applyToMultipleScreens() {
+    const selectedScreens = Array.from(document.querySelectorAll('.screen-checkbox:checked')).map(cb => cb.value);
+    const addPosition = document.getElementById('addPosition').value;
+    const duration = document.getElementById('duration').value;
+    const fileName = document.getElementById('fileName').textContent;
+
+    if (selectedScreens.length === 0) {
+        alert('Please select at least one screen.');
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/add-to-multiple-screens', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ screens: selectedScreens, addPosition, duration, fileName })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Content added to multiple screens successfully!');
+            hideAddToMultipleScreensPopup();
+        } else {
+            alert('Failed to add content to multiple screens.');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding content to multiple screens:', error);
+    });
 }
 
 function closeUploadPopup() {

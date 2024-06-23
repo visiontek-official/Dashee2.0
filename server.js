@@ -2118,6 +2118,20 @@ app.get('/api/search-screens', (req, res) => {
     });
 });
 
+apiApp.post('/api/add-to-multiple-screens', verifyToken, (req, res) => {
+    const { screens, addPosition, duration, fileName } = req.body;
+    const userId = req.userId;
+
+    if (!screens || screens.length === 0) {
+        return res.status(400).json({ success: false, message: 'No screens selected' });
+    }
+
+    // Implement the logic to add the file to the selected screens
+    // ...
+
+    res.json({ success: true, message: 'Content added to multiple screens successfully' });
+});
+
 // Setup Swagger at the end to avoid interference
 swaggerSetup(app);
 
