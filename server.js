@@ -2249,6 +2249,34 @@ app.delete('/api/delete-playlist-item/:playlistId', verifyToken, (req, res) => {
     });
 });
 
+app.get('/api/user-content', verifyToken, (req, res) => {
+    const userId = req.userId;
+
+    const sql = 'SELECT * FROM content WHERE user_id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching user content:', err);
+            return res.status(500).json({ success: false, message: 'Failed to fetch user content' });
+        }
+        res.json({ success: true, content: results });
+    });
+});
+
+// Add a new endpoint to add content to a playlist
+app.post('/api/add-to-playlist', verifyToken, (req, res) => {
+    const { contentId, screenId } = req.body;
+    const userId = req.userId;
+
+    const sql = 'INSERT INTO playlists (screenId, contentId, userId) VALUES (?, ?, ?)';
+    db.query(sql, [screenId, contentId, userId], (err, results) => {
+        if (err) {
+            console.error('Error adding to playlist:', err);
+            return res.status(500).json({ success: false, message: 'Failed to add to playlist' });
+        }
+        res.json({ success: true, message: 'Content added to playlist successfully' });
+    });
+});
+
 // Setup Swagger at the end to avoid interference
 swaggerSetup(app);
 

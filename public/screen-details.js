@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Calling updateScreenDetails with screenId:', screenId);
         updateScreenDetails(screenId);
         fetchPlaylists(screenId);
+        fetchUserContent(); // Fetch and display user content
     } else {
         console.error('No screen ID found in the URL');
     }
@@ -145,6 +146,81 @@ function fetchContentDetails(contentId) {
     .catch(error => {
         console.error('Error fetching content details:', error);
         return null;
+    });
+}
+
+function fetchUserContent() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch('/api/user-content', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayUserContent(data.content);
+        } else {
+            console.error('Failed to fetch user content:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user content:', error);
+    });
+}
+
+function displayUserContent(contentList) {
+    const contentLibrary = document.querySelector('.content-library');
+    contentLibrary.innerHTML = contentList.map(content => `
+        <div class="content-item">
+            <img src="${content.file_path}" alt="${content.file_name}">
+            <div class="content-info">
+                <h3>${content.file_name}</h3>
+                <p>${content.file_type} • ${content.file_orientation}</p>
+            </div>
+            <div class="add-option">
+                <button onclick="addToPlaylist('${content.id}')">Add to Playlist</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function addToPlaylist(contentId) {
+    const screenId = getScreenIdFromURL();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const requestBody = {
+        contentId,
+        screenId
+    };
+
+    fetch('/api/add-to-playlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Content added to the playlist successfully.');
+            fetchPlaylists(screenId); // Refresh the playlist
+        } else {
+            alert('Failed to add content to the playlist.');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding content to playlist:', error);
+        alert('An error occurred while adding the content.');
     });
 }
 

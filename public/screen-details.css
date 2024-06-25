@@ -369,3 +369,58 @@ body {
     font-size: 1.2em;
     color: #333;
 }
+
+.content-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.content-item img {
+    width: 100px;
+    height: 60px;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.content-info {
+    flex: 1;
+}
+
+.content-info h3 {
+    margin: 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.content-info p {
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+    color: #888;
+}
+
+.add-option {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+}
+
+.add-option button {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.add-option button:hover {
+    background-color: #4cae4c;
+}
