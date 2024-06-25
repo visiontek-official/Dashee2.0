@@ -52,7 +52,7 @@
                 </div>
                 <div id="breadcrumb"></div>
                 <div class="thumbnail-container" id="fileList"></div>
-            </section><div class="main-content">
+            </section>
         </main>
     </div>
     <div class="content-section" id="fileList">
@@ -72,29 +72,29 @@
         </div>
     </div>        
     <!-- Add to Multiple Screens Popup -->
-        <div class="popup" id="addToMultipleScreensPopup">
-            <div class="popup-content">
-                <span class="close-btn" onclick="hideAddToMultipleScreensPopup()">&times;</span>
-                <h2><i class="fas fa-list"></i> Add To Multiple Screens</h2>
-                <div class="popup-body">
-                    <p>Add <span id="fileName"></span> to the playlists of multiple screens</p>
-                    <div class="form-group">
-                        <label for="addPosition">Add at position</label>
-                        <select id="addPosition">
-                            <option value="start">Start of playlist</option>
-                            <option value="end">End of playlist</option>
-                        </select>
-                        <label for="duration">Duration</label>
-                        <input type="number" id="duration" value="10" min="1"> Seconds
-                    </div>
-                    <h3>Select screens</h3>
-                    <div id="screensList">
-                        <!-- Dynamically loaded screens will appear here -->
-                    </div>
-                    <button class="apply-button" onclick="applyToMultipleScreens()">APPLY</button>
+    <div class="popup" id="addToMultipleScreensPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="hideAddToMultipleScreensPopup()">&times;</span>
+            <h2><i class="fas fa-list"></i> Add To Multiple Screens</h2>
+            <div class="popup-body">
+                <p>Add <span id="fileName"></span> to the playlists of multiple screens</p>
+                <div class="form-group">
+                    <label for="addPosition">Add at position</label>
+                    <select id="addPosition">
+                        <option value="start">Start of playlist</option>
+                        <option value="end">End of playlist</option>
+                    </select>
+                    <label for="duration">Duration</label>
+                    <input type="number" id="duration" value="10" min="1"> Seconds
                 </div>
+                <h3>Select screens</h3>
+                <div id="screensList">
+                    <!-- Dynamically loaded screens will appear here -->
+                </div>
+                <button class="apply-button" onclick="applyToMultipleScreens()">APPLY</button>
             </div>
         </div>
+    </div>
     <script src="content.js"></script>
 </body>
 </html>

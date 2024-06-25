@@ -226,11 +226,33 @@ function openUploadPopup() {
 }
 
 function addtoplalistFile(fileName) {
-    const popup = document.getElementById('addToMultipleScreensPopup');
-    const fileNameElement = document.getElementById('fileName');
-    fileNameElement.textContent = fileName;
-    fetchUserScreens(); // Fetch the screens for the current user
-    popup.style.display = 'block';
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch(`/api/file-id?fileName=${encodeURIComponent(fileName)}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.contentId) {
+            const popup = document.getElementById('addToMultipleScreensPopup');
+            const fileNameElement = document.getElementById('fileName');
+            fileNameElement.textContent = fileName;
+            popup.dataset.contentId = data.contentId; // Store the contentId in the popup element
+            fetchUserScreens(); // Fetch the screens for the current user
+            popup.style.display = 'block';
+        } else {
+            console.error('Error fetching content ID:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching content ID:', error);
+    });
 }
 
 function hideAddToMultipleScreensPopup() {
@@ -263,11 +285,11 @@ function fetchUserScreens() {
             const statusClass = screen.online_status === 1 ? 'online' : 'offline';
 
             screenItem.innerHTML = `
-                <input type="checkbox" class="screen-checkbox" value="${screen.screen_id}">
+                <input type="checkbox" class="screen-checkbox" value="${screen.screen_id}" onclick="printContentAndScreenId('${screen.screen_id}')">
                 <img src="uploads/default-screen.png" alt="Screen">
                 <div>
                     <p>${screen.screen_name}</p>
-                    <p>Last seen ${screen.last_seen} days ago • ${screen.orientation} orientation</p>
+                    <p>Screen ID: ${screen.screen_id}</p>
                 </div>
                 <span class="status ${statusClass}">${statusText}</span>
             `;
@@ -281,9 +303,7 @@ function fetchUserScreens() {
 
 function applyToMultipleScreens() {
     const selectedScreens = Array.from(document.querySelectorAll('.screen-checkbox:checked')).map(cb => cb.value);
-    const addPosition = document.getElementById('addPosition').value;
-    const duration = document.getElementById('duration').value;
-    const fileName = document.getElementById('fileName').textContent;
+    const contentId = document.getElementById('addToMultipleScreensPopup').dataset.contentId;
 
     if (selectedScreens.length === 0) {
         alert('Please select at least one screen.');
@@ -296,26 +316,42 @@ function applyToMultipleScreens() {
         return;
     }
 
-    fetch('/api/add-to-multiple-screens', {
+    const requestBody = {
+        contentId,
+        selectedScreens
+    };
+
+    fetch('/api/add-to-playlists', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ screens: selectedScreens, addPosition, duration, fileName })
+        body: JSON.stringify(requestBody)
     })
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            alert('Content added to multiple screens successfully!');
+            alert('Content added to playlists successfully!');
             hideAddToMultipleScreensPopup();
         } else {
-            alert('Failed to add content to multiple screens.');
+            alert('Failed to add content to playlists.');
         }
     })
     .catch(error => {
-        console.error('Error adding content to multiple screens:', error);
+        console.error('Error adding content to playlists:', error);
     });
+}
+
+function printContentAndScreenId(screenId) {
+    const popup = document.getElementById('addToMultipleScreensPopup');
+    const contentId = popup.dataset.contentId; // Retrieve the contentId stored in the popup element
+    console.log(`Content ID: ${contentId}, Screen ID: ${screenId}`);
+}
+
+// When opening the popup from the thumbnail options menu
+function openAddToMultipleScreensPopup(fileName, contentId) {
+    addtoplalistFile(fileName, contentId);
 }
 
 function closeUploadPopup() {
@@ -492,43 +528,6 @@ document.getElementById('dragArea').addEventListener('drop', function(event) {
     uploadFiles(files);
 });
 
-/*
-function uploadFiles(files) {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-        formData.append('file', files[i]);
-    }
-    formData.append('folder', currentFolder);
-
-    fetch('/api/upload-file', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('File uploaded successfully');
-            closeUploadPopup();
-            fetchFiles();
-        } else {
-            alert('File upload failed');
-        }
-    })
-    .catch(error => {
-        console.error('Error uploading file:', error);
-        alert('Error uploading file');
-    });
-}
-*/
 function createFolder() {
     const folderName = document.getElementById('folderNameInput').value;
     fetch('/api/create-folder', {

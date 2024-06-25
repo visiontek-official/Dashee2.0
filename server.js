@@ -280,7 +280,7 @@ apiApp.use(bodyParser.json());
 
 // Middleware to log API requests and responses and verify tokens if required
 apiApp.use((req, res, next) => {
-    apiLog(`API request: ${req.method} ${req.url} - Body: ${JSON.stringify(req.body)}`);
+    console.log(`API request: ${req.method} ${req.url} - Body: ${JSON.stringify(req.body)}`);
     next();
 });
 
@@ -2119,17 +2119,134 @@ app.get('/api/search-screens', (req, res) => {
 });
 
 apiApp.post('/api/add-to-multiple-screens', verifyToken, (req, res) => {
-    const { screens, addPosition, duration, fileName } = req.body;
+    const { selectedScreens, addPosition, duration, fileName } = req.body;
     const userId = req.userId;
 
-    if (!screens || screens.length === 0) {
+    if (!selectedScreens || selectedScreens.length === 0) {
         return res.status(400).json({ success: false, message: 'No screens selected' });
     }
 
-    // Implement the logic to add the file to the selected screens
-    // ...
+    console.log('Adding content to multiple screens:', { selectedScreens, addPosition, duration, fileName, userId });
 
-    res.json({ success: true, message: 'Content added to multiple screens successfully' });
+    getContentDetailsByFileName(fileName, (err, content) => {
+        if (err || !content) {
+            console.error('Content not found:', err);
+            return res.status(500).json({ success: false, message: 'Content not found' });
+        }
+
+        let queries = selectedScreens.map(screenId => {
+            return new Promise((resolve, reject) => {
+                const query = `INSERT INTO playlists (screenId, contentId, sequenceNumber, displayDuration, userId) VALUES (?, ?, ?, ?, ?)`;
+                db.query(query, [screenId, content.id, addPosition, duration, userId], function(err) {
+                    if (err) {
+                        console.error('Error inserting into playlists:', err);
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        });
+
+        Promise.all(queries)
+            .then(() => {
+                console.log('Content successfully added to multiple screens');
+                res.json({ success: true, message: 'Content added to multiple screens successfully' });
+            })
+            .catch(err => {
+                console.error('Failed to add content to playlists:', err);
+                res.status(500).json({ success: false, message: 'Failed to add content to playlists', error: err });
+            });
+    });
+});
+
+function getContentDetailsByFileName(fileName, callback) {
+    const query = `SELECT * FROM content WHERE file_name = ?`;
+    db.query(query, [fileName], (err, row) => {
+        if (err) {
+            return callback(err);
+        }
+        callback(null, row[0]);
+    });
+}
+
+app.get('/api/file-id', (req, res) => {
+    const { fileName } = req.query;
+    const sql = 'SELECT id FROM content WHERE file_name = ?';
+    db.query(sql, [fileName], (err, results) => {
+        if (err) {
+            console.error('Error fetching content ID:', err);
+            return res.status(500).json({ success: false, message: 'Failed to fetch content ID' });
+        }
+        if (results.length > 0) {
+            res.json({ success: true, contentId: results[0].id });
+        } else {
+            res.status(404).json({ success: false, message: 'Content not found' });
+        }
+    });
+});
+
+app.post('/api/add-to-playlists', verifyToken, (req, res) => {
+    const { contentId, selectedScreens } = req.body;
+    const userId = req.userId;
+
+    if (!contentId || !selectedScreens || selectedScreens.length === 0) {
+        return res.status(400).json({ success: false, message: 'Invalid input' });
+    }
+
+    const values = selectedScreens.map(screenId => [screenId, contentId, userId]);
+
+    const sql = 'INSERT INTO playlists (screenId, contentId, userId) VALUES ?';
+    db.query(sql, [values], (err, results) => {
+        if (err) {
+            console.error('Error adding to playlists:', err);
+            return res.status(500).json({ success: false, message: 'Failed to add to playlists' });
+        }
+        res.json({ success: true, message: 'Content added to playlists successfully' });
+    });
+});
+
+app.get('/api/screen-playlists/:screenId', verifyToken, (req, res) => {
+    const { screenId } = req.params;
+
+    const sql = 'SELECT * FROM playlists WHERE screenId = ?';
+    db.query(sql, [screenId], (err, results) => {
+        if (err) {
+            console.error('Error fetching playlists:', err);
+            return res.status(500).json({ success: false, message: 'Failed to fetch playlists' });
+        }
+        res.json({ success: true, playlists: results });
+    });
+});
+
+app.get('/api/content-details/:contentId', verifyToken, (req, res) => {
+    const { contentId } = req.params;
+
+    const sql = 'SELECT file_path, file_name, file_type, file_orientation FROM content WHERE id = ?';
+    db.query(sql, [contentId], (err, results) => {
+        if (err) {
+            console.error('Error fetching content details:', err);
+            return res.status(500).json({ success: false, message: 'Failed to fetch content details' });
+        }
+        if (results.length > 0) {
+            res.json({ success: true, content: results[0] });
+        } else {
+            res.status(404).json({ success: false, message: 'Content not found' });
+        }
+    });
+});
+
+app.delete('/api/delete-playlist-item/:playlistId', verifyToken, (req, res) => {
+    const { playlistId } = req.params;
+
+    const sql = 'DELETE FROM playlists WHERE id = ?';
+    db.query(sql, [playlistId], (err, results) => {
+        if (err) {
+            console.error('Error deleting playlist item:', err);
+            return res.status(500).json({ success: false, message: 'Failed to delete playlist item' });
+        }
+        res.json({ success: true, message: 'Playlist item deleted successfully' });
+    });
 });
 
 // Setup Swagger at the end to avoid interference

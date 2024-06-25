@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (screenId) {
         console.log('Calling updateScreenDetails with screenId:', screenId);
         updateScreenDetails(screenId);
+        fetchPlaylists(screenId);
     } else {
         console.error('No screen ID found in the URL');
     }
@@ -96,6 +97,182 @@ function updateScreenDetails(screenId) {
     });
 }
 
+function fetchPlaylists(screenId) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch(`/api/screen-playlists/${screenId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const playlistPromises = data.playlists.map(playlist => fetchContentDetails(playlist.contentId));
+            Promise.all(playlistPromises)
+                .then(contents => {
+                    const detailedPlaylists = data.playlists.map((playlist, index) => ({
+                        ...playlist,
+                        contentDetails: contents[index]
+                    }));
+                    displayPlaylists(detailedPlaylists);
+                });
+        } else {
+            console.error('Failed to fetch playlists:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching playlists:', error);
+    });
+}
+
+function fetchContentDetails(contentId) {
+    const token = localStorage.getItem('token');
+    return fetch(`/api/content-details/${contentId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            return data.content;
+        } else {
+            console.error('Failed to fetch content details:', data.message);
+            return null;
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching content details:', error);
+        return null;
+    });
+}
+
+function displayPlaylists(playlists) {
+    const playlistContent = document.querySelector('.playlist-content');
+    playlistContent.innerHTML = playlists.map(playlist => {
+        const { contentDetails } = playlist;
+        if (!contentDetails) return '';
+
+        return `
+            <div class="playlist-item">
+                <img src="${contentDetails.file_path}" alt="${contentDetails.file_name}">
+                <div class="playlist-info">
+                    <h3>${contentDetails.file_name}</h3>
+                    <p>${contentDetails.file_type} • ${contentDetails.file_orientation} • ${playlist.last_seen} days ago</p>
+                </div>
+                <div class="playlist-duration">
+                    <span>DURATION</span>
+                    <div>${playlist.duration} Secs</div>
+                </div>
+                <div class="options">
+                    <i class="fas fa-ellipsis-h" onclick="togglePlaylistOptionsMenu(event, '${playlist.id}')"></i>
+                    <div class="dropdown-options-menu" id="playlist-options-menu-${playlist.id}" style="display:none;">
+                        <a href="#" onclick="scheduleDisplayTimes('${playlist.id}')">Schedule display times</a>
+                        <a href="#" onclick="setCustomTransition('${playlist.id}')">Set a custom transition</a>
+                        <a href="#" onclick="moveItemUp('${playlist.id}')">Move item up</a>
+                        <a href="#" onclick="moveItemDown('${playlist.id}')">Move item down</a>
+                        <a href="#" onclick="duplicateItem('${playlist.id}')">Duplicate item</a>
+                        <a href="#" onclick="removeFromPlaylist('${playlist.id}')">Remove from playlist</a>
+                    </div>
+                </div>
+                <div class="delete-option">
+                    <button onclick="confirmDelete('${playlist.id}')">Delete</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function confirmDelete(playlistId) {
+    if (confirm('Are you sure you want to delete this content from the playlist?')) {
+        deleteFromPlaylist(playlistId);
+    }
+}
+
+function deleteFromPlaylist(playlistId) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    fetch(`/api/delete-playlist-item/${playlistId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Content deleted from the playlist successfully.');
+            const screenId = getScreenIdFromURL();
+            fetchPlaylists(screenId); // Refresh the playlist
+        } else {
+            alert('Failed to delete content from the playlist.');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting content from playlist:', error);
+        alert('An error occurred while deleting the content.');
+    });
+}
+
+function togglePlaylistOptionsMenu(event, playlistId) {
+    event.stopPropagation(); // Prevents the thumbnail click event
+    console.log(`Toggling dropdown menu for playlist item: ${playlistId}`); // Debug log
+    const dropdownMenu = document.getElementById(`playlist-options-menu-${playlistId}`);
+
+    // Close all other dropdown menus
+    const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+    dropdownMenus.forEach(menu => {
+        if (menu !== dropdownMenu) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // Toggle the current dropdown menu
+    console.log(`Before toggle: ${dropdownMenu.style.display}`);
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    console.log(`After toggle: ${dropdownMenu.style.display}`);
+
+    // Stop propagation to prevent the document click listener from closing it immediately
+    dropdownMenu.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+
+    console.log(`Dropdown menu display style: ${dropdownMenu.style.display}`); // Debug log
+}
+
+function scheduleDisplayTimes(playlistId) {
+    alert(`Schedule display times for playlist item: ${playlistId}`);
+    // Implement your logic here
+}
+
+function setCustomTransition(playlistId) {
+    alert(`Set a custom transition for playlist item: ${playlistId}`);
+    // Implement your logic here
+}
+
+function moveItemUp(playlistId) {
+    alert(`Move item up for playlist item: ${playlistId}`);
+    // Implement your logic here
+}
+
+function moveItemDown(playlistId) {
+    alert(`Move item down for playlist item: ${playlistId}`);
+    // Implement your logic here
+}
+
+function duplicateItem(playlistId) {
+    alert(`Duplicate item for playlist item: ${playlistId}`);
+    // Implement your logic here
+}
+
+function removeFromPlaylist(playlistId) {
+    alert(`Remove from playlist for item: ${playlistId}`);
+    // Implement your logic here
+}
+
 function togglePlaylistOptionsMenu() {
     const menu = document.getElementById('playlist-options-menu');
     const icon = document.querySelector('.fas.fa-ellipsis-h');
@@ -111,7 +288,6 @@ function togglePlaylistOptionsMenu() {
     menu.style.top = `${rect.bottom + window.scrollY}px`;
     menu.style.left = `${rect.left + window.scrollX}px`;
 }
-
 
 function setPlaylistTransitions() {
     alert('Set Playlist Transitions');
@@ -201,12 +377,6 @@ function toggleDropdown() {
 function logout() {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
-}
-
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'index.html';
-    console.log('User logged out of Screen-Detail page due to session that expired');
 }
 
 window.onclick = function(event) {
