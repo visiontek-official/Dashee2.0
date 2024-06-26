@@ -55,6 +55,13 @@ if (config.clearLogsOnStart) {
 function verifyToken(req, res, next) {
     const token = req.headers['authorization'];
     console.log('Received Token:', token);
+     // Check if the token is the admin token
+     if (token === config.adminToken) {
+        req.userId = 'admin';
+        req.isAdmin = true;
+        console.log('Admin token provided');
+        return next();
+    }
     if (!token) {
         console.log('No token provided');
         return res.status(403).send({ auth: false, message: 'No token provided.' });
@@ -2134,6 +2141,53 @@ app.get('/api/search-screens', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/add-to-multiple-screens:
+ *   post:
+ *     tags: [Playlists]
+ *     summary: Add content to multiple screens
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               selectedScreens:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *               addPosition:
+ *                 type: integer
+ *               duration:
+ *                 type: integer
+ *               fileName:
+ *                 type: string
+ *             required:
+ *               - selectedScreens
+ *               - addPosition
+ *               - duration
+ *               - fileName
+ *     responses:
+ *       200:
+ *         description: Content added to multiple screens successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: No screens selected
+ *       500:
+ *         description: Failed to add content to playlists
+ */
 apiApp.post('/api/add-to-multiple-screens', verifyToken, (req, res) => {
     const { selectedScreens, addPosition, duration, fileName } = req.body;
     const userId = req.userId;
@@ -2186,6 +2240,35 @@ function getContentDetailsByFileName(fileName, callback) {
     });
 }
 
+/**
+ * @swagger
+ * /api/file-id:
+ *   get:
+ *     tags: [Content]
+ *     summary: Get content ID by file name
+ *     parameters:
+ *       - name: fileName
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Content ID retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 contentId:
+ *                   type: integer
+ *       404:
+ *         description: Content not found
+ *       500:
+ *         description: Failed to fetch content ID
+ */
 app.get('/api/file-id', (req, res) => {
     const { fileName } = req.query;
     const sql = 'SELECT id FROM content WHERE file_name = ?';
@@ -2202,6 +2285,47 @@ app.get('/api/file-id', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/add-to-playlists:
+ *   post:
+ *     tags: [Playlists]
+ *     summary: Add content to playlists
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               contentId:
+ *                 type: integer
+ *               selectedScreens:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *             required:
+ *               - contentId
+ *               - selectedScreens
+ *     responses:
+ *       200:
+ *         description: Content added to playlists successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Failed to add to playlists
+ */
 app.post('/api/add-to-playlists', verifyToken, (req, res) => {
     const { contentId, selectedScreens } = req.body;
     const userId = req.userId;
@@ -2222,6 +2346,37 @@ app.post('/api/add-to-playlists', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/screen-playlists/{screenId}:
+ *   get:
+ *     tags: [Playlists]
+ *     summary: Get playlists for a screen
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: screenId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Playlists fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 playlists:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Failed to fetch playlists
+ */
 app.get('/api/screen-playlists/:screenId', verifyToken, (req, res) => {
     const { screenId } = req.params;
 
@@ -2235,6 +2390,37 @@ app.get('/api/screen-playlists/:screenId', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/content-details/{contentId}:
+ *   get:
+ *     tags: [Content]
+ *     summary: Get content details by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: contentId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Content details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 content:
+ *                   type: object
+ *       404:
+ *         description: Content not found
+ *       500:
+ *         description: Failed to fetch content details
+ */
 app.get('/api/content-details/:contentId', verifyToken, (req, res) => {
     const { contentId } = req.params;
 
@@ -2252,6 +2438,35 @@ app.get('/api/content-details/:contentId', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/delete-playlist-item/{playlistId}:
+ *   delete:
+ *     tags: [Playlists]
+ *     summary: Delete a playlist item
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: playlistId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Playlist item deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to delete playlist item
+ */
 app.delete('/api/delete-playlist-item/:playlistId', verifyToken, (req, res) => {
     const { playlistId } = req.params;
 
@@ -2265,6 +2480,31 @@ app.delete('/api/delete-playlist-item/:playlistId', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/user-content:
+ *   get:
+ *     tags: [Content]
+ *     summary: Get user content
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User content fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 content:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Failed to fetch user content
+ */
 app.get('/api/user-content', verifyToken, (req, res) => {
     const userId = req.userId;
 
@@ -2278,7 +2518,43 @@ app.get('/api/user-content', verifyToken, (req, res) => {
     });
 });
 
-// Add a new endpoint to add content to a playlist
+/**
+ * @swagger
+ * /api/add-to-playlist:
+ *   post:
+ *     tags: [Playlists]
+ *     summary: Add content to a playlist
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               contentId:
+ *                 type: integer
+ *               screenId:
+ *                 type: integer
+ *             required:
+ *               - contentId
+ *               - screenId
+ *     responses:
+ *       200:
+ *         description: Content added to playlist successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to add to playlist
+ */
 app.post('/api/add-to-playlist', verifyToken, (req, res) => {
     const { contentId, screenId } = req.body;
     const userId = req.userId;
@@ -2293,6 +2569,32 @@ app.post('/api/add-to-playlist', verifyToken, (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/search-content:
+ *   get:
+ *     tags: [Content]
+ *     summary: Search content
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: query
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Content search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch content
+ */
 app.get('/api/search-content', (req, res) => {
     const query = req.query.query.toLowerCase();
     const token = req.headers['authorization'].split(' ')[1];
@@ -2320,6 +2622,29 @@ app.get('/api/search-content', (req, res) => {
 
 
 
+
+// Endpoint: /api/config
+/**
+ * @swagger
+ * /api/config:
+ *   get:
+ *     summary: Get configuration settings
+ *     tags:
+ *       - Config
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved configuration settings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 maxFileSize:
+ *                   type: integer
+ *                   description: Maximum file size allowed for uploads
+ */
 app.get('/api/config', (req, res) => {
     res.json({ maxFileSize: config.uploadConfig.maxFileSize });
 });

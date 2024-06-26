@@ -45,6 +45,8 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 
+
+
 module.exports = (app) => {
     app.use('/api', (req, res, next) => {
         logSwagger(`Swagger UI accessed: ${req.method} ${req.url}`);

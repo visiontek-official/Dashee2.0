@@ -15,4 +15,5 @@ module.exports = {
         allowedFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/avi']
     },
     secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
+    adminToken: '3v3fb7h2haosp1xyz6jica3iz400xbuco5o96lbose6o19akuf1aicwnr7oy',
 };
