@@ -72,10 +72,23 @@
     text-decoration: underline;
 }
 
-.search-bar {
-    padding: 10px;
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-container input {
+    padding: 5px 10px;
+    font-size: 14px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 4px;
+}
+
+.search-container button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 5px;
 }
 
 .content-section {

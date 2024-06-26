@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const fileName = urlParams.get('file');
     loadFileDetails(fileName);
-    updateBreadcrumb();
+    updateBreadcrumb(fileName);
 
     const userMenu = document.querySelector('.user-menu');
     const dropdownToggle = document.querySelector('.dropdown-toggle');
@@ -22,18 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-function updateBreadcrumb() {
-    const breadcrumb = document.getElementById('breadcrumb');
-    const currentPage = document.getElementById('fileName').textContent;
-
-    const breadcrumbHtml = `
-        <a href="content.html">Content</a> / 
-        <span>${currentPage}</span>
-    `;
-
-    breadcrumb.innerHTML = breadcrumbHtml;
-}
 
 function updateBreadcrumb(fileName) {
     console.log('Updating breadcrumb with file name:', fileName);
@@ -54,12 +42,14 @@ function toggleDropdown() {
 
 function logout() {
     console.log('User logged out');
+    localStorage.removeItem('token');
     window.location.href = 'index.html';
 }
 
 function loadUserDetails() {
     const token = localStorage.getItem('token');
     if (!token) {
+        console.error('No token provided, redirecting to login');
         window.location.href = 'index.html';
         return;
     }
@@ -69,7 +59,12 @@ function loadUserDetails() {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch user details');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.error) {
             throw new Error(data.error);
@@ -90,6 +85,7 @@ function loadUserDetails() {
 function loadFileDetails(fileName) {
     const token = localStorage.getItem('token');
     if (!token) {
+        console.error('No token provided, redirecting to login');
         window.location.href = 'index.html';
         return;
     }
@@ -99,20 +95,59 @@ function loadFileDetails(fileName) {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch file details');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.error) {
             throw new Error(data.error);
         }
 
+        // Log the entire response data to inspect its structure
+        console.log('API response data:', data);
+
+        // Check for the presence of file_type and file_path
+        console.log('Keys in data:', Object.keys(data));
+
+        // Log content type and file path
+        console.log('Content type:', data.file_type);
+        console.log('File path:', data.file_path);
+
         // Populate fields with fetched data
         document.getElementById('fileName').textContent = data.file_name;
-        document.getElementById('fileImage').src = data.file_path;
+
+        const fileImageContainer = document.getElementById('fileImageContainer');
+        fileImageContainer.innerHTML = ''; // Clear existing content
+
+        // Check if the file is a video
+        if (data.file_type && data.file_type.startsWith('video/')) {
+            const videoElement = document.createElement('video');
+            videoElement.controls = true;
+            videoElement.classList.add('content-video');
+            videoElement.innerHTML = `
+                <source src="${data.file_path}" type="${data.file_type}">
+                Your browser does not support the video tag.
+            `;
+            fileImageContainer.appendChild(videoElement);
+        } else {
+            const imageElement = document.createElement('img');
+            imageElement.id = 'fileImage';
+            imageElement.src = data.file_path;
+            imageElement.alt = 'File Image';
+            imageElement.classList.add('content-image');
+            fileImageContainer.appendChild(imageElement);
+        }
+
         document.getElementById('title').value = data.file_name.split('.').slice(0, -1).join('.');
         document.getElementById('description').value = data.file_description;
         document.getElementById('tags').value = data.file_tags;
-        document.getElementById('schedule-start').value = data.file_schedule_start;
-        document.getElementById('schedule-end').value = data.file_schedule_end;
+
+        // Fix date format issue
+        document.getElementById('schedule-start').value = data.file_schedule_start ? data.file_schedule_start.replace(' ', 'T') : '';
+        document.getElementById('schedule-end').value = data.file_schedule_end ? data.file_schedule_end.replace(' ', 'T') : '';
 
         // Calculate "Updated X days ago"
         const uploadedDate = new Date(data.upload_date);

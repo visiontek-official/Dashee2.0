@@ -1044,42 +1044,59 @@ app.get('/getUserDetails', (req, res) => {
  *       500:
  *         description: Error uploading file
  */
-app.post('/api/upload-file', upload.single('file'), (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-
-    const userId = req.session.userId;
-    const originalName = req.file.originalname;
-    const userDir = path.join(__dirname, 'uploads', userId.toString());
-
-    if (!fs.existsSync(userDir)) {
-        fs.mkdirSync(userDir, { recursive: true });
-    }
-
-    const filePath = path.join(userDir, originalName);
-    const relativePath = `uploads/${userId.toString()}/${originalName}`;
-    const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
-    const fileSizeInKB = Math.round(req.file.size / 1024); // Convert bytes to KB
-
-    fs.rename(req.file.path, filePath, (err) => {
+app.post('/api/upload-file', (req, res) => {
+    upload.single('file')(req, res, function (err) {
         if (err) {
-            console.log('File move failed: ' + err);
-            return res.status(500).json({ success: false, message: 'File move failed' });
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File too large. Maximum size is ${config.uploadConfig.maxFileSize / (1024 * 1024)}MB.`
+                    });
+                }
+                return res.status(400).json({ success: false, message: err.message });
+            } else if (err) {
+                return res.status(400).json({ success: false, message: err.message });
+            }
         }
 
-        const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type, file_size) VALUES (?, ?, ?, ?, ?)';
-        db.query(sql, [userId, originalName, urlPath, req.file.mimetype, fileSizeInKB], (err, result) => {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const userId = req.session.userId;
+        const originalName = req.file.originalname;
+        const userDir = path.join(__dirname, 'uploads', userId.toString());
+
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+
+        const filePath = path.join(userDir, originalName);
+        const relativePath = `uploads/${userId.toString()}/${originalName}`;
+        const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
+        const fileSizeInKB = Math.round(req.file.size / 1024); // Convert bytes to KB
+
+        fs.rename(req.file.path, filePath, (err) => {
             if (err) {
-                console.log('File save to database failed: ' + err);
-                return res.status(500).json({ success: false, message: 'File save to database failed' });
+                console.log('File move failed: ' + err);
+                return res.status(500).json({ success: false, message: 'File move failed' });
             }
 
-            console.log(`File uploaded and saved: ${filePath}`);
-            res.json({ success: true, filePath: urlPath });
+            const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type, file_size) VALUES (?, ?, ?, ?, ?)';
+            db.query(sql, [userId, originalName, urlPath, req.file.mimetype, fileSizeInKB], (err, result) => {
+                if (err) {
+                    console.log('File save to database failed: ' + err);
+                    return res.status(500).json({ success: false, message: 'File save to database failed' });
+                }
+
+                console.log(`File uploaded and saved: ${filePath}`);
+                res.json({ success: true, filePath: urlPath });
+            });
         });
     });
 });
+
 
 /*
 app.post('/upload-file', upload.single('file'), (req, res) => {
@@ -1253,8 +1270,7 @@ app.get('/api/file-details', (req, res) => {
     }
 
     const sql = `
-        SELECT file_name, file_description, file_path, file_tags, file_schedule_start, file_schedule_end, upload_date, file_size, file_orientation, file_dimensions
-        FROM content
+        SELECT * FROM content
         WHERE file_name = ? AND user_id = ?`;
     db.query(sql, [file, userId], (err, results) => {
         if (err) {
@@ -1509,7 +1525,7 @@ app.get('/getUsers', (req, res) => {
         return res.status(401).json({ error: 'Not authenticated or not authorized' });
     }
 
-    const sql = 'SELECT id, firstname, lastname, email, role, enabled, created, updated, logged_in FROM users';
+    const sql = 'SELECT * FROM users';
     db.query(sql, (err, results) => {
         if (err) {
             log('Error fetching users: ' + err, true);
@@ -1631,7 +1647,7 @@ app.post('/api/update-user', upload.single('profilePic'), verifyToken, (req, res
  */
 app.get('/api/user/:id', (req, res) => {
     const userId = req.params.id;
-    const sql = 'SELECT id, firstname, lastname, email, role, enabled, profile_pic FROM users WHERE id = ?';
+    const sql = 'SELECT * FROM users WHERE id = ?';
     db.query(sql, [userId], (err, results) => {
         if (err) {
             console.error('Failed to fetch user details:', err);
@@ -2006,7 +2022,7 @@ app.post('/api/delete-screen', verifyToken, (req, res) => {
  */
 app.get('/api/screen-details/:id', (req, res) => {
     const screenId = req.params.id;
-    const query = 'SELECT screen_id, screen_name, pairing_code, user_id, enabled, online_status, last_connected, created, updated FROM screens WHERE screen_id = ?';
+    const query = 'SELECT * FROM screens WHERE screen_id = ?';
     
     db.query(query, [screenId], (err, result) => {
         if (err) {
@@ -2275,6 +2291,37 @@ app.post('/api/add-to-playlist', verifyToken, (req, res) => {
         }
         res.json({ success: true, message: 'Content added to playlist successfully' });
     });
+});
+
+app.get('/api/search-content', (req, res) => {
+    const query = req.query.query.toLowerCase();
+    const token = req.headers['authorization'].split(' ')[1];
+    let userId;
+
+    try {
+        const decoded = jwt.verify(token, config.secretKey); // Use the secret key from the config
+        userId = decoded.userId;
+    } catch (err) {
+        console.error('Invalid token:', err);
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const sql = `SELECT * FROM content WHERE file_name LIKE ? AND user_id = ?`;
+    const searchQuery = `%${query}%`;
+    
+    db.query(sql, [searchQuery, userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching content:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.json(results);
+    });
+});
+
+
+
+app.get('/api/config', (req, res) => {
+    res.json({ maxFileSize: config.uploadConfig.maxFileSize });
 });
 
 // Setup Swagger at the end to avoid interference
