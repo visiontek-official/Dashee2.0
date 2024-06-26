@@ -695,29 +695,22 @@ apiApp.get('/api/user-data', verifyToken, (req, res) => {
  *         description: Unauthorized
  */
 app.post('/api/get-files', (req, res) => {
-    if (!req.session.userId) {
+    const userId = req.session.userId; // Get userId from session
+    if (!userId) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const userId = req.session.userId;
-
-    const sql = 'SELECT * FROM content WHERE user_id = ?';
+    const sql = 'SELECT id, file_name AS name, file_path AS path, file_type AS type, upload_date FROM content WHERE user_id = ?';
     db.query(sql, [userId], (err, results) => {
         if (err) {
             console.error('Error fetching files:', err);
             return res.status(500).json({ error: 'Failed to fetch files' });
         }
 
-        const files = results.map(file => ({
-            name: file.file_name,
-            path: file.file_path,
-            type: file.file_type,
-            uploadDate: file.upload_date
-        }));
-
-        res.json(files);
+        res.json(results);
     });
 });
+
 
 //**********************************API END POINTS**********************************
 /**
@@ -1464,24 +1457,47 @@ app.post('/api/delete-file', (req, res) => {
     const relativePath = `uploads/${userId.toString()}/${currentFolder ? currentFolder + '/' : ''}${fileName}`;
     const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
 
-    fs.rm(filePath, { recursive: true, force: true }, (err) => {
+    console.log(`Attempting to delete file: ${filePath}`);
+    console.log(`File Name: ${fileName}, User ID: ${userId}`);
+
+    // First, fetch the contentid from the database
+    const fetchIdSql = 'SELECT id FROM content WHERE file_name = ? AND user_id = ?';
+    db.query(fetchIdSql, [fileName, userId], (err, results) => {
         if (err) {
-            log('File delete failed: ' + err, true);
-            return res.status(500).json({ success: false, message: 'File delete failed' });
+            console.error('Error fetching content ID:', err);
+            return res.status(500).json({ success: false, message: 'Error fetching content ID' });
         }
 
-        // Delete from the database
-        const sql = 'DELETE FROM content WHERE file_name = ? AND user_id = ?';
-        db.query(sql, [fileName, userId], (err, result) => {
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Content not found' });
+        }
+
+        const contentid = results[0].id;
+
+        console.log(`Content ID: ${contentid}`);
+
+        fs.rm(filePath, { recursive: true, force: true }, (err) => {
             if (err) {
-                log('Database deletion failed: ' + err, true);
-                return res.status(500).json({ success: false, message: 'Database deletion failed' });
+                console.error('File delete failed:', err);
+                return res.status(500).json({ success: false, message: 'File delete failed' });
             }
-            log(`File deleted: ${filePath}`);
-            res.json({ success: true });
+
+            console.log(`File deleted from filesystem: ${filePath}`);
+
+            // Delete from the database
+            const deleteSql = 'DELETE FROM content WHERE id = ? AND file_name = ? AND user_id = ?';
+            db.query(deleteSql, [contentid, fileName, userId], (err, result) => {
+                if (err) {
+                    console.error('Database deletion failed:', err);
+                    return res.status(500).json({ success: false, message: 'Database deletion failed' });
+                }
+                console.log(`Database record deleted for file: ${fileName}`);
+                res.json({ success: true });
+            });
         });
     });
 });
+
 
 /**
  * @swagger
@@ -2619,6 +2635,63 @@ app.get('/api/search-content', (req, res) => {
         res.json(results);
     });
 });
+
+app.post('/api/remove-from-all-playlists', (req, res) => {
+    const { contentid } = req.body;
+    const userId = req.session.userId; // Get userId from session
+
+    if (!userId) {
+        console.error('Not authenticated: No user ID in session');
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!contentid) {
+        console.error('Bad request: Missing contentid');
+        return res.status(400).json({ error: 'Missing contentid' });
+    }
+
+    console.log(`Attempting to remove all playlists for content ID: ${contentid} for user ID ${userId}`);
+
+    // Select the records to be deleted from the playlists table
+    const selectSql = `
+        SELECT p.id AS playlistId, p.userId, p.contentId, c.file_name
+        FROM playlists p
+        JOIN content c ON p.contentId = c.id
+        WHERE p.userId = ? AND p.contentId = ?
+    `;
+    db.query(selectSql, [userId, contentid], (err, results) => {
+        if (err) {
+            console.error('Error selecting from playlists:', err);
+            return res.status(500).json({ error: 'Failed to select from playlists' });
+        }
+
+        if (results.length === 0) {
+            console.log(`No playlists found for content ID ${contentid} and user ID ${userId}`);
+            return res.status(404).json({ error: 'No playlists found to delete' });
+        }
+
+        console.log(`Playlists to be deleted:`, results);
+
+        // Proceed to delete the records from the playlists table
+        const deleteSql = 'DELETE FROM playlists WHERE userId = ? AND contentId = ?';
+        db.query(deleteSql, [userId, contentid], (err, result) => {
+            if (err) {
+                console.error('Error deleting from playlists:', err);
+                return res.status(500).json({ error: 'Failed to delete from playlists' });
+            }
+
+            console.log(`Deleted ${result.affectedRows} record(s) from playlists for content ID ${contentid} and user ID ${userId}`);
+            res.json({ success: true });
+        });
+    });
+});
+
+
+
+
+
+
+
 
 
 

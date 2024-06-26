@@ -145,20 +145,20 @@ function loadFileDetails(fileName) {
         document.getElementById('description').value = data.file_description;
         document.getElementById('tags').value = data.file_tags;
 
-        // Fix date format issue
-        document.getElementById('schedule-start').value = data.file_schedule_start ? data.file_schedule_start.replace(' ', 'T') : '';
-        document.getElementById('schedule-end').value = data.file_schedule_end ? data.file_schedule_end.replace(' ', 'T') : '';
+         // Fix date format issue
+         document.getElementById('schedule-start').value = formatDateTime(data.file_schedule_start);
+         document.getElementById('schedule-end').value = formatDateTime(data.file_schedule_end); 
 
         // Calculate "Updated X days ago"
-        const uploadedDate = new Date(data.upload_date);
+        const uploadedDate = new Date(data.upload_date.split(' ')[0]); // Strip time
         const now = new Date();
         const daysAgo = Math.floor((now - uploadedDate) / (1000 * 60 * 60 * 24));
         document.getElementById('uploaded').textContent = `Updated ${daysAgo} days ago`;
 
         // Display file size appropriately
-        let displaySize = `${data.file_size} KB`;
+        let displaySize = `${data.file_size}`;
         if (data.file_size > 1000) {
-            displaySize = `${(data.file_size / 1000).toFixed(2)} MB`;
+            displaySize = `${(data.file_size / 1000).toFixed(2)}`;
         }
         document.getElementById('size').textContent = displaySize;
 
@@ -172,6 +172,12 @@ function loadFileDetails(fileName) {
         console.error('Error fetching file details:', error);
         window.location.href = 'index.html';
     });
+}
+
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const dateTime = new Date(dateTimeString.replace(' ', 'T'));
+    return dateTime.toISOString().slice(0, 16);
 }
 
 document.getElementById('saveChanges').addEventListener('click', () => {
