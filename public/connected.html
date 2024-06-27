@@ -37,55 +37,6 @@
     <h1>Connected to VisionTEK</h1>
     <p>Please continue on your dashboard to add content!</p>
     <div id="content-container"></div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const pairingCode = urlParams.get('pairingCode');
-
-            if (!pairingCode) {
-                alert('Pairing code is missing in the URL');
-                return;
-            }
-
-            const ws = new WebSocket(`ws://visiontek.ddns.net:8100/?pairingCode=${pairingCode}`);
-
-            ws.onmessage = (event) => {
-                const message = JSON.parse(event.data);
-                if (message.type === 'playlistUpdate') {
-                    console.log('Content found:', message.contentUrl);
-                    playContent(message.contentUrl, message.contentType);
-                }
-            };
-
-            ws.onclose = () => {
-                console.log('WebSocket connection closed');
-            };
-
-            setTimeout(() => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.close();
-                }
-            }, 60000); // Close WebSocket after 60 seconds
-
-            function playContent(contentUrl, contentType) {
-                const container = document.getElementById('content-container');
-                container.innerHTML = '';
-
-                if (contentType.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = contentUrl;
-                    container.appendChild(img);
-                } else if (contentType.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.src = contentUrl;
-                    video.autoplay = true;
-                    video.loop = true;
-                    container.appendChild(video);
-                }
-
-                container.style.display = 'block';
-            }
-        });
-    </script>
+    <script src="connected.js"></script>
 </body>
 </html>

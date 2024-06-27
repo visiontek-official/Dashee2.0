@@ -2853,10 +2853,58 @@ app.get('/connected', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'connected.html'));
 });
 
+// Add this endpoint to your server.js
 
+app.get('/api/playlist/:pairingCode', (req, res) => {
+    const { pairingCode } = req.params;
+    const sql = `
+        SELECT c.file_path, c.file_type
+        FROM playlists p
+        JOIN content c ON p.contentId = c.id
+        JOIN screens s ON p.screenid = s.screen_id
+        WHERE s.pairing_code = ?
+        ORDER BY p.sequenceNumber ASC
+    `;
 
+    db.query(sql, [pairingCode], (err, results) => {
+        if (err) {
+            console.error('Error fetching playlist:', err);
+            return res.status(500).json({ error: 'Failed to fetch playlist' });
+        }
+        res.json({ success: true, playlist: results });
+    });
+});
 
+// Add this to your WebSocket handling in server.js
+const updateClientsWithPlaylist = (pairingCode) => {
+    const sql = `
+        SELECT c.file_path, c.file_type
+        FROM playlists p
+        JOIN content c ON p.contentId = c.id
+        JOIN screens s ON p.screenid = s.screen_id
+        WHERE s.pairing_code = ?
+        ORDER BY p.sequenceNumber ASC
+    `;
 
+    db.query(sql, [pairingCode], (err, results) => {
+        if (err) {
+            console.error('Error fetching playlist for WebSocket update:', err);
+            return;
+        }
+
+        console.log(`Sending playlist update for pairing code ${pairingCode}:`, results);
+
+        const message = JSON.stringify({
+            type: 'playlistUpdate',
+            playlist: results
+        });
+        wss.clients.forEach(client => {
+            if (client.pairingCode === pairingCode && client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+    });
+};
 
 
 
