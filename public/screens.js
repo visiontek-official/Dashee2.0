@@ -53,23 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.getElementById('pairing-code-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const pairingCode = document.getElementById('pairing-code-input').value;
-        const response = await fetch('/api/validate-pairing-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pairingCode })
+    const pairingCodeForm = document.getElementById('pairing-code-form');
+    if (pairingCodeForm) {
+        pairingCodeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pairingCode = document.getElementById('pairing-code-input').value;
+            const response = await fetch('/api/validate-pairing-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pairingCode })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Pairing successful!');
+                // Redirect to the connected page with screenId and screenName in the URL
+                const screenId = data.screenId; // Assuming this is returned from the API
+                const screenName = data.screenName; // Assuming this is returned from the API
+                window.location.href = `connected.html?screenId=${screenId}&screenName=${screenName}`;
+            } else {
+                alert('Invalid or expired pairing code.');
+            }
         });
-        const data = await response.json();
-        if (data.success) {
-            alert('Pairing successful!');
-            // Redirect or update UI accordingly
-        } else {
-            alert('Invalid or expired pairing code.');
-        }
-    });
-    
+}       
 });
 
 
