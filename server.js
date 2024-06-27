@@ -21,6 +21,14 @@ const archiveDir = path.join(logDir, 'archive');
 
 const swaggerSetup = require('./swagger');
 
+//Web socket for live communication between server and client
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8100 });
+
+// Map to store pairing code to WebSocket connection and last activity timestamp
+const pairingCodeToWsMap = new Map();
+const lastActivityMap = new Map();
+
 // Helper function to generate token
 const generateToken = (userId) => {
     return jwt.sign({ userId }, config.secretKey, { expiresIn: '1h' });
@@ -1859,10 +1867,29 @@ app.post('/api/add-screen', verifyToken, (req, res) => {
         if (err) {
             return res.status(500).send({ message: 'Error adding screen', error: err });
         }
-        // Redirect to the pairing page
-        res.status(200).send({ success: true, message: 'Screen added successfully', redirectTo: '/pairing.html' });
+
+        // Notify pairing success
+        notifyPairingSuccess(pairing_code);
+
+        res.status(200).send({ success: true, message: 'Screen added successfully' });
     });
 });
+
+// Periodic task to check and update online status
+setInterval(() => {
+    const now = Date.now();
+    lastActivityMap.forEach((timestamp, pairingCode) => {
+        if (now - timestamp > 60000) { // 60 seconds threshold for inactivity
+            const ws = pairingCodeToWsMap.get(pairingCode);
+            if (ws) {
+                ws.terminate(); // Close the WebSocket connection
+                pairingCodeToWsMap.delete(pairingCode);
+                lastActivityMap.delete(pairingCode);
+                updateOnlineStatus(pairingCode, 0); // Set online status to 0 (offline)
+            }
+        }
+    });
+}, 10000); // Check every 10 seconds
 
 /**
  * @swagger
@@ -2707,6 +2734,91 @@ app.get('/api/check-pairing-status', (req, res) => {
     res.json({ paired });
 });
 
+// Endpoint to get content for paired screen
+app.get('/api/get-content', (req, res) => {
+    const { pairingCode } = req.query;
+
+    const query = `
+        SELECT c.file_path, c.file_type
+        FROM playlists p
+        JOIN content c ON p.contentId = c.id
+        JOIN screens s ON p.screenid = s.screen_id
+        WHERE s.pairing_code = ? AND s.online_status = 1
+        ORDER BY p.sequenceNumber ASC
+        LIMIT 1
+    `;
+    db.query(query, [pairingCode], (err, results) => {
+        if (err) {
+            return res.status(500).send({ error: 'Error fetching content' });
+        }
+        if (results.length === 0) {
+            return res.status(404).send({ error: 'No content found' });
+        }
+        res.send(results[0]);
+    });
+});
+
+// Endpoint to check online status
+app.get('/api/check-online-status', (req, res) => {
+    const { pairingCode } = req.query;
+    
+    const query = 'SELECT online_status FROM screens WHERE pairing_code = ?';
+    db.query(query, [pairingCode], (err, results) => {
+        if (err) {
+            return res.status(500).send({ error: 'Error checking online status' });
+        }
+        if (results.length === 0) {
+            return res.status(404).send({ error: 'Screen not found' });
+        }
+        res.send({ online: results[0].online_status === 1 });
+    });
+});
+
+// Helper function to update the online_status in the database
+function updateOnlineStatus(pairingCode, status) {
+    const query = 'UPDATE screens SET online_status = ? WHERE pairing_code = ?';
+    db.query(query, [status, pairingCode], (err) => {
+        if (err) {
+            console.error(`Error updating online status for pairing code ${pairingCode}:`, err);
+        } else {
+            console.log(`Updated online status for pairing code ${pairingCode} to ${status}`);
+        }
+    });
+}
+
+// Update online status based on WebSocket connection
+wss.on('connection', (ws, req) => {
+    const params = new URLSearchParams(req.url.replace('/?', ''));
+    const pairingCode = params.get('pairingCode');
+
+    if (pairingCode) {
+        pairingCodeToWsMap.set(pairingCode, ws);
+        lastActivityMap.set(pairingCode, Date.now());
+        updateOnlineStatus(pairingCode, 1); // Set online status to 1 (online)
+
+        ws.on('close', () => {
+            pairingCodeToWsMap.delete(pairingCode);
+            lastActivityMap.delete(pairingCode);
+            updateOnlineStatus(pairingCode, 0); // Set online status to 0 (offline)
+        });
+
+        ws.on('message', () => {
+            lastActivityMap.set(pairingCode, Date.now());
+        });
+    }
+});
+
+function notifyPairingSuccess(pairingCode) {
+    const ws = pairingCodeToWsMap.get(pairingCode);
+    if (ws) {
+        ws.send(JSON.stringify({ type: 'pairingSuccess' }));
+    }
+}
+
+wss.on('close', () => {
+    console.log('WebSocket connection closed');
+});
+
 // Update the store pairing code endpoint to set paired status when pairing is done
 app.post('/api/store-pairing-code', (req, res) => {
     const { pairingCode } = req.body;
@@ -2720,19 +2832,16 @@ app.post('/api/store-pairing-code', (req, res) => {
     res.json({ success: true });
 });
 
-// Update the validate pairing code endpoint to set the paired status
+// Endpoint to validate pairing code
 app.post('/api/validate-pairing-code', (req, res) => {
     const { pairingCode } = req.body;
     if (!pairingCode) {
         return res.status(400).json({ success: false, message: 'Pairing code is required' });
     }
 
-    // Check if pairing code exists and is not expired (10 minutes)
     const codeData = pairingCodes[pairingCode];
     if (codeData && (Date.now() - codeData.timestamp < 10 * 60 * 1000)) {
-        // Valid pairing code, set the paired status
         pairedScreens[pairingCode] = true;
-        // Remove the pairing code from the list after successful validation
         delete pairingCodes[pairingCode];
         res.json({ success: true });
     } else {

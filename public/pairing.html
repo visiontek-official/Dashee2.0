@@ -28,55 +28,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Add screen with pair code</h1>
+        <h1 id="header">Add screen with pair code</h1>
         <div class="pairing-code" id="pairing-code">Loading...</div>
-        <div class="qr-code">
+        <div class="qr-code" id="qr-code-container">
             <img id="qr-code-img" src="" alt="QR Code to pair">
         </div>
-        <div>or</div>
-        <a href="https://www.visiontek.co.za" target="_blank">www.visiontek.co.za</a>
-        <p>Provide this pairing code to us to assist!</p>
+        <div id="instructions">or</div>
+        <a href="https://www.visiontek.co.za" target="_blank" id="link">www.visiontek.co.za</a>
+        <p id="assist">Provide this pairing code to us to assist!</p>
     </div>
 
-    <script>
-        const pairCode = generatePairingCode();
-
-        async function fetchPairingCode() {
-            const response = await fetch('/api/store-pairing-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pairingCode: pairCode })
-            });
-            const data = await response.json();
-            if (data.success) {
-                document.getElementById('pairing-code').innerText = pairCode;
-                document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?data=${pairCode}&size=150x150`;
-            } else {
-                document.getElementById('pairing-code').innerText = 'Error generating code';
-            }
-        }
-
-        function generatePairingCode() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let result = '';
-            for (let i = 0; i < 6; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
-        async function checkPairingStatus() {
-            const response = await fetch(`/api/check-pairing-status?code=${pairCode}`);
-            const data = await response.json();
-            if (data.paired) {
-                window.location.href = 'connected.html';
-            }
-        }
-
-        fetchPairingCode();
-
-        // Polling every 5 seconds
-        setInterval(checkPairingStatus, 5000);
-    </script>
+    <script src="pairing.js"></script>
 </body>
 </html>

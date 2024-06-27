@@ -75,13 +75,17 @@ label {
     color: #555;
 }
 
-input[type="email"], input[type="password"], button {
+input[type="text"], input[type="email"], input[type="password"], button {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input[type="checkbox"] {
+    margin-right: 10px;
 }
 
 button {
