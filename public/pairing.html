@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pairing Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2b2d42;
+            color: #edf2f4;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+        }
+        .pairing-code {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        .qr-code {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add screen with pair code</h1>
+        <div class="pairing-code" id="pairing-code">Loading...</div>
+        <div class="qr-code">
+            <img id="qr-code-img" src="" alt="QR Code to pair">
+        </div>
+        <div>or</div>
+        <a href="https://www.visiontek.co.za" target="_blank">www.visiontek.co.za</a>
+        <p>Provide this pairing code to us to assist!</p>
+    </div>
+
+    <script>
+        const pairCode = generatePairingCode();
+
+        async function fetchPairingCode() {
+            const response = await fetch('/api/store-pairing-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pairingCode: pairCode })
+            });
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('pairing-code').innerText = pairCode;
+                document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?data=${pairCode}&size=150x150`;
+            } else {
+                document.getElementById('pairing-code').innerText = 'Error generating code';
+            }
+        }
+
+        function generatePairingCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        async function checkPairingStatus() {
+            const response = await fetch(`/api/check-pairing-status?code=${pairCode}`);
+            const data = await response.json();
+            if (data.paired) {
+                window.location.href = 'connected.html';
+            }
+        }
+
+        fetchPairingCode();
+
+        // Polling every 5 seconds
+        setInterval(checkPairingStatus, 5000);
+    </script>
+</body>
+</html>

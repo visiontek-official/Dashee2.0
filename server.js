@@ -7,6 +7,8 @@ const fs = require('fs');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const config = require('./config/config');
+const pairingCodes = {};
+const pairedScreens = {};  // Store paired status
 
 const app = express(); // Web server
 const apiApp = express(); // API server
@@ -1857,7 +1859,8 @@ app.post('/api/add-screen', verifyToken, (req, res) => {
         if (err) {
             return res.status(500).send({ message: 'Error adding screen', error: err });
         }
-        res.status(200).send({ success: true, message: 'Screen added successfully' });
+        // Redirect to the pairing page
+        res.status(200).send({ success: true, message: 'Screen added successfully', redirectTo: '/pairing.html' });
     });
 });
 
@@ -2686,8 +2689,60 @@ app.post('/api/remove-from-all-playlists', (req, res) => {
     });
 });
 
+app.get('/pairing', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pairing.html'));
+});
 
+// Endpoint to generate and store a pairing code
+app.post('/api/generate-pairing-code', (req, res) => {
+    const pairingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    pairingCodes[pairingCode] = { timestamp: Date.now() };
+    res.json({ success: true, pairingCode });
+});
 
+// Endpoint to check pairing status
+app.get('/api/check-pairing-status', (req, res) => {
+    const { code } = req.query;
+    const paired = pairedScreens[code] || false;
+    res.json({ paired });
+});
+
+// Update the store pairing code endpoint to set paired status when pairing is done
+app.post('/api/store-pairing-code', (req, res) => {
+    const { pairingCode } = req.body;
+    if (!pairingCode) {
+        return res.status(400).json({ success: false, message: 'Pairing code is required' });
+    }
+
+    // Store pairing code with a timestamp for expiration (e.g., 10 minutes)
+    pairedScreens[pairingCode] = false;  // Initial status is not paired
+    pairingCodes[pairingCode] = { timestamp: Date.now() };
+    res.json({ success: true });
+});
+
+// Update the validate pairing code endpoint to set the paired status
+app.post('/api/validate-pairing-code', (req, res) => {
+    const { pairingCode } = req.body;
+    if (!pairingCode) {
+        return res.status(400).json({ success: false, message: 'Pairing code is required' });
+    }
+
+    // Check if pairing code exists and is not expired (10 minutes)
+    const codeData = pairingCodes[pairingCode];
+    if (codeData && (Date.now() - codeData.timestamp < 10 * 60 * 1000)) {
+        // Valid pairing code, set the paired status
+        pairedScreens[pairingCode] = true;
+        // Remove the pairing code from the list after successful validation
+        delete pairingCodes[pairingCode];
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ success: false, message: 'Invalid or expired pairing code' });
+    }
+});
+
+app.get('/connected', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'connected.html'));
+});
 
 
 

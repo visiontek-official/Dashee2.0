@@ -52,6 +52,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.getElementById('pairing-code-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pairingCode = document.getElementById('pairing-code-input').value;
+        const response = await fetch('/api/validate-pairing-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pairingCode })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Pairing successful!');
+            // Redirect or update UI accordingly
+        } else {
+            alert('Invalid or expired pairing code.');
+        }
+    });
+    
 });
 
 
@@ -211,29 +229,51 @@ function addScreen() {
         alert('Screen name and pairing code cannot be blank');
         return;
     }
-    
-    fetch('/api/add-screen', {
+
+    // Validate the pairing code
+    fetch('/api/validate-pairing-code', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode })
+        body: JSON.stringify({ pairingCode })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            alert('Screen added successfully');
-            hideAddScreenPopup();
-            fetchScreens(); // Refresh screen list
-        } else {
-            alert('Error adding screen: ' + data.message);
+        if (!data.success) {
+            alert('Invalid or expired pairing code');
+            return;
         }
+
+        // Add the screen if pairing code is valid
+        fetch('/api/add-screen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Screen added successfully');
+                hideAddScreenPopup();
+                fetchScreens(); // Refresh screen list
+            } else {
+                alert('Error adding screen: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error adding screen:', error);
+        });
     })
     .catch(error => {
-        console.error('Error adding screen:', error);
+        console.error('Error validating pairing code:', error);
     });
 }
+
 
 function showAddScreenPopup() {
     document.getElementById('addScreenPopup').style.display = 'block';
