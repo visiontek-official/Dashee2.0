@@ -251,6 +251,8 @@ function addScreen() {
             return;
         }
 
+        const screenUrl = `http://visiontek.ddns.net:8001/connected.html?pairingCode=${pairingCode}`;
+
         // Add the screen if pairing code is valid
         fetch('/api/add-screen', {
             method: 'POST',
@@ -258,7 +260,7 @@ function addScreen() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode })
+            body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode, screen_url: screenUrl })
         })
         .then(response => response.json())
         .then(data => {
@@ -278,7 +280,6 @@ function addScreen() {
         console.error('Error validating pairing code:', error);
     });
 }
-
 
 function showAddScreenPopup() {
     document.getElementById('addScreenPopup').style.display = 'block';

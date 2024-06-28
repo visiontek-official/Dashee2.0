@@ -79,6 +79,9 @@ function updateScreenDetails(screenId) {
         document.getElementById('screenName').textContent = data.screen_name;
         document.getElementById('breadcrumbScreenName').textContent = data.screen_name;
 
+        // Display screen URL
+        document.getElementById('screenUrl').textContent = data.screen_url;
+
         const statusElement = document.getElementById('screenStatus');
         console.log('Online status:', data.online_status); // Log the online status
 

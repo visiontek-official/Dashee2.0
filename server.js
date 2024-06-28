@@ -168,6 +168,7 @@ const createTables = () => {
         enabled BOOLEAN DEFAULT false,
         online_status BOOLEAN DEFAULT false,
         last_connected DATETIME DEFAULT NULL,
+        screen_url VARCHAR(255) NOT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
@@ -1862,8 +1863,9 @@ app.get('/api/get-screens', verifyToken, (req, res) => {
  */
 app.post('/api/add-screen', verifyToken, (req, res) => {
     const { screen_name, pairing_code } = req.body;
-    const query = 'INSERT INTO screens (screen_name, pairing_code, user_id) VALUES (?, ?, ?)';
-    db.query(query, [screen_name, pairing_code, req.userId], (err, results) => {
+    const screen_url = `http://visiontek.ddns.net:8001/connected.html?pairingCode=${pairing_code}`;
+    const query = 'INSERT INTO screens (screen_name, pairing_code, user_id, screen_url) VALUES (?, ?, ?, ?)';
+    db.query(query, [screen_name, pairing_code, req.userId, screen_url], (err, results) => {
         if (err) {
             return res.status(500).send({ message: 'Error adding screen', error: err });
         }
@@ -1871,7 +1873,7 @@ app.post('/api/add-screen', verifyToken, (req, res) => {
         // Notify pairing success
         notifyPairingSuccess(pairing_code);
 
-        res.status(200).send({ success: true, message: 'Screen added successfully' });
+        res.status(200).send({ success: true, message: 'Screen added successfully', screen_url });
     });
 });
 

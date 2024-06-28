@@ -424,3 +424,19 @@ body {
 .add-option button:hover {
     background-color: #4cae4c;
 }
+
+.url-section {
+    margin-top: 10px;
+}
+
+.url-section h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.url-section p {
+    margin: 5px 0 0 0;
+    font-size: 1em;
+    color: #555;
+}
