@@ -191,29 +191,76 @@ const createTables = () => {
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
 
+    const playlistsTableQuery = `CREATE TABLE IF NOT EXISTS playlists (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        screenId INT,
+        userId INT,
+        contentId INT,
+        sequenceNumber INT,
+        displayDuration INT DEFAULT 60,
+        transition VARCHAR(255),
+        transitionSpeedLabel VARCHAR(255),
+        scheduleEnabled BOOLEAN,
+        monStart TIME,
+        monEnd TIME,
+        tueStart TIME,
+        tueEnd TIME,
+        wedStart TIME,
+        wedEnd TIME,
+        thuStart TIME,
+        thuEnd TIME,
+        friStart TIME,
+        friEnd TIME,
+        satStart TIME,
+        satEnd TIME,
+        sunStart TIME,
+        sunEnd TIME,
+        thumbnail VARCHAR(255),
+        title VARCHAR(255),
+        orientation VARCHAR(255),
+        fileType VARCHAR(255),
+        startDate DATETIME,
+        expirationDate DATETIME,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(255),
+        shufflePlay BOOLEAN,
+        defaultTransition VARCHAR(255),
+        defaultTransitionSpeedLabel VARCHAR(255),
+        enableImageTransitions BOOLEAN,
+        enableWebappTransitions BOOLEAN
+    )`;
+
     db.query(userTableQuery, (err, result) => {
         if (err) {
-            log('User table creation failed: ' + err, true);
+            console.log('User table creation failed: ' + err);
             throw err;
         }
-        log('User table checked/created');
+        console.log('User table checked/created');
         checkAdminUser();
     });
 
     db.query(screenTableQuery, (err, result) => {
         if (err) {
-            log('Screen table creation failed: ' + err, true);
+            console.log('Screen table creation failed: ' + err);
             throw err;
         }
-        log('Screen table checked/created');
+        console.log('Screen table checked/created');
     });
 
     db.query(contentTableQuery, (err, result) => {
         if (err) {
-            log('Content table creation failed: ' + err, true);
+            console.log('Content table creation failed: ' + err);
             throw err;
         }
-        log('Content table checked/created');
+        console.log('Content table checked/created');
+    });
+
+    db.query(playlistsTableQuery, (err, result) => {
+        if (err) {
+            console.log('Playlists table creation failed: ' + err);
+            throw err;
+        }
+        console.log('Playlists table checked/created');
     });
 };
 
@@ -1267,6 +1314,9 @@ app.post('/getFiles', (req, res) => {
  *                   type: string
  *                 file_dimensions:
  *                   type: string
+ *                 displayDuration:
+ *                   type: string
+ *                   format: time
  *       401:
  *         description: Unauthorized
  *       404:
@@ -1281,8 +1331,10 @@ app.get('/api/file-details', (req, res) => {
     }
 
     const sql = `
-        SELECT * FROM content
-        WHERE file_name = ? AND user_id = ?`;
+        SELECT c.*, p.displayDuration
+        FROM content c
+        LEFT JOIN playlists p ON c.id = p.contentId
+        WHERE c.file_name = ? AND c.user_id = ?`;
     db.query(sql, [file, userId], (err, results) => {
         if (err) {
             console.error('Error fetching file details:', err);
@@ -1303,9 +1355,8 @@ app.get('/api/file-details', (req, res) => {
  * @swagger
  * /api/save-file-details:
  *   post:
- *     summary: Save file details
- *     description: Update details of a specific file.
- *     tags: [Files]
+ *     summary: Update file details
+ *     tags: [Content]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -1335,21 +1386,52 @@ app.get('/api/file-details', (req, res) => {
  *                 type: string
  *               dimensions:
  *                 type: string
+ *               display_duration:
+ *                 type: string
+ *                 example: '00:01:00'
  *     responses:
  *       200:
- *         description: File details saved successfully
+ *         description: File details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
  *       401:
- *         description: Unauthorized
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Not authenticated
  *       500:
- *         description: Error saving file details
+ *         description: Failed to save file details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to save file details
  */
+
 app.post('/api/save-file-details', (req, res) => {
     const userId = req.session.userId;
     if (!userId) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const { file, title, description, tags, schedule_start, schedule_end, size, orientation, dimensions } = req.body;
+    const { file, title, description, tags, schedule_start, schedule_end, size, orientation, dimensions, display_duration } = req.body;
+
+    console.log('Received request to save file details:', {
+        file, title, description, tags, schedule_start, schedule_end, size, orientation, dimensions, display_duration
+    });
 
     const sql = `
         UPDATE content
@@ -1360,10 +1442,19 @@ app.post('/api/save-file-details', (req, res) => {
             console.error('Error saving file details:', err);
             return res.status(500).json({ error: 'Failed to save file details' });
         }
-        res.json({ success: true });
+
+        const playlistQuery = `UPDATE playlists SET displayDuration = ? WHERE contentId = (SELECT id FROM content WHERE file_name = ? AND user_id = ?)`;
+        db.query(playlistQuery, [display_duration, file, userId], (err, result) => {
+            if (err) {
+                console.error('Error updating playlists table:', err);
+                return res.status(500).json({ error: 'Failed to update display duration' });
+            }
+
+            console.log('Playlists table updated successfully with displayDuration:', display_duration);
+            res.json({ success: true });
+        });
     });
 });
-
 
 //Rename File Endpoint
 /**
@@ -2911,7 +3002,7 @@ const updateClientsWithPlaylist = (pairingCode) => {
 app.post('/api/get-playlist-content', (req, res) => {
     const { pairing_code } = req.body;
     const query = `
-        SELECT s.screen_id, c.file_path, c.file_type
+        SELECT s.screen_id, c.file_path, c.file_type, p.displayDuration
         FROM screens s
         JOIN playlists p ON s.screen_id = p.screenid
         JOIN content c ON p.contentId = c.id

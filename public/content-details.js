@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    document.getElementById('saveChanges').addEventListener('click', saveChanges);
 });
 
 function updateBreadcrumb(fileName) {
@@ -106,23 +108,16 @@ function loadFileDetails(fileName) {
             throw new Error(data.error);
         }
 
-        // Log the entire response data to inspect its structure
         console.log('API response data:', data);
-
-        // Check for the presence of file_type and file_path
         console.log('Keys in data:', Object.keys(data));
-
-        // Log content type and file path
         console.log('Content type:', data.file_type);
         console.log('File path:', data.file_path);
 
-        // Populate fields with fetched data
         document.getElementById('fileName').textContent = data.file_name;
 
         const fileImageContainer = document.getElementById('fileImageContainer');
         fileImageContainer.innerHTML = ''; // Clear existing content
 
-        // Check if the file is a video
         if (data.file_type && data.file_type.startsWith('video/')) {
             const videoElement = document.createElement('video');
             videoElement.controls = true;
@@ -145,17 +140,18 @@ function loadFileDetails(fileName) {
         document.getElementById('description').value = data.file_description;
         document.getElementById('tags').value = data.file_tags;
 
-         // Fix date format issue
-         document.getElementById('schedule-start').value = formatDateTime(data.file_schedule_start);
-         document.getElementById('schedule-end').value = formatDateTime(data.file_schedule_end); 
+        document.getElementById('schedule-start').value = formatDateTime(data.file_schedule_start);
+        document.getElementById('schedule-end').value = formatDateTime(data.file_schedule_end);
 
-        // Calculate "Updated X days ago"
+        const displayDuration = convertHHMMSSToMinutes(data.displayDuration);
+        console.log('Display duration fetched:', displayDuration);
+        document.getElementById('displayDuration').value = displayDuration;
+
         const uploadedDate = new Date(data.upload_date.split(' ')[0]); // Strip time
         const now = new Date();
         const daysAgo = Math.floor((now - uploadedDate) / (1000 * 60 * 60 * 24));
         document.getElementById('uploaded').textContent = `Updated ${daysAgo} days ago`;
 
-        // Display file size appropriately
         let displaySize = `${data.file_size}`;
         if (data.file_size > 1000) {
             displaySize = `${(data.file_size / 1000).toFixed(2)}`;
@@ -177,10 +173,24 @@ function loadFileDetails(fileName) {
 function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '';
     const dateTime = new Date(dateTimeString.replace(' ', 'T'));
+    if (isNaN(dateTime.getTime())) return '';
     return dateTime.toISOString().slice(0, 16);
 }
 
-document.getElementById('saveChanges').addEventListener('click', () => {
+function convertHHMMSSToMinutes(hhmmss) {
+    if (!hhmmss) return 0;
+    const [hours, minutes, seconds] = hhmmss.split(':').map(Number);
+    return (hours * 60) + minutes + (seconds / 60);
+}
+
+function convertMinutesToHHMMSS(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+    const secs = Math.floor((minutes * 60) % 60);
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function saveChanges() {
     const fileName = new URLSearchParams(window.location.search).get('file');
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
@@ -190,6 +200,7 @@ document.getElementById('saveChanges').addEventListener('click', () => {
     const size = document.getElementById('size').textContent;
     const orientation = document.getElementById('orientation').textContent;
     const dimensions = document.getElementById('dimensions').textContent;
+    const displayDuration = convertMinutesToHHMMSS(Number(document.getElementById('displayDuration').value));
 
     const updatedFileName = `${title}.${fileName.split('.').pop()}`; // Add extension back to title
 
@@ -209,19 +220,22 @@ document.getElementById('saveChanges').addEventListener('click', () => {
             schedule_end: scheduleEnd,
             size,
             orientation,
-            dimensions
+            dimensions,
+            display_duration: displayDuration
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            console.log('File details saved successfully');
             alert('File details saved successfully');
             window.location.reload();
         } else {
+            console.error('Failed to save file details:', data);
             alert('Failed to save file details');
         }
     })
     .catch(error => {
         console.error('Error saving file details:', error);
     });
-});
+}

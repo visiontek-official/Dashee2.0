@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function displayContent(contents) {
-        if (contents.length === 0) {
+    function displayContent(playlists) {
+        if (playlists.length === 0) {
             showDefaultScreen();
             return;
         }
@@ -67,31 +67,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentIndex = 0;
 
-        function showContent() {
-            const content = contents[currentIndex];
+        function showPlaylist() {
+            const playlist = playlists[currentIndex];
             container.innerHTML = ''; // Clear previous content
+            let contentIndex = 0;
 
-            if (content.file_type === 'image/jpeg') {
-                const img = document.createElement('img');
-                img.src = content.file_path;
-                container.appendChild(img);
-                setTimeout(showContent, 5000); // 5 seconds for images
-            } else if (content.file_type === 'video/mp4') {
-                const video = document.createElement('video');
-                video.src = content.file_path;
-                video.autoplay = true;
-                video.loop = true;
-                video.muted = true; // Ensure video is muted for autoplay to work
-                video.controls = false; // Hide controls for full screen
-                video.onended = showContent; // Move to next content after video ends
-                container.appendChild(video);
-                video.play(); // Explicitly call play
+            function showContent() {
+                const content = playlist[contentIndex];
+                container.innerHTML = ''; // Clear previous content
+
+                if (content.file_type === 'image/jpeg') {
+                    const img = document.createElement('img');
+                    img.src = content.file_path;
+                    container.appendChild(img);
+                } else if (content.file_type === 'video/mp4') {
+                    const video = document.createElement('video');
+                    video.src = content.file_path;
+                    video.autoplay = true;
+                    video.loop = true;
+                    video.muted = true; // Ensure video is muted for autoplay to work
+                    video.controls = false; // Hide controls for full screen
+                    container.appendChild(video);
+                    video.play(); // Explicitly call play
+                }
+
+                const duration = content.displayDuration * 60000; // Convert minutes to milliseconds
+                setTimeout(() => {
+                    contentIndex = (contentIndex + 1) % playlist.length;
+                    showContent();
+                }, duration);
             }
 
-            currentIndex = (currentIndex + 1) % contents.length;
+            showContent();
+            currentIndex = (currentIndex + 1) % playlists.length;
         }
 
-        showContent();
+        showPlaylist();
+        setInterval(showPlaylist, playlists[currentIndex].reduce((acc, content) => acc + content.displayDuration * 60000, 0)); // Sum durations of all contents in the playlist
     }
 
     function showDefaultScreen() {
