@@ -37,6 +37,7 @@ window.onload = function() {
 
         document.querySelector('.user-name').innerHTML = `${data.firstname} ${data.lastname} <i class="fas fa-caret-down"></i>`;
         document.getElementById('profilePic').src = data.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+        document.getElementById('profileThumbnail').src = data.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
         document.getElementById('firstname').value = data.firstname;
         document.getElementById('lastname').value = data.lastname;
         document.getElementById('email').value = data.email;

@@ -6,6 +6,7 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header class="main-header">
@@ -13,12 +14,12 @@
             <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
             <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
             <div class="dropdown-menu" id="dropdownMenu">
-                <a href="profile.html">My Profile</a>
-                <a href="#">Settings</a>
-                <a href="content.html">File Management</a>
-                <a href="#">Support</a>
-                <a href="index.html" onclick="logout()">Logout</a>
-            </div>
+                <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                <a href="content.html"><i class="fas fa-folder"></i> File Management</a>
+                <a href="#"><i class="fas fa-life-ring"></i> Support</a>
+                <a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>            
         </div>
     </header>
     <div class="dashboard-container">
@@ -66,6 +67,21 @@
                         <p id="totalScreens">0</p>
                         <p>Total Screens</p>
                     </div>
+                    <div class="stat">
+                        <i class="fas fa-desktop"></i>
+                        <p id="onlineScreens">0</p>
+                        <p>Total Online Screens</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-play"></i>
+                        <p id="totalPlaylists">0</p>
+                        <p>Total Playlists</p>
+                    </div>
+                </div>
+                <div class="charts">
+                    <canvas id="userChart"></canvas>
+                    <canvas id="playlistChart"></canvas>
+                    <canvas id="screenChart"></canvas>
                 </div>
             </section>
         </main>

@@ -23,6 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('saveChanges').addEventListener('click', saveChanges);
+
+    // Event listener to close the options dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const dropdownMenus = document.querySelectorAll('.dropdown-options-menu');
+        dropdownMenus.forEach(menu => {
+            if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    });
 });
 
 function updateBreadcrumb(fileName) {
@@ -40,6 +50,15 @@ function updateBreadcrumb(fileName) {
 function toggleDropdown() {
     var dropdownMenu = document.getElementById('dropdownMenu');
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+}
+
+window.onclick = function(event) {
+    if (!event.target.matches('.user-name') && !event.target.matches('.fa-caret-down')) {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        if (dropdownMenu.style.display === 'block') {
+            dropdownMenu.style.display = 'none';
+        }
+    }
 }
 
 function logout() {

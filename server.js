@@ -589,7 +589,12 @@ app.get('/api/statistics', (req, res) => {
         totalUsers: 'SELECT COUNT(*) AS count FROM users',
         activeUsers: 'SELECT COUNT(*) AS count FROM users WHERE logged_in = TRUE',
         disabledUsers: 'SELECT COUNT(*) AS count FROM users WHERE enabled = FALSE',
-        totalScreens: 'SELECT COUNT(*) AS count FROM screens'
+        totalScreens: 'SELECT COUNT(*) AS count FROM screens',
+        onlineScreens: 'SELECT COUNT(*) AS count FROM screens WHERE online_status = 1',
+        totalPlaylists: 'SELECT COUNT(*) AS count FROM playlists',
+        dailyUsers: 'SELECT DATE(created) AS date, COUNT(*) AS count FROM users GROUP BY DATE(created)',
+        dailyScreens: 'SELECT DATE(created) AS date, COUNT(*) AS count FROM screens GROUP BY DATE(created)',
+        dailyPlaylists: 'SELECT DATE(createdAt) AS date, COUNT(*) AS count FROM playlists GROUP BY DATE(createdAt)'
     };
 
     Promise.all(Object.values(queries).map(query => new Promise((resolve, reject) => {
@@ -597,13 +602,36 @@ app.get('/api/statistics', (req, res) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(results[0].count);
+                resolve(results);
             }
         });
     })))
-    .then(([totalUsers, activeUsers, disabledUsers, totalScreens]) => {
-        console.log('Fetched statistics:', { totalUsers, activeUsers, disabledUsers, totalScreens });
-        res.json({ totalUsers, activeUsers, disabledUsers, totalScreens });
+    .then(([totalUsers, activeUsers, disabledUsers, totalScreens, onlineScreens, totalPlaylists, dailyUsers, dailyScreens, dailyPlaylists]) => {
+        const formatResults = (results) => results.map(row => ({ date: row.date, count: row.count }));
+        
+        console.log('Fetched statistics:', { 
+            totalUsers: totalUsers[0].count, 
+            activeUsers: activeUsers[0].count, 
+            disabledUsers: disabledUsers[0].count, 
+            totalScreens: totalScreens[0].count,
+            onlineScreens: onlineScreens[0].count,
+            totalPlaylists: totalPlaylists[0].count,
+            dailyUsers: formatResults(dailyUsers),
+            dailyScreens: formatResults(dailyScreens),
+            dailyPlaylists: formatResults(dailyPlaylists)
+        });
+        
+        res.json({ 
+            totalUsers: totalUsers[0].count, 
+            activeUsers: activeUsers[0].count, 
+            disabledUsers: disabledUsers[0].count, 
+            totalScreens: totalScreens[0].count,
+            onlineScreens: onlineScreens[0].count,
+            totalPlaylists: totalPlaylists[0].count,
+            dailyUsers: formatResults(dailyUsers),
+            dailyScreens: formatResults(dailyScreens),
+            dailyPlaylists: formatResults(dailyPlaylists)
+        });
     })
     .catch(err => {
         console.log('Failed to fetch statistics:', err);

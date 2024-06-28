@@ -14,12 +14,12 @@
             <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
             <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
             <div class="dropdown-menu" id="dropdownMenu">
-                <a href="profile.html">My Profile</a>
-                <a href="#">Settings</a>
-                <a href="content.html">File Management</a>
-                <a href="#">Support</a>
-                <a href="index.html" onclick="logout()">Logout</a>
-            </div>
+                <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                <a href="content.html"><i class="fas fa-folder"></i> File Management</a>
+                <a href="#"><i class="fas fa-life-ring"></i> Support</a>
+                <a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div> 
         </div>
     </header>
     <div class="dashboard-container">
@@ -40,6 +40,9 @@
         <main class="main-content">
             <section class="content">
                 <h1>My Profile</h1>
+                <div class="profile-thumbnail">
+                    <img id="profileThumbnail" src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="Profile Picture Thumbnail">
+                </div>
                 <form id="profileForm" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="firstname">First Name:</label>
@@ -64,7 +67,7 @@
                     <div class="button-container">
                         <button type="submit">Update</button>
                         <button type="button" id="clearButton">Clear</button>
-                      </div>
+                    </div>
                 </form>
                 <div id="notification" class="notification"></div>
             </section>

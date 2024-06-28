@@ -1,6 +1,20 @@
 h1 {
     font-size: 1.5em;
     margin-bottom: 20px;
+    text-align: center;
+}
+
+.profile-thumbnail {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.profile-thumbnail img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
 }
 
 form {
@@ -40,11 +54,7 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 
 .button-container {
     display: flex;
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
+    gap: 10px; /* Add gap between buttons */
     justify-content: flex-start; /* Align buttons to the start */
     width: 100%;
 }
@@ -66,7 +76,6 @@ button:hover {
 
 button#clearButton {
     background-color: #1d2a38;
-    margin-left: 10px;
 }
 
 button#clearButton:hover {
