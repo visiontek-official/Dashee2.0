@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Received WebSocket message:', message);
         if (message.type === 'playlistUpdate') {
             console.log('Playlist update received:', message.playlist);
-            playPlaylist(message.playlist);
+            displayContent(message.playlist);
         }
     };
 
@@ -30,37 +30,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 60000); // Close WebSocket after 60 seconds
 
-    function playPlaylist(playlist) {
-        const container = document.createElement('div');
-        container.style.position = 'fixed';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.backgroundColor = 'black';
-        container.style.zIndex = '9999';
+    // Initial content fetch based on pairing code
+    fetchContent(pairingCode);
 
-        document.body.innerHTML = ''; // Clear the current content
-        document.body.appendChild(container);
+    async function fetchContent(pairingCode) {
+        try {
+            const response = await fetch('/api/get-playlist-content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pairing_code: pairingCode })
+            });
 
-        playlist.forEach(item => {
-            if (item.file_type.startsWith('image/')) {
+            const data = await response.json();
+
+            if (data.success) {
+                displayContent(data.content);
+            } else {
+                showDefaultScreen();
+            }
+        } catch (error) {
+            console.error('Error fetching content:', error);
+            showDefaultScreen();
+        }
+    }
+
+    function displayContent(contents) {
+        if (contents.length === 0) {
+            showDefaultScreen();
+            return;
+        }
+
+        const container = document.getElementById('content-container');
+        container.innerHTML = ''; // Clear any existing content
+
+        let currentIndex = 0;
+
+        function showContent() {
+            const content = contents[currentIndex];
+            container.innerHTML = ''; // Clear previous content
+
+            if (content.file_type === 'image/jpeg') {
                 const img = document.createElement('img');
-                img.src = item.file_path;
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
+                img.src = content.file_path;
                 container.appendChild(img);
-            } else if (item.file_type.startsWith('video/')) {
+                setTimeout(showContent, 5000); // 5 seconds for images
+            } else if (content.file_type === 'video/mp4') {
                 const video = document.createElement('video');
-                video.src = item.file_path;
-                video.style.width = '100%';
-                video.style.height = '100%';
-                video.style.objectFit = 'cover';
+                video.src = content.file_path;
                 video.autoplay = true;
                 video.loop = true;
+                video.muted = true; // Ensure video is muted for autoplay to work
+                video.controls = false; // Hide controls for full screen
+                video.onended = showContent; // Move to next content after video ends
                 container.appendChild(video);
+                video.play(); // Explicitly call play
             }
-        });
+
+            currentIndex = (currentIndex + 1) % contents.length;
+        }
+
+        showContent();
+    }
+
+    function showDefaultScreen() {
+        const container = document.getElementById('content-container');
+        container.innerHTML = ''; // Clear any existing content
+
+        const defaultScreen = document.createElement('div');
+        defaultScreen.style.width = '100%';
+        defaultScreen.style.height = '100%';
+        defaultScreen.style.display = 'flex';
+        defaultScreen.style.justifyContent = 'center';
+        defaultScreen.style.alignItems = 'center';
+        defaultScreen.style.backgroundColor = '#304050'; // Updated background color
+        defaultScreen.style.color = '#FFFFFF'; // Text color
+        defaultScreen.style.fontSize = '2em';
+        defaultScreen.style.fontFamily = 'Arial, sans-serif';
+        defaultScreen.style.textAlign = 'center';
+        defaultScreen.style.padding = '20px';
+        defaultScreen.style.boxSizing = 'border-box';
+        defaultScreen.innerText = 'Connected Screen - No Content Available';
+
+        container.appendChild(defaultScreen);
     }
 });

@@ -2908,6 +2908,27 @@ const updateClientsWithPlaylist = (pairingCode) => {
     });
 };
 
+app.post('/api/get-playlist-content', (req, res) => {
+    const { pairing_code } = req.body;
+    const query = `
+        SELECT s.screen_id, c.file_path, c.file_type
+        FROM screens s
+        JOIN playlists p ON s.screen_id = p.screenid
+        JOIN content c ON p.contentId = c.id
+        WHERE s.pairing_code = ?`;
+
+    db.query(query, [pairing_code], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error fetching playlist content', error: err });
+        }
+
+        if (results.length > 0) {
+            res.status(200).send({ success: true, content: results });
+        } else {
+            res.status(404).send({ success: false, message: 'No content found for this pairing code' });
+        }
+    });
+});
 
 
 // Endpoint: /api/config
