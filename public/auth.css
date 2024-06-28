@@ -85,6 +85,7 @@ input[type="email"], input[type="password"], button {
 }
 
 button {
+    width: 106%;
     background-color: #1d2a38;
     color: white;
     border: none;
