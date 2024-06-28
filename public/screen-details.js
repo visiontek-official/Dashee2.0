@@ -101,6 +101,15 @@ function updateScreenDetails(screenId) {
     });
 }
 
+function openScreenUrl() {
+    const screenUrl = document.getElementById('screenUrl').textContent;
+    if (screenUrl && screenUrl !== 'Loading...') {
+        window.open(screenUrl, '_blank');
+    } else {
+        alert('Screen URL is not available.');
+    }
+}
+
 function fetchPlaylists(screenId) {
     const token = localStorage.getItem('token');
     if (!token) {

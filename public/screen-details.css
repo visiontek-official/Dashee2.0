@@ -436,7 +436,22 @@ body {
 }
 
 .url-section p {
-    margin: 5px 0 0 0;
+    margin: 5px 0 10px 0; /* Adjusted margin to provide space for the button */
     font-size: 1em;
     color: #555;
+}
+
+.view-url-button {
+    padding: 5px 10px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #1d2a38;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-url-button:hover {
+    background-color: #ff2592;
 }
