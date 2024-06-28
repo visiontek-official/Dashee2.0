@@ -197,7 +197,7 @@ const createTables = () => {
         userId INT,
         contentId INT,
         sequenceNumber INT,
-        displayDuration INT DEFAULT 60,
+        displayDuration TIME,
         transition VARCHAR(255),
         transitionSpeedLabel VARCHAR(255),
         scheduleEnabled BOOLEAN,
@@ -1102,6 +1102,10 @@ app.get('/getUserDetails', (req, res) => {
  *       500:
  *         description: Error uploading file
  */
+const sanitizeFileName = (fileName) => {
+    return fileName.replace(/[^a-zA-Z0-9.-]/g, '_'); // Replace non-alphanumeric characters (except dots and dashes) with underscores
+};
+
 app.post('/api/upload-file', (req, res) => {
     upload.single('file')(req, res, function (err) {
         if (err) {
@@ -1124,14 +1128,15 @@ app.post('/api/upload-file', (req, res) => {
 
         const userId = req.session.userId;
         const originalName = req.file.originalname;
+        const sanitizedFileName = sanitizeFileName(originalName);
         const userDir = path.join(__dirname, 'uploads', userId.toString());
 
         if (!fs.existsSync(userDir)) {
             fs.mkdirSync(userDir, { recursive: true });
         }
 
-        const filePath = path.join(userDir, originalName);
-        const relativePath = `uploads/${userId.toString()}/${originalName}`;
+        const filePath = path.join(userDir, sanitizedFileName);
+        const relativePath = `uploads/${userId.toString()}/${sanitizedFileName}`;
         const urlPath = `${config.server_url}:${config.webPort}/${relativePath}`;
         const fileSizeInKB = Math.round(req.file.size / 1024); // Convert bytes to KB
 
@@ -1142,7 +1147,7 @@ app.post('/api/upload-file', (req, res) => {
             }
 
             const sql = 'INSERT INTO content (user_id, file_name, file_path, file_type, file_size) VALUES (?, ?, ?, ?, ?)';
-            db.query(sql, [userId, originalName, urlPath, req.file.mimetype, fileSizeInKB], (err, result) => {
+            db.query(sql, [userId, sanitizedFileName, urlPath, req.file.mimetype, fileSizeInKB], (err, result) => {
                 if (err) {
                     console.log('File save to database failed: ' + err);
                     return res.status(500).json({ success: false, message: 'File save to database failed' });
@@ -1154,6 +1159,7 @@ app.post('/api/upload-file', (req, res) => {
         });
     });
 });
+
 
 
 /*
@@ -2999,27 +3005,98 @@ const updateClientsWithPlaylist = (pairingCode) => {
     });
 };
 
-app.post('/api/get-playlist-content', (req, res) => {
-    const { pairing_code } = req.body;
+app.get('/api/check-playlist', (req, res) => {
+    const fileName = req.query.file;
+    const authorizationHeader = req.headers.authorization;
+
+    if (!authorizationHeader) {
+        console.error('No authorization header provided');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authorizationHeader.split(' ')[1];
+    if (!token) {
+        console.error('No token provided');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Implement your own logic to extract userId from the token
+    const userId = getUserIdFromToken(token); 
+    if (!userId) {
+        console.error('Invalid token, unable to extract userId');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log(`Checking playlist for userId: ${userId} and fileName: ${fileName}`);
+
     const query = `
-        SELECT s.screen_id, c.file_path, c.file_type, p.displayDuration
-        FROM screens s
-        JOIN playlists p ON s.screen_id = p.screenid
+        SELECT COUNT(*) AS count
+        FROM playlists p
         JOIN content c ON p.contentId = c.id
-        WHERE s.pairing_code = ?`;
+        WHERE c.user_id = ? AND c.file_name = ?
+    `;
 
-    db.query(query, [pairing_code], (err, results) => {
+    db.query(query, [userId, fileName], (err, results) => {
         if (err) {
-            return res.status(500).send({ message: 'Error fetching playlist content', error: err });
+            console.error('Error executing query:', err);
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
-        if (results.length > 0) {
-            res.status(200).send({ success: true, content: results });
-        } else {
-            res.status(404).send({ success: false, message: 'No content found for this pairing code' });
-        }
+        console.log(`Query result: ${JSON.stringify(results)}`);
+
+        res.json({ isInPlaylist: results[0].count > 0 });
     });
 });
+
+function getUserIdFromToken(token) {
+    try {
+        const decoded = jwt.verify(token, config.secretKey);
+        return decoded.userId; // Adjust based on how your token is structured
+    } catch (err) {
+        console.error('Failed to decode token:', err);
+        return null;
+    }
+}
+
+app.post('/api/get-playlist-content', async (req, res) => {
+    try {
+        const { pairing_code } = req.body;
+        const content = await getContentByPairingCode(pairing_code);
+
+        if (content.length > 0) {
+            res.json({ success: true, content });
+        } else {
+            res.json({ success: false, message: 'No content found' });
+        }
+    } catch (error) {
+        console.error('Error fetching playlist content:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
+// Function to get content by pairing code
+function getContentByPairingCode(pairingCode) {
+    return new Promise((resolve, reject) => {
+        const sql = `
+            SELECT c.file_path, c.file_type, p.displayDuration
+            FROM playlists p
+            JOIN content c ON p.contentId = c.id
+            JOIN screens s ON p.screenid = s.screen_id
+            WHERE s.pairing_code = ?
+            ORDER BY p.sequenceNumber ASC
+        `;
+        db.query(sql, [pairingCode], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
+
+
 
 
 // Endpoint: /api/config

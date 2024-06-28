@@ -92,7 +92,7 @@ function loadFileDetails(fileName) {
         return;
     }
 
-    fetch(`/api/file-details?file=${fileName}`, {
+    fetch(`/api/file-details?file=${encodeURIComponent(fileName)}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -162,6 +162,9 @@ function loadFileDetails(fileName) {
         document.getElementById('orientation').textContent = data.file_orientation;
         document.getElementById('dimensions').textContent = data.file_dimensions;
 
+        // Check if the content is in a playlist
+        checkIfInPlaylist(data.file_name, token);
+
         updateBreadcrumb(data.file_name);
     })
     .catch(error => {
@@ -170,24 +173,45 @@ function loadFileDetails(fileName) {
     });
 }
 
+function checkIfInPlaylist(fileName, token) {
+    fetch(`/api/check-playlist?file=${encodeURIComponent(fileName)}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to check playlist status');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.isInPlaylist) {
+            document.getElementById('displayDuration').disabled = false;
+            document.getElementById('durationInfo').style.display = 'none';
+        } else {
+            document.getElementById('displayDuration').disabled = true;
+            document.getElementById('durationInfo').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error checking playlist status:', error);
+        alert('There was an error checking the playlist status. Please try again later.');
+    });
+}
+
+
+function convertHHMMSSToMinutes(hhmmss) {
+    if (!hhmmss) return 0;
+    const [hours, minutes, seconds] = hhmmss.split(':').map(Number);
+    return hours * 60 + minutes + seconds / 60;
+}
+
 function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '';
     const dateTime = new Date(dateTimeString.replace(' ', 'T'));
     if (isNaN(dateTime.getTime())) return '';
     return dateTime.toISOString().slice(0, 16);
-}
-
-function convertHHMMSSToMinutes(hhmmss) {
-    if (!hhmmss) return 0;
-    const [hours, minutes, seconds] = hhmmss.split(':').map(Number);
-    return (hours * 60) + minutes + (seconds / 60);
-}
-
-function convertMinutesToHHMMSS(minutes) {
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.floor(minutes % 60);
-    const secs = Math.floor((minutes * 60) % 60);
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function saveChanges() {
@@ -200,7 +224,7 @@ function saveChanges() {
     const size = document.getElementById('size').textContent;
     const orientation = document.getElementById('orientation').textContent;
     const dimensions = document.getElementById('dimensions').textContent;
-    const displayDuration = convertMinutesToHHMMSS(Number(document.getElementById('displayDuration').value));
+    const displayDuration = convertMinutesToHHMMSS(document.getElementById('displayDuration').value);
 
     const updatedFileName = `${title}.${fileName.split('.').pop()}`; // Add extension back to title
 
@@ -227,15 +251,20 @@ function saveChanges() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log('File details saved successfully');
             alert('File details saved successfully');
             window.location.reload();
         } else {
-            console.error('Failed to save file details:', data);
             alert('Failed to save file details');
         }
     })
     .catch(error => {
         console.error('Error saving file details:', error);
     });
+}
+
+function convertMinutesToHHMMSS(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+    const secs = Math.floor((minutes * 60) % 60);
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }

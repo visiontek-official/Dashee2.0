@@ -43,9 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ pairing_code: pairingCode })
             });
 
-            const data = await response.json();
+            const text = await response.text();
+            console.log('Server response:', text); // Log the raw response text
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = JSON.parse(text); // Parse the text as JSON
 
             if (data.success) {
+                console.log('Fetched content:', data.content);
                 displayContent(data.content);
             } else {
                 showDefaultScreen();
@@ -56,8 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function displayContent(playlists) {
-        if (playlists.length === 0) {
+    function displayContent(content) {
+        console.log('Playlists:', content); // Log the playlists array to understand its structure
+        if (!content || content.length === 0) {
             showDefaultScreen();
             return;
         }
@@ -67,43 +76,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentIndex = 0;
 
-        function showPlaylist() {
-            const playlist = playlists[currentIndex];
+        function showContent() {
+            if (currentIndex >= content.length) {
+                currentIndex = 0;
+            }
+            const item = content[currentIndex];
+            console.log('Displaying content:', item);
+
             container.innerHTML = ''; // Clear previous content
-            let contentIndex = 0;
 
-            function showContent() {
-                const content = playlist[contentIndex];
-                container.innerHTML = ''; // Clear previous content
+            if (item.file_type === 'image/jpeg' || item.file_type === 'image/png') {
+                const img = document.createElement('img');
+                img.src = item.file_path;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                container.appendChild(img);
 
-                if (content.file_type === 'image/jpeg') {
-                    const img = document.createElement('img');
-                    img.src = content.file_path;
-                    container.appendChild(img);
-                } else if (content.file_type === 'video/mp4') {
-                    const video = document.createElement('video');
-                    video.src = content.file_path;
-                    video.autoplay = true;
-                    video.loop = true;
-                    video.muted = true; // Ensure video is muted for autoplay to work
-                    video.controls = false; // Hide controls for full screen
-                    container.appendChild(video);
-                    video.play(); // Explicitly call play
-                }
-
-                const duration = content.displayDuration * 60000; // Convert minutes to milliseconds
+                const duration = item.displayDuration ? parseDuration(item.displayDuration) : 5000; // Default to 5 seconds if displayDuration is null
                 setTimeout(() => {
-                    contentIndex = (contentIndex + 1) % playlist.length;
+                    currentIndex++;
                     showContent();
                 }, duration);
-            }
+            } else if (item.file_type === 'video/mp4') {
+                const video = document.createElement('video');
+                video.src = item.file_path;
+                video.autoplay = true;
+                video.loop = false; // Set to false to handle end event
+                video.muted = true; // Ensure video is muted for autoplay to work
+                video.controls = false; // Hide controls for full screen
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                container.appendChild(video);
+                video.play(); // Explicitly call play
 
-            showContent();
-            currentIndex = (currentIndex + 1) % playlists.length;
+                if (item.displayDuration) {
+                    const duration = parseDuration(item.displayDuration); // Convert duration to milliseconds
+                    setTimeout(() => {
+                        currentIndex++;
+                        showContent();
+                    }, duration);
+                } else {
+                    video.addEventListener('ended', () => {
+                        currentIndex++;
+                        showContent();
+                    });
+                }
+            }
         }
 
-        showPlaylist();
-        setInterval(showPlaylist, playlists[currentIndex].reduce((acc, content) => acc + content.displayDuration * 60000, 0)); // Sum durations of all contents in the playlist
+        showContent();
+    }
+
+    function parseDuration(hhmmss) {
+        if (!hhmmss) {
+            // Default to 5 seconds if displayDuration is null
+            return 5000;
+        }
+        const [hours, minutes, seconds] = hhmmss.split(':').map(Number);
+        return ((hours * 60 + minutes) * 60 + seconds) * 1000;
     }
 
     function showDefaultScreen() {
@@ -126,5 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
         defaultScreen.innerText = 'Connected Screen - No Content Available';
 
         container.appendChild(defaultScreen);
+
+        // Show logo and message
+        const logoContainer = document.querySelector('.logo-container');
+        const messageContainer = document.querySelector('.message-container');
+
+        if (logoContainer) logoContainer.style.display = 'block';
+        if (messageContainer) messageContainer.style.display = 'block';
     }
 });
