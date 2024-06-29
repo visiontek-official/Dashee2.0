@@ -1,11 +1,13 @@
 const express = require('express');
-const session = require('express-session');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const session = require('express-session');
 const mysql = require('mysql');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const config = require('./config/config');
 const pairingCodes = {};
 const pairedScreens = {};  // Store paired status
@@ -342,6 +344,14 @@ apiApp.listen(config.apiPort, () => {
 // API server middleware and routes
 apiApp.use(bodyParser.urlencoded({ extended: true }));
 apiApp.use(bodyParser.json());
+
+function isAuthenticated(req, res, next) {
+    if (req.session && req.session.userId) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Unauthorized' });
+    }
+}
 
 // Middleware to log API requests and responses and verify tokens if required
 apiApp.use((req, res, next) => {
@@ -3076,6 +3086,32 @@ app.get('/api/check-playlist', (req, res) => {
     });
 });
 
+// Middleware to authenticate token
+function authenticateToken(req, res, next) {
+    const authorizationHeader = req.headers.authorization;
+
+    if (!authorizationHeader) {
+        console.error('No authorization header provided');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authorizationHeader.split(' ')[1];
+    if (!token) {
+        console.error('No token provided');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Implement your own logic to extract userId from the token
+    const userId = getUserIdFromToken(token); 
+    if (!userId) {
+        console.error('Invalid token, unable to extract userId');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    req.userId = userId; // Attach the userId to the request object for later use
+    next();
+}
+
 function getUserIdFromToken(token) {
     try {
         const decoded = jwt.verify(token, config.secretKey);
@@ -3124,8 +3160,147 @@ function getContentByPairingCode(pairingCode) {
     });
 }
 
+app.get('/api/user-playlists', (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const sql = `
+        SELECT p.id, CONCAT('Playlist ', p.id) AS name, p.screenid, p.createdAt, c.file_path
+        FROM playlists p
+        JOIN content c ON p.userid = c.user_id
+        WHERE c.user_id = ?
+    `;
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.log('Failed to fetch playlists:', err);
+            return res.status(500).json({ error: 'Failed to fetch playlists' });
+        }
+
+        const groupedPlaylists = results.reduce((acc, playlist) => {
+            const key = `${playlist.name}_${playlist.screenid}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    name: playlist.name,
+                    screenid: playlist.screenid,
+                    createdAt: playlist.createdAt,
+                    file_paths: [],
+                    ids: [],
+                };
+            }
+            acc[key].file_paths.push(playlist.file_path);
+            acc[key].ids.push(playlist.id);
+            return acc;
+        }, {});
+
+        res.json({ playlists: Object.values(groupedPlaylists) });
+    });
+});
 
 
+
+
+app.delete('/api/delete-playlist/:id', (req, res) => {
+    const playlistId = req.params.id;
+    const userId = req.session.userId;
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const sql = 'DELETE FROM playlists WHERE id = ? AND userid = ?';
+    db.query(sql, [playlistId, userId], (err, result) => {
+        if (err) {
+            console.log('Failed to delete playlist:', err);
+            return res.status(500).json({ error: 'Failed to delete playlist' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Playlist not found or not authorized' });
+        }
+        res.status(204).send();
+    });
+});
+
+// Sending Support Request Endpoint
+const supportStorage = multer.memoryStorage();
+const supportUpload = multer({ 
+    storage: supportStorage,
+    limits: { fileSize: config.support_request_max_file_size_mb * 1024 * 1024 }, // 10MB
+    fileFilter: (req, file, cb) => {
+        const allowedFormats = config.support_request_file_formats.split(',').map(format => `image/${format}`).concat(['video/mp4', 'video/avi']);
+        if (allowedFormats.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file format'), false);
+        }
+    }
+});
+
+app.post('/api/send-support-request', supportUpload.single('attachment'), async (req, res) => {
+    const { name, email, subject, message, copy, recaptcha } = req.body;
+    const attachment = req.file;
+
+    console.log('Request Body:', req.body); // Log to debug the request body
+    if (!name || !email || !subject || !message || !recaptcha) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const recaptchaSecret = config.g_secret_key;
+    const recaptchaVerificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecret}&response=${recaptcha}`;
+
+    try {
+        const recaptchaResponse = await axios.post(recaptchaVerificationUrl);
+        if (!recaptchaResponse.data.success) {
+            return res.status(400).json({ error: 'reCAPTCHA verification failed' });
+        }
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtpout.secureserver.net',
+            port: 465,
+            secure: true,
+            auth: {
+                user: 'info@visiontek.co.za',
+                pass: 'KristyLee5483@!1'
+            }
+        });
+
+        const mailOptions = {
+            from: 'info@visiontek.co.za',
+            to: 'support@visiontek.co.za',
+            subject: `DasheeApp | Support Request: ${subject}`,
+            html: `<p><strong>Name:</strong> ${name}</p>
+                   <p><strong>Email:</strong> ${email}</p>
+                   <p><strong>Message:</strong></p>
+                   <p>${message}</p>`,
+            attachments: []
+        };
+
+        if (attachment) {
+            mailOptions.attachments.push({
+                filename: attachment.originalname,
+                content: attachment.buffer,
+                contentType: attachment.mimetype
+            });
+        }
+
+        if (copy) {
+            mailOptions.cc = email;
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending email:', error);
+                return res.status(500).json({ error: 'Failed to send support request' });
+            } else {
+                console.log('Email sent:', info.response);
+                return res.json({ success: true });
+            }
+        });
+    } catch (error) {
+        console.log('Error verifying reCAPTCHA:', error);
+        return res.status(500).json({ error: 'reCAPTCHA verification failed' });
+    }
+});
 
 // Endpoint: /api/config
 /**

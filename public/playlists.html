@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
-    <link rel="stylesheet" href="users.css">
+    <title>My Playlists</title>
+    <link rel="stylesheet" href="playlists.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -21,7 +21,7 @@
                 <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="playlists.html"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"></li>
+                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i><span> Users</span><i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <header class="main-header">
@@ -34,34 +34,21 @@
                     <a href="content.html"><i class="fas fa-folder"></i> File Management</a>
                     <a href="support.html"><i class="fas fa-life-ring"></i> Support</a>
                     <a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div> 
+                </div>
             </div>
         </header>
         <main class="main-content">
             <section class="content">
                 <div class="content-header">
-                    <h1>Users</h1>
+                    <h1>Playlists</h1>
                 </div>
-                <table id="userTable" class="user-table">
-                    <thead>
-                        <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Enabled</th>
-                            <th>Profile Picture</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- User data will be populated here -->
-                    </tbody>
-                </table>
+                <div id="playlistContainer" class="playlist-container">
+                    <!-- Playlists will be dynamically populated here -->
+                </div>
             </section>
         </main>
     </div>
     <div id="notification" class="notification"></div>
-    <script src="users.js"></script>
+    <script src="playlists.js"></script>
 </body>
 </html>

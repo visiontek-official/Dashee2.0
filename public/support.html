@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
-    <link rel="stylesheet" href="users.css">
+    <title>Support</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="support.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="support.js" defer></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -21,7 +23,7 @@
                 <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="playlists.html"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem"></li>
+                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i><span> Users</span><i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <header class="main-header">
@@ -40,28 +42,31 @@
         <main class="main-content">
             <section class="content">
                 <div class="content-header">
-                    <h1>Users</h1>
+                    <h1>Support</h1>
                 </div>
-                <table id="userTable" class="user-table">
-                    <thead>
-                        <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Enabled</th>
-                            <th>Profile Picture</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- User data will be populated here -->
-                    </tbody>
-                </table>
+                <form id="supportForm" class="support-form">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                    <div>
+                        <label for="attachment">Attachment:</label>
+                        <input type="file" id="attachment" name="attachment" accept="image/png, image/jpeg, image/jpg, image/webp, video/mp4, video/avi">
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="copy" name="copy">
+                        <label for="copy">Send me a copy of this support request</label>
+                    </div>
+                    <div class="g-recaptcha" data-sitekey="6Lci_JwUAAAAAC8YSojVf31tN3LTV-bqmkf7xG7Y"></div>
+                    <button type="submit">Send Request</button>
+                </form>
             </section>
         </main>
     </div>
     <div id="notification" class="notification"></div>
-    <script src="users.js"></script>
 </body>
 </html>

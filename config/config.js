@@ -16,4 +16,8 @@ module.exports = {
     },
     secretKey: 'q8i570tovb1u439dlt101nhv0mire6omvq3wk5prz652zj5sd70bsz7aukdt', // used for token generation
     adminToken: '3v3fb7h2haosp1xyz6jica3iz400xbuco5o96lbose6o19akuf1aicwnr7oy',
+    support_request_max_file_size_mb: 10,
+    support_request_file_formats: 'png,jpg,jpeg,webp,mp4,avi',
+    g_site_key: '6Lci_JwUAAAAAC8YSojVf31tN3LTV-bqmkf7xG7Y',
+    g_secret_key: '6Lci_JwUAAAAAFYXAtnyYjsFZmXiK_LJa4M1cGO1',
 };
