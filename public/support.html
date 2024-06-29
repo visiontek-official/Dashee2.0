@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="support.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="support.js" defer></script>
 </head>
 <body>
@@ -23,7 +22,7 @@
                 <li><a href="#"><i class="fas fa-users"></i> Groups <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="playlists.html"><i class="fas fa-play"></i> Playlists <i class="fas fa-arrow-right"></i></a></li>
                 <li><a href="#"><i class="fas fa-globe"></i> Websites <i class="fas fa-arrow-right"></i></a></li>
-                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i><span> Users</span><i class="fas fa-arrow-right"></i></a></li>
+                <li id="userMenuItem" style="display: none;"><a href="users.html"><i class="fas fa-user"></i> Users <i class="fas fa-arrow-right"></i></a></li>
             </ul>
         </nav>
         <header class="main-header">
@@ -61,7 +60,7 @@
                         <input type="checkbox" id="copy" name="copy">
                         <label for="copy">Send me a copy of this support request</label>
                     </div>
-                    <div class="g-recaptcha" data-sitekey="your-site-key"></div>
+                    <!-- reCAPTCHA will be added here dynamically -->
                     <button type="submit">Send Request</button>
                 </form>
             </section>

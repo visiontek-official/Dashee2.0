@@ -89,6 +89,11 @@ function verifyToken(req, res, next) {
     });
 }
 
+// Serve the Google reCAPTCHA site key
+app.get('/api/recaptcha-site-key', (req, res) => {
+    res.json({ siteKey: config.g_site_key });
+});
+
 apiApp.use('/api/get-screens', verifyToken);
 apiApp.use('/api/add-screen', verifyToken);
 

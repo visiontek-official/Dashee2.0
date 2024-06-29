@@ -1,11 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
     loadUserDetails();
 
+    fetchSiteKey()
+        .then(siteKey => {
+            loadRecaptcha(siteKey);
+        })
+        .catch(error => {
+            console.error('Error fetching reCAPTCHA site key:', error);
+        });
+
     document.getElementById('supportForm').addEventListener('submit', function (event) {
         event.preventDefault();
         sendSupportRequest();
     });
 });
+
+function fetchSiteKey() {
+    return fetch('/api/recaptcha-site-key')
+        .then(response => response.json())
+        .then(data => {
+            if (data.siteKey) {
+                return data.siteKey;
+            } else {
+                throw new Error('Site key not found');
+            }
+        });
+}
+
+function loadRecaptcha(siteKey) {
+    const recaptchaContainer = document.createElement('div');
+    recaptchaContainer.className = 'g-recaptcha';
+    recaptchaContainer.setAttribute('data-sitekey', siteKey);
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.parentNode.insertBefore(recaptchaContainer, submitButton);
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+}
 
 function toggleDropdown() {
     var dropdownMenu = document.getElementById('dropdownMenu');
