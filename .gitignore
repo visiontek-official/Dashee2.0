@@ -11,3 +11,4 @@ node_modules/
 #.env
 uploads/
 config.js
+node_modules
