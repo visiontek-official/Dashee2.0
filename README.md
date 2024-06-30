@@ -5,8 +5,7 @@
 [![GitHub issues open](https://img.shields.io/github/issues/themesberg/flowbite-admin-dashboard.svg)](https://github.com/themesberg/flowbite-admin-dashboard/issues?q=is%3Aopen+is%3Aissue)
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/themesberg/flowbite-admin-dashboard.svg)](https://github.com/themesberg/flowbite-admin-dashboard/issues?q=is%3Aissue+is%3Aclosed)
 
-[![Dashee 2.0 Dashboard Preview](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)(https://i.ibb.co/F4xkk4M/Dashee-Login.png)(https://i.ibb.co/Cbq9QS3/Dashee-Signup.png)(https://i.ibb.co/LnKmGQR/Dashee-Screens.png)(https://i.ibb.co/p4WM35G/Dashee-Content.png)(https://i.ibb.co/FDdZnkK/Dashee-Content-Details.png)(https://i.ibb.co/LQTkDd4/Dashee-Screen-Details.png)
-(https://i.ibb.co/JdDmMcY/Dashee-Graphs.png)]
+![Dashee 2.0 Dashboard Preview](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)
 This project is a free and open-source UI admin dashboard template built with the components from [Flowbite](https://github.com/themesberg/flowbite) and based on the utility-first [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) framework featuring charts, tables, widgets, CRUD layouts, modals, drawers, and more.
 
 This admin dashboard can quickly help you get started building an application for your project using the newest UI/UX development technologies in the open-source area including Tailwind CSS and Flowbite.
@@ -23,11 +22,11 @@ This admin dashboard can quickly help you get started building an application fo
 
 | Login page | Register page | Reset password
 | --- | --- | --- |
-| [![Login page](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/login.jpg)](https://flowbite-admin-dashboard.vercel.app/authentication/sign-in/) | [![Register page](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/register.jpg)](https://flowbite-admin-dashboard.vercel.app/authentication/sign-up/) | [![Reset password](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/reset-password.jpg)](https://flowbite-admin-dashboard.vercel.app/authentication/reset-password/)
+| [![Login page](https://i.ibb.co/F4xkk4M/Dashee-Login.png)](https://i.ibb.co/F4xkk4M/Dashee-Login.png) | [![Register page](https://i.ibb.co/Cbq9QS3/Dashee-Signup.png)](https://i.ibb.co/Cbq9QS3/Dashee-Signup.png) | [![Reset password](https://i.ibb.co/MhdNDD7/Dashee-forgot-password.png)](https://i.ibb.co/MhdNDD7/Dashee-forgot-password.png)
 
-| Forgot password | Profile lock | Maintenance page
+| Forgot password | Profile | Maintenance page
 | --- | --- | --- |
-| [![Forgot password](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/forgot-password.jpg)](https://flowbite-admin-dashboard.vercel.app/authentication/forgot-password/) | [![Profile lock](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/profile-lock.jpg)](https://flowbite-admin-dashboard.vercel.app/authentication/profile-lock/) | [![Maintenance page](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/maintenance.jpg)](https://flowbite-admin-dashboard.vercel.app/pages/maintenance/)
+| [![Forgot password](https://i.ibb.co/MhdNDD7/Dashee-forgot-password.png)](https://i.ibb.co/MhdNDD7/Dashee-forgot-password.png) | [![Profile](https://i.ibb.co/f8j8zbN/Dashee-profile.png)](https://i.ibb.co/f8j8zbN/Dashee-profile.png) | [![Maintenance page](https://i.ibb.co/f8j8zbN/Dashee-profile.png)](https://i.ibb.co/f8j8zbN/Dashee-profile.png)
 
 | 404 not found | 500 server error | Playground
 | --- | --- | --- |
