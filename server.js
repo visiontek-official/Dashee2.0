@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
 const mysql = require('mysql');
 const path = require('path');
@@ -16,6 +19,7 @@ const app = express(); // Web server
 const apiApp = express(); // API server
 const logFile = path.join(__dirname, 'logs', 'server.log');
 const apiLogFile = path.join(__dirname, 'logs', 'api.log');
+const saltRounds = 10;
 
 // Define the paths for the logs and archive directories
 const logDir = path.join(__dirname, 'logs');
@@ -163,6 +167,8 @@ const createTables = () => {
         enabled BOOLEAN DEFAULT true,
         logged_in BOOLEAN DEFAULT FALSE,
         api_token VARCHAR(255) DEFAULT NULL,
+        reset_token VARCHAR(255) DEFAULT NULL,
+        token_expiry BIGINT DEFAULT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`;
@@ -342,9 +348,11 @@ const upload = multer({
     }
 });
 
+/*
 apiApp.listen(config.apiPort, () => {
     apiLog(`API server running on port ${config.apiPort}`);
 });
+*/
 
 // API server middleware and routes
 apiApp.use(bodyParser.urlencoded({ extended: true }));
@@ -366,7 +374,7 @@ apiApp.use((req, res, next) => {
 
 // Middleware to log API requests and responses and verify tokens
 app.use((req, res, next) => {
-    const publicPaths = ['/index.html', '/login', '/signup', '/css', '/js', '/images'];
+    const publicPaths = ['/index.html', '/login', '/signup', '/forgot-password', '/reset-password', '/css', '/js', '/images'];
     if (publicPaths.some(path => req.path.startsWith(path)) || req.path.startsWith('/api')) {
         return next();
     }
@@ -847,17 +855,41 @@ app.post('/api/get-files', (req, res) => {
 app.post('/signup', (req, res) => {
     const { firstname, lastname, email, password, terms } = req.body;
     log(`Signup form data: ${JSON.stringify(req.body)}`);
+
     if (!terms) {
         return res.json({ success: false, message: 'You must accept the terms and conditions to register.' });
     }
-    const sql = 'INSERT INTO users (firstname, lastname, email, password, profile_pic) VALUES (?, ?, ?, ?, ?)';
-    db.query(sql, [firstname, lastname, email, password, 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png'], (err, result) => {
+
+    // Check if the email already exists
+    const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
+    db.query(checkEmailSql, [email], (err, results) => {
         if (err) {
-            log('Signup failed: ' + err, true);
+            log('Error checking email: ' + err, true);
             return res.json({ success: false, message: 'Signup failed. Please try again.' });
         }
-        log(`User signed up: ${email}`, true);
-        return res.json({ success: true });
+
+        if (results.length > 0) {
+            // Email already exists
+            return res.json({ success: false, message: 'Email already exists. Please use a different email.' });
+        }
+
+        // Hash the password
+        bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
+            if (err) {
+                log('Error hashing password: ' + err, true);
+                return res.json({ success: false, message: 'Signup failed. Please try again.' });
+            }
+
+            const sql = 'INSERT INTO users (firstname, lastname, email, password, profile_pic) VALUES (?, ?, ?, ?, ?)';
+            db.query(sql, [firstname, lastname, email, hashedPassword, 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png'], (err, result) => {
+                if (err) {
+                    log('Signup failed: ' + err, true);
+                    return res.json({ success: false, message: 'Signup failed. Please try again.' });
+                }
+                log(`User signed up: ${email}`, true);
+                return res.json({ success: true });
+            });
+        });
     });
 });
 
@@ -897,28 +929,52 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     log(`Login form data: ${JSON.stringify(req.body)}`);
-    const sql = 'SELECT * FROM users WHERE email = ? AND password = ? AND enabled = true';
-    db.query(sql, [email, password], (err, results) => {
-        if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+    const sql = 'SELECT * FROM users WHERE email = ? AND enabled = true';
+    
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            return res.json({ success: false, message: 'Login failed. Please try again.' });
+        }
 
-        if (results.length > 0) {
-            const user = results[0];
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
+        }
+
+        const user = results[0];
+
+        // Compare the provided password with the hashed password in the database
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                return res.json({ success: false, message: 'Login failed. Please try again.' });
+            }
+
+            if (!isMatch) {
+                return res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
+            }
+
+            // If password matches, generate the token and proceed with login
             const token = jwt.sign({ userId: user.id }, config.secretKey, { expiresIn: '1h' });
 
             log(`Generated token: ${token}`);
 
             const updateSql = 'UPDATE users SET logged_in = TRUE, api_token = ? WHERE id = ?';
             db.query(updateSql, [token, user.id], (err) => {
-                if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+                if (err) {
+                    return res.json({ success: false, message: 'Login failed. Please try again.' });
+                }
 
                 const fetchUpdatedUserSql = 'SELECT * FROM users WHERE id = ?';
                 db.query(fetchUpdatedUserSql, [user.id], (err, updatedResults) => {
-                    if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+                    if (err) {
+                        return res.json({ success: false, message: 'Login failed. Please try again.' });
+                    }
 
                     log(`Updated user data: ${JSON.stringify(updatedResults)}`);
 
                     req.session.regenerate((err) => {
-                        if (err) return res.json({ success: false, message: 'Login failed. Please try again.' });
+                        if (err) {
+                            return res.json({ success: false, message: 'Login failed. Please try again.' });
+                        }
 
                         req.session.userId = user.id;
                         req.session.firstName = user.firstname;
@@ -936,11 +992,10 @@ app.post('/login', (req, res) => {
                     });
                 });
             });
-        } else {
-            res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
-        }
+        });
     });
 });
+
 
 /**
  * @swagger
@@ -3203,9 +3258,6 @@ app.get('/api/user-playlists', (req, res) => {
     });
 });
 
-
-
-
 app.delete('/api/delete-playlist/:id', (req, res) => {
     const playlistId = req.params.id;
     const userId = req.session.userId;
@@ -3307,6 +3359,105 @@ app.post('/api/send-support-request', supportUpload.single('attachment'), async 
     }
 });
 
+// Forgot password endpoint
+app.post('/forgot-password', (req, res) => {
+    const { email } = req.body;
+
+    console.log(`Received forgot password request for email: ${email}`);
+
+    db.query('SELECT * FROM users WHERE email = ?', [email], (err, result) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error' });
+        }
+
+        if (result.length === 0) {
+            console.warn('No user exists with this email address');
+            return res.status(404).json({ success: false, message: 'No user exists with this email address' });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetLink = `${req.protocol}://${req.get('host')}/reset-password.html?token=${resetToken}`;
+
+        const tokenExpiry = Date.now() + 3600000; // 1 hour from now
+        db.query('UPDATE users SET reset_token = ?, token_expiry = ? WHERE email = ?', [resetToken, tokenExpiry, email], (err, updateResult) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ success: false, message: 'Database error' });
+            }
+
+            const mailOptions = {
+                from: 'info@visiontek.co.za',
+                to: email,
+                subject: 'Dashee | Password Reset Request',
+                html: `<p>Please click the link below to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p>`
+            };
+
+            const transporter = nodemailer.createTransport({
+                host: 'smtpout.secureserver.net',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: 'info@visiontek.co.za',
+                    pass: 'KristyLee5483@!1'
+                }
+            });
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Failed to send email:', error);
+                    return res.status(500).json({ success: false, message: 'Failed to send email' });
+                }
+                console.log('Reset link sent to email:', email);
+                res.json({ success: true, message: 'Reset link sent to your email address.' });
+            });
+        });
+    });
+});
+
+// Reset password endpoint
+app.post('/reset-password', async (req, res) => {
+    const { password, token } = req.body;
+
+    try {
+        // Check if the reset token is valid and not expired
+        const user = await new Promise((resolve, reject) => {
+            db.query('SELECT * FROM users WHERE reset_token = ? AND token_expiry > ?', [token, Date.now()], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        if (user.length === 0) {
+            return res.status(400).json({ error: 'Password reset token is invalid or has expired.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the user's password and clear the reset token and expiry
+        await new Promise((resolve, reject) => {
+            db.query('UPDATE users SET password = ?, reset_token = NULL, token_expiry = NULL WHERE id = ?', [hashedPassword, user[0].id], (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        res.json({ success: true, message: 'Password reset successfully.' });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Failed to reset password.' });
+    }
+});
+
+
+
+
 // Endpoint: /api/config
 /**
  * @swagger
@@ -3337,5 +3488,5 @@ app.get('/api/config', (req, res) => {
 swaggerSetup(app);
 
 app.listen(config.webPort, () => {
-    log(`Web server running on port ${config.webPort}`);
+    log(`WEB & API server running on port ${config.webPort}`);
 });

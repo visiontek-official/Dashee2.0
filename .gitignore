@@ -10,3 +10,5 @@ node_modules/
 # Ignore all config files
 #.env
 uploads/
+config.js
+config/config.js

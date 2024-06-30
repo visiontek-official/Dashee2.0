@@ -1,33 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Load sidebar
-    fetch('sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-            const sidebarContainer = document.getElementById('sidebarContainer');
-            if (sidebarContainer) {
-                sidebarContainer.innerHTML = data;
-            }
-        });
-
-    // Load header
-    fetch('header.html')
-        .then(response => response.text())
-        .then(data => {
-            const headerContainer = document.getElementById('headerContainer');
-            if (headerContainer) {
-                headerContainer.innerHTML = data;
-            }
-            // Load user menu inside the header
-            return fetch('user-menu.html');
-        })
-        .then(response => response.text())
-        .then(data => {
-            const userMenuContainer = document.getElementById('userMenuContainer');
-            if (userMenuContainer) {
-                userMenuContainer.innerHTML = data;
-            }
-        });
-
     loadDashboardData();
 });
 
@@ -132,25 +103,25 @@ function loadDashboardData() {
             totalPlaylistsElement.textContent = data.totalPlaylists;
         }
 
-        createChart('userChart', 'Daily Total Users', data.dailyUsers);
-        createChart('screenChart', 'Daily Total Screens', data.dailyScreens);
-        createChart('playlistChart', 'Daily Total Playlists', data.dailyPlaylists);
+        createChart('userChart', 'Total Users', data.dailyUsers, 'bar');
+        createChart('screenChart', 'Total Screens', data.dailyScreens, 'line');
+        createChart('playlistChart', 'Total Playlists', data.dailyPlaylists, 'bar');
     })
     .catch(error => {
         console.error('Error fetching statistics:', error);
     });
 }
 
-function createChart(chartId, label, data) {
+function createChart(chartId, label, data, type) {
     const ctx = document.getElementById(chartId).getContext('2d');
     new Chart(ctx, {
-        type: 'bar',
+        type: type,
         data: {
             labels: data.map(item => new Date(item.date).toISOString().split('T')[0]), // Format date to yyyy-mm-dd
             datasets: [{
                 label: label,
                 data: data.map(item => item.count),
-                backgroundColor: '#263e4b', // Change bar color
+                backgroundColor: type === 'line' ? 'rgba(39, 144, 255, 0.2)' : '#263e4b', // Change bar color
                 borderColor: '#263e4b',
                 borderWidth: 1
             }]
