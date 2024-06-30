@@ -240,19 +240,21 @@ body {
 .charts {
     margin-top: 50px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Change to row to align charts next to each other */
     gap: 20px; /* Add gap between the charts */
     width: 100%;
     box-sizing: border-box;
     padding: 0 15px; /* Adjust padding to ensure charts fit within the container */
+    flex-wrap: wrap; /* Ensure charts wrap to the next line if they exceed container width */
 }
 
 .chart-full-width {
-    width: 100%;
+    width: calc(50% - 20px); /* Adjust width to accommodate gap */
     height: 400px; /* Adjust height as needed */
 }
 
 .chart-half-width {
-    width: 100%;
+    width: calc(50% - 20px); /* Adjust width to accommodate gap */
     height: 400px; /* Adjust height as needed */
 }
+
