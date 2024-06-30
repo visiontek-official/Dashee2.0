@@ -16,9 +16,14 @@ This admin dashboard can quickly help you get started building an application fo
 | --- | --- | --- |
 | [![Dashboard](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png) | [![Stacked Layout](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png) | [![Products (CRUD)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)
 
-| Users (CRUD) | Settings | Pricing page
+| Screens | Screen Details | Screens Add
 | --- | --- | --- |
-| [![Users (CRUD)](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/users.jpg)](https://flowbite-admin-dashboard.vercel.app/crud/users/) | [![Settings](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/settings.jpg)](https://flowbite-admin-dashboard.vercel.app/settings/) | [![Pricing page](https://flowbite.s3.amazonaws.com/templates/flowbite-admin-dashboard/github/pricing.jpg)](https://flowbite-admin-dashboard.vercel.app/pages/pricing/)
+| [![Screens](https://i.ibb.co/LnKmGQR/Dashee-Screens.png)](https://i.ibb.co/LnKmGQR/Dashee-Screens.png) | [![Screen Details](https://i.ibb.co/LQTkDd4/Dashee-Screen-Details.png)](https://i.ibb.co/LQTkDd4/Dashee-Screen-Details.png) | [![Screens Add](https://i.ibb.co/p6DjnCf/Dashee-screens-add.png)](https://i.ibb.co/p6DjnCf/Dashee-screens-add.png)
+
+| Content | Content Details | Content Add
+| --- | --- | --- |
+| [![Screens](https://i.ibb.co/p4WM35G/Dashee-Content.png)](https://i.ibb.co/p4WM35G/Dashee-Content.png) | [![Screen Details](https://i.ibb.co/FDdZnkK/Dashee-Content-Details.png)](https://i.ibb.co/FDdZnkK/Dashee-Content-Details.png) | [![Content Add](https://i.ibb.co/Y78Vshv/Dashee-content-add.png)](https://i.ibb.co/Y78Vshv/Dashee-content-add.png)
+
 
 | Login page | Register page | Reset password
 | --- | --- | --- |
