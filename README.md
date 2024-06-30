@@ -5,8 +5,8 @@
 [![GitHub issues open](https://img.shields.io/github/issues/themesberg/flowbite-admin-dashboard.svg)](https://github.com/themesberg/flowbite-admin-dashboard/issues?q=is%3Aopen+is%3Aissue)
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/themesberg/flowbite-admin-dashboard.svg)](https://github.com/themesberg/flowbite-admin-dashboard/issues?q=is%3Aissue+is%3Aclosed)
 
-![Dashee 2.0 Dashboard Preview](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)(https://i.ibb.co/F4xkk4M/Dashee-Login.png)(https://i.ibb.co/Cbq9QS3/Dashee-Signup.png)(https://i.ibb.co/LnKmGQR/Dashee-Screens.png)(https://i.ibb.co/p4WM35G/Dashee-Content.png)(https://i.ibb.co/FDdZnkK/Dashee-Content-Details.png)(https://i.ibb.co/LQTkDd4/Dashee-Screen-Details.png)
-(https://i.ibb.co/JdDmMcY/Dashee-Graphs.png)
+[![Dashee 2.0 Dashboard Preview](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)(https://i.ibb.co/F4xkk4M/Dashee-Login.png)(https://i.ibb.co/Cbq9QS3/Dashee-Signup.png)(https://i.ibb.co/LnKmGQR/Dashee-Screens.png)(https://i.ibb.co/p4WM35G/Dashee-Content.png)(https://i.ibb.co/FDdZnkK/Dashee-Content-Details.png)(https://i.ibb.co/LQTkDd4/Dashee-Screen-Details.png)
+(https://i.ibb.co/JdDmMcY/Dashee-Graphs.png)]
 This project is a free and open-source UI admin dashboard template built with the components from [Flowbite](https://github.com/themesberg/flowbite) and based on the utility-first [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) framework featuring charts, tables, widgets, CRUD layouts, modals, drawers, and more.
 
 This admin dashboard can quickly help you get started building an application for your project using the newest UI/UX development technologies in the open-source area including Tailwind CSS and Flowbite.
