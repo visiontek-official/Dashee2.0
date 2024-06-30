@@ -3322,8 +3322,8 @@ app.post('/api/send-support-request', supportUpload.single('attachment'), async 
         });
 
         const mailOptions = {
-            from: 'info@visiontek.co.za',
-            to: 'support@visiontek.co.za',
+            from: config.smtp.auth.user,
+            to: config.to,
             subject: `DasheeApp | Support Request: ${subject}`,
             html: `<p><strong>Name:</strong> ${name}</p>
                    <p><strong>Email:</strong> ${email}</p>
@@ -3387,19 +3387,19 @@ app.post('/forgot-password', (req, res) => {
             }
 
             const mailOptions = {
-                from: 'info@visiontek.co.za',
+                from: config.smtp.auth.user,
                 to: email,
                 subject: 'Dashee | Password Reset Request',
                 html: `<p>Please click the link below to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p>`
             };
 
             const transporter = nodemailer.createTransport({
-                host: 'smtpout.secureserver.net',
-                port: 465,
-                secure: true,
+                host: config.smtp.host,
+                port: config.smtp.port,
+                secure: config.smtp.secure,
                 auth: {
-                    user: 'info@visiontek.co.za',
-                    pass: 'KristyLee5483@!1'
+                    user: config.smtp.auth.user,
+                    pass: config.smtp.auth.pass
                 }
             });
 
