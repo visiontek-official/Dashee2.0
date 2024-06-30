@@ -15,7 +15,7 @@ This admin dashboard can quickly help you get started building an application fo
 
 | Dashboard | Stacked Layout | Products (CRUD)
 | --- | --- | --- |
-| [![Dashboard](https://i.ibb.co/F4xkk4M/Dashee-Login.png)](https://flowbite-admin-dashboard.vercel.app/) | [![https://i.ibb.co/F4xkk4M/Dashee-Login.png)](https://flowbite-admin-dashboard.vercel.app/layouts/stacked/)
+| [![Dashboard](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png) | [![Stacked Layout](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png) | [![Products (CRUD)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)](https://i.ibb.co/pZM2PV9/Dashee-Dashboard.png)
 
 | Users (CRUD) | Settings | Pricing page
 | --- | --- | --- |
