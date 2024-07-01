@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="template.css">
+    <link rel="stylesheet" href="calendar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="template.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <div id="sidebar-container"></div>
+    <div class="dashboard-container">
+        <main class="main-content">
+            <section class="content">
+                <div class="calendar-header">
+                    <button class="add-event-button" onclick="openAddEventPopup()">+ Add Event</button>
+                    <div id="calendar-filters">
+                        <label><input type="checkbox" value="viewAll" id="viewAllCheckbox" checked> View All</label>
+                        <label style="color: #f14343;"><input type="checkbox" value="personal" class="category-checkbox" checked> Personal</label>
+                        <label style="color: #304050;"><input type="checkbox" value="business" class="category-checkbox" checked> Business</label>
+                        <label style="color: #07a053;"><input type="checkbox" value="family" class="category-checkbox" checked> Family</label>
+                        <label style="color: #f33df3;"><input type="checkbox" value="holiday" class="category-checkbox" checked> Holiday</label>
+                    </div>
+                </div>
+                <div id="calendar"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Event Popup -->
+    <div class="popup" id="addEventPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeAddEventPopup()">&times;</span>
+            <h2>Add Event</h2>
+            <div class="popup-body">
+                <label for="eventTitle">Title</label>
+                <input type="text" id="eventTitle">
+                <label for="eventStart">Start</label>
+                <input type="datetime-local" id="eventStart">
+                <label for="eventEnd">End</label>
+                <input type="datetime-local" id="eventEnd">
+                <label for="eventCategory">Category</label>
+                <select id="eventCategory">
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                    <option value="family">Family</option>
+                    <option value="holiday">Holiday</option>
+                </select>
+                <button onclick="addEvent()">Add Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Event Popup -->
+    <div class="popup" id="editEventPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeEditEventPopup()">&times;</span>
+            <h2>Edit Event</h2>
+            <div class="popup-body">
+                <input type="hidden" id="editEventId">
+                <label for="editEventTitle">Title</label>
+                <input type="text" id="editEventTitle">
+                <label for="editEventStart">Start</label>
+                <input type="datetime-local" id="editEventStart">
+                <label for="editEventEnd">End</label>
+                <input type="datetime-local" id="editEventEnd">
+                <label for="editEventCategory">Category</label>
+                <select id="editEventCategory">
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                    <option value="family">Family</option>
+                    <option value="holiday">Holiday</option>
+                </select>
+                <button onclick="updateEvent()">Update Event</button>
+                <button onclick="deleteEventPrompt()">Delete Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Popup -->
+    <div class="popup" id="deleteEventPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeDeleteEventPopup()">&times;</span>
+            <h2>Delete Event</h2>
+            <div class="popup-body">
+                <p>Are you sure you want to delete this event?</p>
+                <button onclick="confirmDeleteEvent()">Yes, Delete</button>
+                <button onclick="closeDeleteEventPopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="calendar.js" defer></script>
+</body>
+</html>

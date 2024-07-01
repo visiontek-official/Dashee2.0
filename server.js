@@ -14,6 +14,7 @@ const axios = require('axios');
 const config = require('./config/config');
 const pairingCodes = {};
 const pairedScreens = {};  // Store paired status
+const events = []; //
 
 const app = express(); // Web server
 const apiApp = express(); // API server
@@ -204,6 +205,17 @@ const createTables = () => {
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
 
+    const eventsTableQuery = `CREATE TABLE IF NOT EXISTS events (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        start DATETIME NOT NULL,
+        end DATETIME,
+        category VARCHAR(50),
+        color VARCHAR(7) NOT NULL DEFAULT '#3788d8',
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )`;
+
     const playlistsTableQuery = `CREATE TABLE IF NOT EXISTS playlists (
         id INT AUTO_INCREMENT PRIMARY KEY,
         screenId INT,
@@ -274,6 +286,14 @@ const createTables = () => {
             throw err;
         }
         console.log('Playlists table checked/created');
+    });
+
+    db.query(eventsTableQuery, (err, result) => {
+        if (err) {
+            console.log('Events table creation failed: ' + err);
+            throw err;
+        }
+        console.log('Events table checked/created');
     });
 };
 
@@ -3455,6 +3475,68 @@ app.post('/reset-password', async (req, res) => {
     }
 });
 
+// Fetch all events for the user
+app.get('/api/events', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const sql = 'SELECT * FROM events WHERE user_id = ?';
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching events:', err);
+            return res.status(500).json({ error: 'Failed to fetch events' });
+        }
+        res.json(results);
+    });
+});
+
+// Create a new event
+app.post('/api/events', authenticateToken, (req, res) => {
+    const { title, start, end, category, color } = req.body;
+    const userId = req.userId;
+
+    // Insert event into the database
+    const sql = 'INSERT INTO events (title, start, end, category, color, user_id) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(sql, [title, start, end, category, color, userId], (err, result) => {
+        if (err) {
+            console.error('Error inserting event:', err);
+            return res.status(500).json({ error: 'Failed to insert event' });
+        }
+        res.json({ id: result.insertId, title, start, end, category, color });
+    });
+});
+
+// Get event details
+app.get('/api/events/:id', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const eventId = req.params.id;
+    const sql = 'SELECT * FROM events WHERE id = ? AND user_id = ?';
+    db.query(sql, [eventId, userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching event details:', err);
+            return res.status(500).json({ error: 'Failed to fetch event details' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+        res.json(results[0]);
+    });
+});
+
+//Update the event
+app.put('/api/events/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { title, start, end, category, color } = req.body;
+    const userId = req.userId;
+
+    // Update event in the database
+    const sql = 'UPDATE events SET title = ?, start = ?, end = ?, category = ?, color = ? WHERE id = ? AND user_id = ?';
+    db.query(sql, [title, start, end, category, color, id, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating event:', err);
+            return res.status(500).json({ error: 'Failed to update event' });
+        }
+        res.json({ title, start, end, category, color });
+    });
+});
 
 
 
