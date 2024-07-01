@@ -41,17 +41,26 @@
             <section class="content">
                 <div class="content-header">
                     <h1>Content Library</h1>
-                    <div class="content-controls">
-                        <button class="upload-button" onclick="openUploadPopup()">UPLOAD FILES</button>
-                        <div class="sort-filter">
-                            <a href="#">SORT</a>
-                            <a href="#">FILTERS</a>
+                    <button class="upload-button-files" onclick="openUploadPopup()">UPLOAD FILES</button>
+                </div>
+                <!-- New Filters Section -->
+                <div class="filters-section">
+                    <div class="dropdown">
+                        <a href="#" id="sortLink"><i class="fas fa-sort"></i> SORT</a>
+                        <div class="dropdown-content" id="sortDropdown">
+                            <a href="#" onclick="sortScreens('dateNewest')">Date added (newest first)</a>
+                            <a href="#" onclick="sortScreens('dateOldest')">Date added (oldest first)</a>
+                            <a href="#" onclick="sortScreens('alphaAsc')">Alphabetical (ascending)</a>
+                            <a href="#" onclick="sortScreens('alphaDesc')">Alphabetical (descending)</a>
+                            <a href="#" onclick="sortScreens('lastSeenNewest')">Time last seen (newest first)</a>
+                            <a href="#" onclick="sortScreens('lastSeenOldest')">Time last seen (oldest first)</a>
                         </div>
-                        <div class="search-container">
-                            <input type="text" id="searchInput" placeholder="Search content...">
-                            <button id="searchButton"><i class="fas fa-search"></i></button>
-                        </div>
-                    </div>                    
+                    </div>
+                    <a href="#" id="filtersLink" onclick="showFilterPopup()"><i class="fas fa-filter"></i> FILTERS</a>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search">
+                        <button id="searchButton"><i class="fas fa-search"></i></button>
+                    </div>
                 </div>
                 <div id="breadcrumb"></div>
                 <div class="thumbnail-container" id="fileList"></div>
