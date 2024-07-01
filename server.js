@@ -3538,6 +3538,22 @@ app.put('/api/events/:id', authenticateToken, (req, res) => {
     });
 });
 
+// Delete an event
+app.delete('/api/events/:id', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const eventId = req.params.id;
+    const sql = 'DELETE FROM events WHERE id = ? AND user_id = ?';
+    db.query(sql, [eventId, userId], (err, result) => {
+        if (err) {
+            console.error('Error deleting event:', err);
+            return res.status(500).json({ error: 'Failed to delete event' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+        res.sendStatus(204);
+    });
+});
 
 
 // Endpoint: /api/config
