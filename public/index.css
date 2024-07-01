@@ -169,25 +169,3 @@ p {
     display: block;
     margin-top: 10px;
 }
-
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px;
-    border-radius: 5px;
-    display: none;
-    z-index: 1000;
-    font-size: 16px;
-}
-
-.notification.success {
-    background-color: #4caf50;
-    color: white;
-}
-
-.notification.error {
-    background-color: #f44336;
-    color: white;
-}
-

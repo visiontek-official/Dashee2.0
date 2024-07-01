@@ -1,7 +1,7 @@
 require('dotenv').config(); // Load environment variables from .env file
 
 module.exports = {
-    server_url: 'localhost', // The base URL for the server
+    server_url: 'visiontek.ddns.net', // The base URL for the server
     sql_server_url: 'localhost', // The URL for the SQL server
     webPort: 8001, // Port for the web server
     apiPort: 8002, // Port for the API server

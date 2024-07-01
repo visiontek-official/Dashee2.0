@@ -68,6 +68,17 @@ if (config.clearLogsOnStart) {
     archiveAndClearLogs();
 }
 
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+    host: config.smtp.host,
+    port: config.smtp.port,
+    secure: config.smtp.secure,
+    auth: {
+        user: config.smtp.auth.user,
+        pass: config.smtp.auth.pass
+    }
+});
+
 // Verify Token Middleware
 function verifyToken(req, res, next) {
     const token = req.headers['authorization'];
@@ -157,6 +168,16 @@ function handleDisconnect() {
 handleDisconnect();
 
 const createTables = () => {
+    const pendingusersTableQuery = `CREATE TABLE IF NOT EXISTS pending_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        firstname VARCHAR(255) NOT NULL,
+        lastname VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        verification_token VARCHAR(64) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
     const userTableQuery = `CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         firstname VARCHAR(255) NOT NULL,
@@ -167,6 +188,8 @@ const createTables = () => {
         role VARCHAR(50) DEFAULT 'user',
         enabled BOOLEAN DEFAULT true,
         logged_in BOOLEAN DEFAULT FALSE,
+        email_verified TINYINT(1) DEFAULT 0,
+        verification_token VARCHAR(255),
         api_token VARCHAR(255) DEFAULT NULL,
         reset_token VARCHAR(255) DEFAULT NULL,
         token_expiry BIGINT DEFAULT NULL,
@@ -255,6 +278,14 @@ const createTables = () => {
         enableImageTransitions BOOLEAN,
         enableWebappTransitions BOOLEAN
     )`;
+
+    db.query(pendingusersTableQuery, (err, result) => {
+        if (err) {
+            console.log('Pending Users table creation failed: ' + err);
+            throw err;
+        }
+        console.log('Pending Users table checked/created');
+    });
 
     db.query(userTableQuery, (err, result) => {
         if (err) {
@@ -395,7 +426,7 @@ apiApp.use((req, res, next) => {
 
 // Middleware to log API requests and responses and verify tokens
 app.use((req, res, next) => {
-    const publicPaths = ['/index.html', '/login', '/signup', '/forgot-password', '/reset-password', '/css', '/js', '/images'];
+    const publicPaths = ['/index.html', '/login', '/signup', '/forgot-password', '/reset-password', '/css', '/js', '/images', '/verify-email'];
     if (publicPaths.some(path => req.path.startsWith(path)) || req.path.startsWith('/api')) {
         return next();
     }
@@ -882,7 +913,7 @@ app.post('/signup', (req, res) => {
     }
 
     // Check if the email already exists
-    const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
+    const checkEmailSql = 'SELECT * FROM pending_users WHERE email = ?';
     db.query(checkEmailSql, [email], (err, results) => {
         if (err) {
             log('Error checking email: ' + err, true);
@@ -890,25 +921,46 @@ app.post('/signup', (req, res) => {
         }
 
         if (results.length > 0) {
-            // Email already exists
-            return res.json({ success: false, message: 'Email already exists. Please use a different email.' });
+            // Email already exists in pending users
+            return res.json({ success: false, message: 'Email already exists. Please check your inbox for the verification email.' });
         }
 
-        // Hash the password
+        // Hash the password using bcrypt
         bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
             if (err) {
                 log('Error hashing password: ' + err, true);
                 return res.json({ success: false, message: 'Signup failed. Please try again.' });
             }
 
-            const sql = 'INSERT INTO users (firstname, lastname, email, password, profile_pic) VALUES (?, ?, ?, ?, ?)';
-            db.query(sql, [firstname, lastname, email, hashedPassword, 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png'], (err, result) => {
+            // Generate verification token
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+
+            const sql = 'INSERT INTO pending_users (firstname, lastname, email, password, verification_token) VALUES (?, ?, ?, ?, ?)';
+            db.query(sql, [firstname, lastname, email, hashedPassword, verificationToken], (err, result) => {
                 if (err) {
                     log('Signup failed: ' + err, true);
                     return res.json({ success: false, message: 'Signup failed. Please try again.' });
                 }
-                log(`User signed up: ${email}`, true);
-                return res.json({ success: true });
+
+                // Generate verification link using config values
+                const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+
+                // Send verification email
+                const mailOptions = {
+                    from: config.smtp.auth.user,
+                    to: email,
+                    subject: 'Email Verification',
+                    text: `Please verify your email by clicking on the following link: ${verificationLink}`
+                };
+
+                transporter.sendMail(mailOptions, (err, info) => {
+                    if (err) {
+                        log('Error sending email: ' + err, true);
+                        return res.json({ success: false, message: 'Signup failed. Please try again.' });
+                    }
+                    log(`User signed up: ${email}`, true);
+                    return res.json({ success: true, message: 'Verification email sent. Please check your inbox.' });
+                });
             });
         });
     });
@@ -950,8 +1002,9 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     log(`Login form data: ${JSON.stringify(req.body)}`);
-    const sql = 'SELECT * FROM users WHERE email = ? AND enabled = true';
     
+    // Check if the email exists in the database
+    const sql = 'SELECT * FROM users WHERE email = ? AND enabled = true';
     db.query(sql, [email], (err, results) => {
         if (err) {
             return res.json({ success: false, message: 'Login failed. Please try again.' });
@@ -963,60 +1016,145 @@ app.post('/login', (req, res) => {
 
         const user = results[0];
 
-        // Compare the provided password with the hashed password in the database
-        bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) {
-                return res.json({ success: false, message: 'Login failed. Please try again.' });
-            }
+        // Check if the email is verified
+        if (user.email_verified !== 1) {
+            // Generate verification link using config values
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+            
+            // Update the verification token in the pending_users table
+            const updateVerificationTokenSql = 'UPDATE pending_users SET verification_token = ? WHERE email = ?';
+            db.query(updateVerificationTokenSql, [verificationToken, email], (err) => {
+                if (err) {
+                    log('Error updating verification token: ' + err, true);
+                    return res.json({ success: false, message: 'Login failed. Please try again.' });
+                }
 
-            if (!isMatch) {
-                return res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
-            }
+                // Send verification email
+                const mailOptions = {
+                    from: config.smtp.auth.user,
+                    to: email,
+                    subject: 'Email Verification',
+                    text: `Please verify your email by clicking on the following link: ${verificationLink}`
+                };
 
-            // If password matches, generate the token and proceed with login
-            const token = jwt.sign({ userId: user.id }, config.secretKey, { expiresIn: '1h' });
+                transporter.sendMail(mailOptions, (err, info) => {
+                    if (err) {
+                        log('Error sending email: ' + err, true);
+                        return res.json({ success: false, message: 'Login failed. Please try again.' });
+                    }
 
-            log(`Generated token: ${token}`);
-
-            const updateSql = 'UPDATE users SET logged_in = TRUE, api_token = ? WHERE id = ?';
-            db.query(updateSql, [token, user.id], (err) => {
+                    return res.json({
+                        success: false,
+                        message: 'Your email is not verified. Please check your inbox for the verification email.',
+                        resendVerification: true
+                    });
+                });
+            });
+        } else {
+            // Compare the provided password with the hashed password in the database
+            bcrypt.compare(password, user.password, (err, isMatch) => {
                 if (err) {
                     return res.json({ success: false, message: 'Login failed. Please try again.' });
                 }
 
-                const fetchUpdatedUserSql = 'SELECT * FROM users WHERE id = ?';
-                db.query(fetchUpdatedUserSql, [user.id], (err, updatedResults) => {
+                if (!isMatch) {
+                    return res.json({ success: false, message: 'Incorrect email or password or user not enabled' });
+                }
+
+                // If password matches, generate the token and proceed with login
+                const token = jwt.sign({ userId: user.id }, config.secretKey, { expiresIn: '1h' });
+
+                log(`Generated token: ${token}`);
+
+                const updateSql = 'UPDATE users SET logged_in = TRUE, api_token = ? WHERE id = ?';
+                db.query(updateSql, [token, user.id], (err) => {
                     if (err) {
                         return res.json({ success: false, message: 'Login failed. Please try again.' });
                     }
 
-                    log(`Updated user data: ${JSON.stringify(updatedResults)}`);
-
-                    req.session.regenerate((err) => {
+                    const fetchUpdatedUserSql = 'SELECT * FROM users WHERE id = ?';
+                    db.query(fetchUpdatedUserSql, [user.id], (err, updatedResults) => {
                         if (err) {
                             return res.json({ success: false, message: 'Login failed. Please try again.' });
                         }
 
-                        req.session.userId = user.id;
-                        req.session.firstName = user.firstname;
-                        req.session.lastName = user.lastname;
-                        req.session.profilePic = user.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
-                        req.session.role = user.role;
-                        log(`User logged in: ${email}`);
-                        log(`Session data: ${JSON.stringify(req.session)}`);
-                        req.session.save(() => {
-                            log('Session data after login:', req.session);
+                        log(`Updated user data: ${JSON.stringify(updatedResults)}`);
 
-                            // Store the token in localStorage (use JavaScript in your frontend)
-                            res.json({ success: true, token });
+                        req.session.regenerate((err) => {
+                            if (err) {
+                                return res.json({ success: false, message: 'Login failed. Please try again.' });
+                            }
+
+                            req.session.userId = user.id;
+                            req.session.firstName = user.firstname;
+                            req.session.lastName = user.lastname;
+                            req.session.profilePic = user.profile_pic || 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png';
+                            req.session.role = user.role;
+                            log(`User logged in: ${email}`);
+                            log(`Session data: ${JSON.stringify(req.session)}`);
+                            req.session.save(() => {
+                                log('Session data after login:', req.session);
+
+                                // Store the token in localStorage (use JavaScript in your frontend)
+                                res.json({ success: true, token });
+                            });
                         });
                     });
                 });
             });
-        });
+        }
     });
 });
 
+
+// Endpoint to resend verification email
+app.post('/resend-verification', (req, res) => {
+    const { email } = req.body;
+
+    // Check if the email exists in the pending users
+    const checkEmailSql = 'SELECT * FROM pending_users WHERE email = ?';
+    db.query(checkEmailSql, [email], (err, results) => {
+        if (err) {
+            log('Error checking email: ' + err, true);
+            return res.json({ success: false, message: 'Failed to resend verification email. Please try again.' });
+        }
+
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'Email not found or already verified.' });
+        }
+
+        // Generate a new verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const updateTokenSql = 'UPDATE pending_users SET verification_token = ? WHERE email = ?';
+        db.query(updateTokenSql, [verificationToken, email], (err) => {
+            if (err) {
+                log('Error updating verification token: ' + err, true);
+                return res.json({ success: false, message: 'Failed to resend verification email. Please try again.' });
+            }
+
+            // Generate verification link using config values
+            const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+
+            // Send verification email
+            const mailOptions = {
+                from: config.smtp.auth.user,
+                to: email,
+                subject: 'Email Verification',
+                text: `Please verify your email by clicking on the following link: ${verificationLink}`
+            };
+
+            transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                    log('Error sending email: ' + err, true);
+                    return res.json({ success: false, message: 'Failed to resend verification email. Please try again.' });
+                }
+                log(`Verification email resent to: ${email}`, true);
+                return res.json({ success: true, message: 'Verification email sent. Please check your inbox.' });
+            });
+        });
+    });
+});
 
 /**
  * @swagger
@@ -3333,12 +3471,12 @@ app.post('/api/send-support-request', supportUpload.single('attachment'), async 
         }
 
         const transporter = nodemailer.createTransport({
-            host: 'smtpout.secureserver.net',
-            port: 465,
-            secure: true,
+            host: config.smtp.host,
+            port: config.smtp.port,
+            secure: config.smtp.secure,
             auth: {
-                user: 'info@visiontek.co.za',
-                pass: 'KristyLee5483@!1'
+                user: config.smtp.auth.user,
+                pass: config.smtp.auth.pass
             }
         });
 
@@ -3604,6 +3742,50 @@ app.post('/api/clear-all-notifications', authenticateToken, (req, res) => {
             return res.status(500).json({ error: 'Failed to clear notifications' });
         }
         res.sendStatus(200);
+    });
+});
+
+app.get('/verify-email', (req, res) => {
+    const { token } = req.query;
+
+    if (!token) {
+        return res.status(400).json({ success: false, message: 'Invalid verification token.' });
+    }
+
+    const sql = 'SELECT * FROM pending_users WHERE verification_token = ?';
+    db.query(sql, [token], (err, results) => {
+        if (err) {
+            log('Error verifying email: ' + err, true);
+            return res.status(500).json({ success: false, message: 'Verification failed. Please try again.' });
+        }
+
+        if (results.length === 0) {
+            // No pending user found with the token
+            return res.status(400).json({ success: false, message: 'Invalid verification token.' });
+        }
+
+        const pendingUser = results[0];
+
+        // Move user from pending_users to users
+        const insertUserSql = 'INSERT INTO users (firstname, lastname, email, password, profile_pic, email_verified) VALUES (?, ?, ?, ?, ?, 1)';
+        db.query(insertUserSql, [pendingUser.firstname, pendingUser.lastname, pendingUser.email, pendingUser.password, 'https://i.ibb.co/BTwp6Bv/default-profile-pic.png'], (err, result) => {
+            if (err) {
+                log('Error creating user: ' + err, true);
+                return res.status(500).json({ success: false, message: 'Verification failed. Please try again.' });
+            }
+
+            // Delete the pending user
+            const deletePendingUserSql = 'DELETE FROM pending_users WHERE id = ?';
+            db.query(deletePendingUserSql, [pendingUser.id], (err, result) => {
+                if (err) {
+                    log('Error deleting pending user: ' + err, true);
+                    return res.status(500).json({ success: false, message: 'Verification failed. Please try again.' });
+                }
+
+                // Redirect to the login page with a success notification
+                res.redirect('/index.html?verified=true');
+            });
+        });
     });
 });
 

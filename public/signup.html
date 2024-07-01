@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup</title>
     <link rel="stylesheet" href="signup.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -45,6 +46,12 @@
             e.preventDefault();
             var formData = new URLSearchParams(new FormData(this)).toString();
             console.log('Signup form data:', formData);
+    
+            // Change button text to "Signing Up..."
+            const signupButton = document.querySelector('.button');
+            signupButton.textContent = 'Signing Up...';
+            signupButton.disabled = true;
+    
             fetch('/signup', {
                 method: 'POST',
                 headers: {
@@ -59,13 +66,17 @@
                     window.location.href = '/';
                 } else {
                     document.getElementById('signupError').innerText = data.message;
+                    signupButton.textContent = 'Sign Up'; // Revert button text
+                    signupButton.disabled = false; // Re-enable button
                 }
             })
             .catch(error => {
                 console.error('Error during signup:', error);
                 document.getElementById('signupError').innerText = 'An error occurred. Please try again.';
+                signupButton.textContent = 'Sign Up'; // Revert button text
+                signupButton.disabled = false; // Re-enable button
             });
         });
-    </script>
+    </script>    
 </body>
 </html>
