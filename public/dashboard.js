@@ -1,5 +1,98 @@
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
+    const token = localStorage.getItem('token');
+
+    // Existing code...
+
+    // Fetch past events and show notification icon if there are any
+    fetchPastEvents();
+
+    function fetchPastEvents() {
+        fetch('/api/past-events', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                document.getElementById('notificationIcon').classList.add('has-notifications');
+                updateNotificationList(data);
+            } else {
+                document.getElementById('notificationIcon').classList.remove('has-notifications');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching past events:', error);
+        });
+    }
+
+    function updateNotificationList(events) {
+        const notificationList = document.getElementById('notificationList');
+        notificationList.innerHTML = '';
+
+        events.forEach(event => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <div class="event-info">
+                    <span class="event-title">${event.title}</span>
+                    <span class="event-time">${new Date(event.start).toLocaleString()}</span>
+                    <span class="event-description">${event.description || ''}</span>
+                </div>
+                <span class="mark-as-read" onclick="markEventAsRead(${event.id})">&times;</span>
+            `;
+            listItem.dataset.eventId = event.id;
+            notificationList.appendChild(listItem);
+        });
+    }
+
+    function markEventAsRead(eventId) {
+        fetch(`/api/mark-event-read/${eventId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => {
+            if (response.ok) {
+                fetchPastEvents(); // Refresh notifications
+                toggleNotificationDropdown();
+            }
+        })
+        .catch(error => {
+            console.error('Error marking event as read:', error);
+        });
+    }
+
+    function clearAllNotifications() {
+        fetch(`/api/mark-all-events-read`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => {
+            if (response.ok) {
+                fetchPastEvents(); // Refresh notifications
+                toggleNotificationDropdown();
+            }
+        })
+        .catch(error => {
+            console.error('Error marking all events as read:', error);
+        });
+    }
+
+    window.toggleNotificationDropdown = function() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.classList.toggle('has-notifications');
+    }
+
+    window.toggleSidebar = function() {
+        document.body.classList.toggle('sidebar-closed');
+    }
+
+    window.addEventListener('click', function(event) {
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+
+        if (!notificationDropdown.contains(event.target) && event.target !== notificationIcon) {
+            notificationDropdown.classList.remove('has-notifications');
+        }
+    });
 });
 
 function toggleDropdown() {

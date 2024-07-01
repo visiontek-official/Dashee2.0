@@ -23,6 +23,7 @@ body {
     top: 0;
     right: 0;
     left: 250px;
+    transition: left 0.3s, width 0.3s;
 }
 
 .user-menu {
@@ -77,6 +78,7 @@ body {
     top: 0;
     bottom: 0;
     overflow-y: auto;
+    transition: margin-left 0.3s;
 }
 
 .sidebar-header {
@@ -128,4 +130,142 @@ body {
 .sidebar-menu li a.active {
     background-color: #1a2733;
     color: #ffffff;
+}
+
+/* Notification Icon */
+#notificationIcon {
+    font-size: 24px;
+    margin-left: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+#notificationIcon.has-notifications::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+}
+
+/* Toggle Button */
+.toggle-sidebar {
+    background: none;
+    color: #304050;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    margin-right: 20px;
+}
+
+.toggle-sidebar:hover {
+    background-color: #ffffff;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+/* Sidebar and Main Content Styles */
+.sidebar-closed .sidebar {
+    margin-left: -250px; /* Adjust to hide sidebar */
+}
+
+.sidebar-closed .main-header {
+    left: 0;
+    width: 100%;
+}
+
+.sidebar-closed .main-content {
+    margin-left: 0;
+}
+
+/* Notifications */
+.notification-container {
+    position: relative;
+    padding-right: 20px;
+    color: #263e4b;
+}
+
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 30px;
+    right: 0;
+    width: 300px;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 10px;
+}
+
+.notification-dropdown .dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.notification-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.notification-dropdown ul li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.notification-dropdown ul li .event-info {
+    flex-grow: 1;
+}
+
+.notification-dropdown ul li .event-info span {
+    display: block;
+}
+
+.notification-dropdown ul li .event-info .event-title {
+    font-weight: bold;
+}
+
+.notification-dropdown ul li .event-info .event-time {
+    font-size: 0.85em;
+    color: #888;
+}
+
+.notification-dropdown ul li .event-info .event-description {
+    font-size: 0.9em;
+}
+
+.notification-dropdown ul li .mark-as-read {
+    cursor: pointer;
+    color: #888;
+    margin-left: 10px;
+}
+
+.notification-dropdown .view-all {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.notification-dropdown .view-all:hover {
+    text-decoration: underline;
+}
+
+.notification-dropdown.has-notifications {
+    display: block;
 }

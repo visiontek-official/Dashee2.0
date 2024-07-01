@@ -213,6 +213,7 @@ const createTables = () => {
         end DATETIME,
         category VARCHAR(50),
         color VARCHAR(7) NOT NULL DEFAULT '#3788d8',
+        unread INT NOT NULL DEFAULT 1,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`;
 
@@ -3490,8 +3491,13 @@ app.get('/api/events', authenticateToken, (req, res) => {
 
 // Create a new event
 app.post('/api/events', authenticateToken, (req, res) => {
-    const { title, start, end, category, color } = req.body;
+    let { title, start, end, category, color } = req.body;
     const userId = req.userId;
+
+    // If the end date is not provided, set it to the start date
+    if (!end) {
+        end = start;
+    }
 
     // Insert event into the database
     const sql = 'INSERT INTO events (title, start, end, category, color, user_id) VALUES (?, ?, ?, ?, ?, ?)';
@@ -3552,6 +3558,52 @@ app.delete('/api/events/:id', authenticateToken, (req, res) => {
             return res.status(404).json({ error: 'Event not found' });
         }
         res.sendStatus(204);
+    });
+});
+
+// Fetch past events
+app.get('/api/past-events', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const sql = 'SELECT * FROM events WHERE user_id = ? AND unread = 1 AND end < NOW()';
+
+    // Print the current date and time to the console
+    const now = new Date();
+    console.log('Current date and time:', now.toISOString());
+
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching past events:', err);
+            return res.status(500).json({ error: 'Failed to fetch past events' });
+        }
+        console.log('Fetched events:', results); // Log the fetched events
+        res.json(results);
+    });
+});
+
+// Mark event as read
+app.post('/api/mark-event-read/:id', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const eventId = req.params.id;
+    const sql = 'UPDATE events SET unread = 0 WHERE id = ? AND user_id = ?';
+    db.query(sql, [eventId, userId], (err, result) => {
+        if (err) {
+            console.error('Error marking event as read:', err);
+            return res.status(500).json({ error: 'Failed to mark event as read' });
+        }
+        res.sendStatus(200);
+    });
+});
+
+// Clear all notifications
+app.post('/api/clear-all-notifications', authenticateToken, (req, res) => {
+    const userId = req.userId;
+    const sql = 'UPDATE events SET unread = 0 WHERE user_id = ?';
+    db.query(sql, [userId], (err, result) => {
+        if (err) {
+            console.error('Error clearing notifications:', err);
+            return res.status(500).json({ error: 'Failed to clear notifications' });
+        }
+        res.sendStatus(200);
     });
 });
 

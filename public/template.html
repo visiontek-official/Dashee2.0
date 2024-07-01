@@ -1,7 +1,21 @@
 <!-- template.html -->
 <div id="template-header">
     <header class="main-header">
+        <div class="header-left">
+            <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
         <div class="user-menu">
+            <div class="notification-container">
+                <i class="fas fa-bell" id="notificationIcon" onclick="toggleNotificationDropdown()"></i>
+                <div id="notificationDropdown" class="notification-dropdown">
+                    <div class="dropdown-header">
+                        <span>Notification</span>
+                        <a href="#" onclick="clearAllNotifications()">Clear All</a>
+                    </div>
+                    <ul id="notificationList"></ul>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+            </div>
             <img src="https://i.ibb.co/BTwp6Bv/default-profile-pic.png" alt="User Profile" class="profile-pic" id="profilePic">
             <span class="user-name" onclick="toggleDropdown()" id="userName">Loading... <i class="fas fa-caret-down"></i></span>
             <div class="dropdown-menu" id="dropdownMenu">
@@ -10,7 +24,7 @@
                 <a href="content.html"><i class="fas fa-folder"></i> File Management</a>
                 <a href="support.html"><i class="fas fa-life-ring"></i> Support</a>
                 <a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div> 
+            </div>
         </div>
     </header>
 </div>

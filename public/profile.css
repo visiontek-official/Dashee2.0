@@ -98,3 +98,36 @@ button#clearButton:hover {
 .notification.show {
     display: block;
 }
+
+/* Toggle Button */
+.toggle-sidebar {
+    background: none;
+    color: #304050;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    margin-right: 20px;
+}
+
+.toggle-sidebar:hover {
+    background-color: #ffffff;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+/* Sidebar and Main Content Styles */
+.sidebar-closed .sidebar {
+    margin-left: -250px; /* Adjust to hide sidebar */
+}
+
+.sidebar-closed .main-header {
+    left: 0;
+    width: 100%;
+}
+
+.sidebar-closed .main-content {
+    margin-left: 0;
+}
