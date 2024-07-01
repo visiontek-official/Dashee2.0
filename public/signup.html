@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup</title>
     <link rel="stylesheet" href="signup.css">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -41,17 +40,20 @@
             <img src="http://www.visiontek.co.za/wp-content/uploads/2024/06/Coffee-Shop-Digital-Menu-Board-2.png" alt="Digital Menu Board" class="image">
         </div>
     </div>
+    <!-- Add this notification div -->
+    <div id="notification" class="notification">
+        <span id="notificationMessage" class="notificationMessage"></span>
+        <button onclick="closeNotification()">Close</button>
+    </div>
     <script>
         document.getElementById('signupForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const signupButton = document.querySelector('#signupForm button[type="submit"]');
+            signupButton.textContent = 'Creating Account...';
+            signupButton.disabled = true; // Optionally disable the button to prevent multiple clicks
+
             var formData = new URLSearchParams(new FormData(this)).toString();
             console.log('Signup form data:', formData);
-    
-            // Change button text to "Signing Up..."
-            const signupButton = document.querySelector('.button');
-            signupButton.textContent = 'Signing Up...';
-            signupButton.disabled = true;
-    
             fetch('/signup', {
                 method: 'POST',
                 headers: {
@@ -63,20 +65,44 @@
             .then(data => {
                 console.log('Signup response data:', data);
                 if (data.success) {
-                    window.location.href = '/';
+                    showNotification('Verification email has been sent. Please check your inbox.');
+                    // Reset button text and enable button
+                    signupButton.textContent = 'Sign Up';
+                    signupButton.disabled = false;
                 } else {
                     document.getElementById('signupError').innerText = data.message;
-                    signupButton.textContent = 'Sign Up'; // Revert button text
+                    signupButton.textContent = 'Sign Up'; // Reset button text
                     signupButton.disabled = false; // Re-enable button
                 }
             })
             .catch(error => {
                 console.error('Error during signup:', error);
                 document.getElementById('signupError').innerText = 'An error occurred. Please try again.';
-                signupButton.textContent = 'Sign Up'; // Revert button text
+                signupButton.textContent = 'Sign Up'; // Reset button text
                 signupButton.disabled = false; // Re-enable button
             });
         });
-    </script>    
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            const body = document.body;
+
+            notificationMessage.innerHTML = message;
+            notification.classList.add('show');
+            body.classList.add('blurred'); // Blur the background
+
+            setTimeout(() => {
+                closeNotification();
+            }, 5000); // Close the notification after 3 seconds
+        }
+        
+        function closeNotification() {
+            const notification = document.getElementById('notification');
+            const body = document.body;
+            notification.classList.remove('show');
+            body.classList.remove('blurred'); // Remove blur effect
+        }
+    </script>
 </body>
 </html>
