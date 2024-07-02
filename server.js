@@ -943,7 +943,7 @@ app.post('/signup', (req, res) => {
                 }
 
                 // Generate verification link using config values
-                const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+                const verificationLink = `http://dev.visiontek.co.za:8001/verify-email?token=${verificationToken}`;
 
                 // Send verification email
                 const mailOptions = {
@@ -1021,7 +1021,7 @@ app.post('/login', (req, res) => {
                 if (pendingResults.length > 0) {
                     // Generate a new verification token
                     const verificationToken = crypto.randomBytes(32).toString('hex');
-                    const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+                    const verificationLink = `http://dev.visiontek.co.za:8001/verify-email?token=${verificationToken}`;
 
                     // Update the verification token in the pending_users table
                     const updateVerificationTokenSql = 'UPDATE pending_users SET verification_token = ? WHERE email = ?';
@@ -1063,7 +1063,7 @@ app.post('/login', (req, res) => {
             if (user.email_verified !== 1) {
                 // Generate a new verification token
                 const verificationToken = crypto.randomBytes(32).toString('hex');
-                const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+                const verificationLink = `http://dev.visiontek.co.za:8001/verify-email?token=${verificationToken}`;
 
                 // Update the verification token in the pending_users table
                 const updateVerificationTokenSql = 'UPDATE pending_users SET verification_token = ? WHERE email = ?';
@@ -1177,7 +1177,7 @@ app.post('/resend-verification', (req, res) => {
             }
 
             // Generate verification link using config values
-            const verificationLink = `http://${config.server_url}:${config.webPort}/verify-email?token=${verificationToken}`;
+            const verificationLink = `http://dev.visiontek.co.za:8001/verify-email?token=${verificationToken}`;
 
             // Send verification email
             const mailOptions = {
@@ -2260,7 +2260,7 @@ app.get('/api/get-screens', verifyToken, (req, res) => {
  */
 app.post('/api/add-screen', verifyToken, (req, res) => {
     const { screen_name, pairing_code } = req.body;
-    const screen_url = `http://visiontek.ddns.net:8001/connected.html?pairingCode=${pairing_code}`;
+    const screen_url = `http://dev.visiontek.co.za:8001/connected.html?pairingCode=${pairing_code}`;
     const query = 'INSERT INTO screens (screen_name, pairing_code, user_id, screen_url) VALUES (?, ?, ?, ?)';
     db.query(query, [screen_name, pairing_code, req.userId, screen_url], (err, results) => {
         if (err) {

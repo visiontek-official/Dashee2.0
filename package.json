@@ -1,6 +1,6 @@
 {
   "name": "dashee2.0",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -24,7 +24,10 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^10.0.0",
-    "ws": "^8.17.1"
+    "ws": "^8.17.1",
+    "crypto": "^1.0.1",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
   },
   "description": ""
 }

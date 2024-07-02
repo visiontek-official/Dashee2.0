@@ -1,17 +1,17 @@
 require('dotenv').config(); // Load environment variables from .env file
 
 module.exports = {
-    server_url: 'visiontek.ddns.net', // The base URL for the server
-    sql_server_url: 'localhost', // The URL for the SQL server
-    webPort: 8001, // Port for the web server
-    apiPort: 8002, // Port for the API server
+    server_url: process.env.SERVER_URL, // The base URL for the server
+    sql_server_url: process.env.SQL_SERVER_URL, // The URL for the SQL server
+    webPort: process.env.WEBPORT, // Port for the web server
+    apiPort: process.env.APIPORT, // Port for the API server
     logging: true, // Enable or disable logging
     api_debug: true, // Enable or disable API debugging
     clearLogsOnStart: true, // Clear logs when the server starts
     dbUser: process.env.DB_USER, // Database user, loaded from environment variable
     dbPassword: process.env.DB_PASSWORD, // Database password, loaded from environment variable
-    dbName: 'dashee2_0', // Name of the database
-    sqlPort: 3306, // Port for the SQL server
+    dbName: process.env.DATABASENAME, // Name of the database
+    sqlPort: process.env.SQLPORT, // Port for the SQL server
     uploadConfig: {
         maxFileSize: 50 * 1024 * 1024, // Maximum file size for uploads (50MB)
         allowedFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/avi'] // Allowed file formats for uploads

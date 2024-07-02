@@ -251,7 +251,7 @@ function addScreen() {
             return;
         }
 
-        const screenUrl = `http://visiontek.ddns.net:8001/connected.html?pairingCode=${pairingCode}`;
+        const screenUrl = `http://dev.visiontek.co.za:8001/connected.html?pairingCode=${pairingCode}`;
 
         // Add the screen if pairing code is valid
         fetch('/api/add-screen', {
