@@ -58,25 +58,39 @@ document.addEventListener('DOMContentLoaded', () => {
         pairingCodeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const pairingCode = document.getElementById('pairing-code-input').value;
-            const response = await fetch('/api/validate-pairing-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pairingCode })
-            });
-            const data = await response.json();
-            if (data.success) {
-                alert('Pairing successful!');
-                // Redirect to the connected page with screenId and screenName in the URL
-                const screenId = data.screenId; // Assuming this is returned from the API
-                const screenName = data.screenName; // Assuming this is returned from the API
-                window.location.href = `connected.html?screenId=${screenId}&screenName=${screenName}`;
-            } else {
-                alert('Invalid or expired pairing code.');
+            try {
+                const response = await fetch('/api/validate-pairing-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pairingCode })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Pairing successful!');
+                    // Redirect to the connected page with screenId and screenName in the URL
+                    const screenId = data.screenId; // Assuming this is returned from the API
+                    const screenName = data.screenName; // Assuming this is returned from the API
+                    window.location.href = `connected.html?screenId=${screenId}&screenName=${screenName}`;
+                } else {
+                    showNotification('Invalid or expired pairing code.', 'error');
+                }
+            } catch (error) {
+                console.error('Error validating pairing code:', error);
+                showNotification('Error validating pairing code.', 'error');
             }
         });
-}       
+    }
 });
 
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerText = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        notification.remove();
+    }, 3000); // Remove after 3 seconds
+}
 
 function fetchScreens() {
     const token = localStorage.getItem('token');
@@ -225,13 +239,34 @@ function toggleOptionsMenu(event, screenId) {
     });
 }
 
-function addScreen() {
+async function getDeviceIdentity() {
+    try {
+        const response = await fetch('/api/get-device-info');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return `${data.uuid}-${data.macAddress}`;
+    } catch (error) {
+        console.error('Error fetching device information:', error);
+        return 'default-identity';
+    }
+}
+
+async function addScreen() {
+    const addButton = document.querySelector('.next-button'); // Select the button by class
+    addButton.disabled = true;
+    addButton.textContent = 'ADDING SCREEN...';
+
     const token = localStorage.getItem('token');
     const screenName = document.getElementById('screenName').value;
     const pairingCode = document.getElementById('pairingCode').value;
+    const identity = await getDeviceIdentity(); // Ensure identity is fetched
 
-    if (!screenName || !pairingCode) {
-        alert('Screen name and pairing code cannot be blank');
+    if (!screenName || !pairingCode || !identity) {
+        alert('Screen name, pairing code, and identity cannot be blank');
+        addButton.disabled = false;
+        addButton.textContent = 'ADD SCREEN';
         return;
     }
 
@@ -244,10 +279,17 @@ function addScreen() {
         },
         body: JSON.stringify({ pairingCode })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (!data.success) {
-            alert('Invalid or expired pairing code');
+            showNotification('Invalid or expired pairing code.', 'error');
+            addButton.disabled = false;
+            addButton.textContent = 'ADD SCREEN';
             return;
         }
 
@@ -260,7 +302,7 @@ function addScreen() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode, screen_url: screenUrl })
+            body: JSON.stringify({ screen_name: screenName, pairing_code: pairingCode, screen_url: screenUrl, identity })
         })
         .then(response => response.json())
         .then(data => {
@@ -271,14 +313,83 @@ function addScreen() {
             } else {
                 alert('Error adding screen: ' + data.message);
             }
+            addButton.disabled = false;
+            addButton.textContent = 'ADD SCREEN';
         })
         .catch(error => {
             console.error('Error adding screen:', error);
+            addButton.disabled = false;
+            addButton.textContent = 'ADD SCREEN';
         });
     })
     .catch(error => {
         console.error('Error validating pairing code:', error);
+        showNotification('Error validating pairing code.', 'error');
+        addButton.disabled = false;
+        addButton.textContent = 'ADD SCREEN';
     });
+}
+
+async function getDeviceIdentity() {
+    const userAgent = navigator.userAgent;
+
+    if (/Windows/.test(userAgent)) {
+        return await getWindowsDeviceName();
+    } else if (/Macintosh/.test(userAgent)) {
+        return await getMacDeviceName();
+    } else if (/Linux/.test(userAgent)) {
+        return await getLinuxDeviceName();
+    } else if (/Android/.test(userAgent)) {
+        return await getAndroidDeviceName();
+    } else if (/iPhone|iPad/.test(userAgent)) {
+        return await getIOSDeviceName();
+    }
+
+    return 'default-identity';
+}
+
+async function getWindowsDeviceName() {
+    console.log('Fetching Windows device name');
+    return await fetchDeviceInfo('/api/get-windows-device-name');
+}
+
+async function getMacDeviceName() {
+    console.log('Fetching Mac device name');
+    return await fetchDeviceInfo('/api/get-mac-device-name');
+}
+
+async function getLinuxDeviceName() {
+    console.log('Fetching Linux device name');
+    return await fetchDeviceInfo('/api/get-linux-device-name');
+}
+
+async function getAndroidDeviceName() {
+    console.log('Fetching Android device name');
+    return await fetchDeviceInfo('/api/get-android-device-name');
+}
+
+async function getIOSDeviceName() {
+    console.log('Fetching iOS device name');
+    return await fetchDeviceInfo('/api/get-ios-device-name');
+}
+
+async function fetchDeviceInfo(apiEndpoint) {
+    try {
+        const response = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (data.success) {
+            return `${data.uuid}-${data.macAddress}`;
+        } else {
+            console.error(`Error fetching device info from ${apiEndpoint}:`, data.message);
+            return 'DEVICE_NAME';
+        }
+    } catch (error) {
+        console.error(`Error fetching device info from ${apiEndpoint}:`, error);
+        return 'DEVICE_NAME';
+    }
 }
 
 function showAddScreenPopup() {

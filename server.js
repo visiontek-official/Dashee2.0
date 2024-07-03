@@ -15,9 +15,11 @@ const config = require('./config/config');
 const pairingCodes = {};
 const pairedScreens = {};  // Store paired status
 const events = []; //
+const si = require('systeminformation');
 
 const app = express(); // Web server
 const apiApp = express(); // API server
+app.use(express.json());
 const logFile = path.join(__dirname, 'logs', 'server.log');
 const apiLogFile = path.join(__dirname, 'logs', 'api.log');
 const saltRounds = 10;
@@ -40,6 +42,117 @@ const lastActivityMap = new Map();
 const generateToken = (userId) => {
     return jwt.sign({ userId }, config.secretKey, { expiresIn: '1h' });
 };
+
+// Function to get the MAC address
+async function getMacAddress() {
+    try {
+        const networkInterfaces = await si.networkInterfaces();
+        const mac = networkInterfaces[0].mac; // Assuming first interface is the primary one
+        return mac;
+    } catch (error) {
+        console.error('Error retrieving MAC address:', error);
+        throw error;
+    }
+}
+
+// Endpoint to get Windows device name
+app.post('/api/get-windows-device-name', async (req, res) => {
+    try {
+        const systemInfo = await si.system();
+        const uuid = systemInfo.uuid;
+        const macAddress = await getMacAddress();
+        res.json({ success: true, uuid, macAddress });
+    } catch (error) {
+        console.error('Error retrieving Windows device info:', error);
+        res.status(500).json({ success: false, message: 'Error retrieving Windows device info' });
+    }
+});
+
+// Endpoint to get Mac device name
+app.post('/api/get-mac-device-name', async (req, res) => {
+    try {
+        const systemInfo = await si.system();
+        const uuid = systemInfo.uuid;
+        const macAddress = await getMacAddress();
+        res.json({ success: true, uuid, macAddress });
+    } catch (error) {
+        console.error('Error retrieving Mac device info:', error);
+        res.status(500).json({ success: false, message: 'Error retrieving Mac device info' });
+    }
+});
+
+// Endpoint to get Linux device name
+app.post('/api/get-linux-device-name', async (req, res) => {
+    try {
+        const systemInfo = await si.system();
+        const uuid = systemInfo.uuid;
+        const macAddress = await getMacAddress();
+        res.json({ success: true, uuid, macAddress });
+    } catch (error) {
+        console.error('Error retrieving Linux device info:', error);
+        res.status(500).json({ success: false, message: 'Error retrieving Linux device info' });
+    }
+});
+
+// Endpoint to get Android device name (placeholder)
+app.post('/api/get-android-device-name', async (req, res) => {
+    res.json({ success: true, uuid: 'ANDROID_UUID', macAddress: 'ANDROID_MAC_ADDRESS' });
+});
+
+// Endpoint to get iOS device name (placeholder)
+app.post('/api/get-ios-device-name', async (req, res) => {
+    res.json({ success: true, uuid: 'IOS_UUID', macAddress: 'IOS_MAC_ADDRESS' });
+});
+
+// Endpoint to check device identity
+app.post('/api/check-device', async (req, res) => {
+    try {
+        const { uuid, macAddress, userId } = req.body;
+        const identity = `${uuid}-${macAddress}`;
+        console.log('Checking identity...');
+        console.log('UUID:', uuid);
+        console.log('MAC Address:', macAddress);
+        console.log('User ID:', userId);
+        console.log('Device Identity:', identity);
+
+        const result = await db.query('SELECT * FROM screens WHERE identity = ? AND user_id = ?', [identity, userId]);
+
+        if (result.length > 0) {
+            const screen = result[0];
+            console.log('Identity found:', screen);
+            res.json({ success: true, pairingCode: screen.pairing_code });
+        } else {
+            console.log('Identity not found');
+            res.json({ success: false });
+        }
+    } catch (error) {
+        console.error('Error checking identity:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Endpoint to check device information in the database
+app.post('/api/check-device-info', async (req, res) => {
+    const { uuid, macAddress, identity, userId } = req.body;
+    try {
+        const query = 'SELECT pairing_code FROM screens WHERE uuid = ? AND mac_address = ? AND identity = ? AND user_id = ?';
+        db.query(query, [uuid, macAddress, identity, userId], (error, results) => {
+            if (error) {
+                console.error('Error checking device info:', error);
+                return res.status(500).json({ success: false, message: 'Server error' });
+            }
+
+            if (results.length > 0) {
+                res.json({ success: true, pairingCode: results[0].pairing_code });
+            } else {
+                res.json({ success: false });
+            }
+        });
+    } catch (error) {
+        console.error('Error checking device info:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
 // Function to archive and clear logs
 const archiveAndClearLogs = () => {
@@ -204,10 +317,14 @@ const createTables = () => {
         user_id INT NOT NULL,
         enabled BOOLEAN DEFAULT false,
         online_status BOOLEAN DEFAULT false,
-        last_connected DATETIME DEFAULT NULL,
+        last_connected TIMESTAMP NULL DEFAULT NULL,
         screen_url VARCHAR(255) NOT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        identity VARCHAR(255) NOT NULL,
+        uuid VARCHAR(255) DEFAULT NULL,
+        mac_address VARCHAR(255) DEFAULT NULL,
+        timestamp BIGINT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`;
 
@@ -2259,10 +2376,24 @@ app.get('/api/get-screens', verifyToken, (req, res) => {
  *         description: Failed to add screen
  */
 app.post('/api/add-screen', verifyToken, (req, res) => {
-    const { screen_name, pairing_code } = req.body;
+    const { screen_name, pairing_code, identity } = req.body;
+
+    // Retrieve uuid and mac_address from pairingCodes object using pairing_code
+    const pairingData = pairingCodes[pairing_code];
+    if (!pairingData) {
+        return res.status(400).send({ success: false, message: 'Invalid pairing code' });
+    }
+
+    const { uuid, macAddress } = pairingData;
     const screen_url = `http://dev.visiontek.co.za:8001/connected.html?pairingCode=${pairing_code}`;
-    const query = 'INSERT INTO screens (screen_name, pairing_code, user_id, screen_url) VALUES (?, ?, ?, ?)';
-    db.query(query, [screen_name, pairing_code, req.userId, screen_url], (err, results) => {
+
+    // Check if uuid and mac_address are available
+    if (!uuid || !macAddress) {
+        return res.status(400).send({ success: false, message: 'UUID and MAC address are required' });
+    }
+
+    const query = 'INSERT INTO screens (screen_name, pairing_code, user_id, screen_url, uuid, mac_address, identity) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    db.query(query, [screen_name, pairing_code, req.userId, screen_url, uuid, macAddress, identity], (err, results) => {
         if (err) {
             return res.status(500).send({ message: 'Error adding screen', error: err });
         }
@@ -3120,10 +3251,62 @@ app.get('/pairing', (req, res) => {
 });
 
 // Endpoint to generate and store a pairing code
-app.post('/api/generate-pairing-code', (req, res) => {
+/*app.post('/api/generate-pairing-code', (req, res) => {
     const pairingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     pairingCodes[pairingCode] = { timestamp: Date.now() };
     res.json({ success: true, pairingCode });
+});*/
+
+// Endpoint to generate and store a pairing code
+app.post('/api/generate-pairing-code', async (req, res) => {
+    const { uuid, macAddress, userId } = req.body;
+    const pairingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const timestamp = Date.now();
+
+    console.log('Generating pairing code...');
+    console.log('UUID:', uuid);
+    console.log('MAC Address:', macAddress);
+    console.log('User ID:', userId);
+
+    if (!userId || !uuid || !macAddress) {
+        console.log('Missing user ID, UUID, or MAC address');
+        return res.json({ success: false, message: 'user_id, uuid, and mac_address are required' });
+    }
+
+    pairingCodes[pairingCode] = { timestamp, userId, uuid, macAddress }; // Store the pairing code with timestamp
+
+    console.log('Pairing code generated and stored:', pairingCode);
+    console.log('UUID and MAC Address stored:', uuid, macAddress);
+    res.json({ success: true, pairingCode });
+});
+
+// Endpoint to check identity
+app.post('/api/check-identity', async (req, res) => {
+    const { uuid, macAddress, userId } = req.body;
+    console.log('Checking identity...');
+    console.log('UUID:', uuid);
+    console.log('MAC Address:', macAddress);
+    console.log('User ID:', userId);
+
+    if (!uuid || !macAddress || !userId) {
+        return res.status(400).json({ success: false, message: 'UUID, MAC address, and user_id are required' });
+    }
+
+    try {
+        const result = await db.query('SELECT * FROM screens WHERE uuid = ? AND mac_address = ? AND user_id = ?', [uuid, macAddress, userId]);
+
+        if (result.length > 0) {
+            const screen = result[0];
+            console.log('Identity found:', screen);
+            res.json({ success: true, pairingCode: screen.pairing_code });
+        } else {
+            console.log('Identity not found');
+            res.json({ success: false });
+        }
+    } catch (error) {
+        console.error('Error checking identity:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 });
 
 // Endpoint to check pairing status
@@ -3241,19 +3424,13 @@ app.post('/api/validate-pairing-code', (req, res) => {
     const codeData = pairingCodes[pairingCode];
     if (codeData && (Date.now() - codeData.timestamp < 10 * 60 * 1000)) {
         pairedScreens[pairingCode] = true;
-        delete pairingCodes[pairingCode];
         res.json({ success: true });
     } else {
         res.status(400).json({ success: false, message: 'Invalid or expired pairing code' });
     }
 });
 
-app.get('/connected', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'connected.html'));
-});
-
 // Add this endpoint to your server.js
-
 app.get('/api/playlist/:pairingCode', (req, res) => {
     const { pairingCode } = req.params;
     const sql = `

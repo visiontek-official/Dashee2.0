@@ -386,3 +386,24 @@ body {
 .popup-footer button:nth-child(2):hover {
     background-color: #ff2592;
 }
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border-radius: 5px;
+    z-index: 1000;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.notification.error {
+    background-color: red;
+}
+
+.notification.success {
+    background-color: green;
+}

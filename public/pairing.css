@@ -1,28 +1,68 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #2c3e50;
-    color: #ecf0f1;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    background-color: #2b2d42;
+    color: #edf2f4;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* Prevent scrolling */
 }
 
-.pairing-container {
+.container {
     text-align: center;
-    background-color: #34495e;
     padding: 20px;
-    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px; /* Cap the width for larger screens */
 }
 
-.pairing-code h1 {
-    font-size: 4em;
-    color: #1abc9c;
+.pairing-code {
+    font-size: 3rem;
+    margin: 20px 0;
+}
+
+.qr-code {
+    margin: 20px 0;
 }
 
 .qr-code img {
+    width: 100%;
+    max-width: 300px; /* Cap the size for larger screens */
+    height: auto; /* Maintain aspect ratio */
+}
+
+#instructions {
+    margin: 10px 0;
+    font-size: 18px;
+    color: #555;
+}
+
+#link {
+    color: white; /* Change the link color to white */
+    text-decoration: none;
+    font-size: 18px;
+}
+
+#assist {
     margin-top: 20px;
-    width: 150px;
-    height: 150px;
+    font-size: 16px;
+    color: #777;
+}
+
+@media (max-width: 600px) {
+    .pairing-code {
+        font-size: 2rem;
+    }
+
+    #instructions,
+    #link,
+    #assist {
+        font-size: 14px;
+    }
+
+    .qr-code img {
+        max-width: 150px;
+    }
 }
